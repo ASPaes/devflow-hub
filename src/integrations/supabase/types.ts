@@ -663,6 +663,20 @@ export type Database = {
         }[]
       }
       is_dev_gestor: { Args: never; Returns: boolean }
+      list_usuarios_admin: {
+        Args: never
+        Returns: {
+          ativo: boolean
+          avatar_url: string
+          created_at: string
+          email: string
+          id: string
+          last_sign_in_at: string
+          nome: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string
+        }[]
+      }
       mark_cobranca_failed: {
         Args: { p_error: string; p_id: string }
         Returns: undefined
