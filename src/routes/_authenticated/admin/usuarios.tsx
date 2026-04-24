@@ -412,11 +412,7 @@ function UsuariosPage() {
 }
 
 interface EditUserFieldsProps {
-  form: ReturnType<
-    typeof import("react-hook-form").useForm<EditValues>
-  > extends infer R
-    ? R
-    : never;
+  form: import("react-hook-form").UseFormReturn<EditValues>;
   target: UsuarioAdmin;
   meuId: string | null;
   lista: UsuarioAdmin[];
