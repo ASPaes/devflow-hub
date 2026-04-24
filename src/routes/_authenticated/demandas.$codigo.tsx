@@ -146,6 +146,9 @@ function DemandaDetalhe() {
             </p>
           </div>
 
+          {/* Reabertura (apenas se entregue) */}
+          <ReaberturaBanner demanda={demanda} isOwner={isOwner} />
+
           {/* Descrição */}
           <Card>
             <CardHeader>
