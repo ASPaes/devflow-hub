@@ -688,6 +688,7 @@ export type Database = {
       }
       close_expired_demands: { Args: never; Returns: number }
       dashboard_metrics: { Args: never; Returns: Json }
+      demanda_visivel: { Args: { p_demanda_id: string }; Returns: boolean }
       enqueue_cobranca: {
         Args: {
           p_condicao: number
@@ -720,7 +721,9 @@ export type Database = {
           id: string
           last_sign_in_at: string
           nome: string
-          role: Database["public"]["Enums"]["app_role"]
+          perfil_acesso_id: string
+          perfil_acesso_nome: string
+          permissoes: Database["public"]["Enums"]["app_permissao"][]
           updated_at: string
         }[]
       }
@@ -735,25 +738,6 @@ export type Database = {
       mark_cobranca_skipped: {
         Args: { p_id: string; p_reason: string }
         Returns: undefined
-      }
-      promote_to_dev_gestor: {
-        Args: { p_email: string }
-        Returns: {
-          ativo: boolean
-          avatar_url: string | null
-          created_at: string
-          id: string
-          nome: string
-          perfil_acesso_id: string
-          role: Database["public"]["Enums"]["app_role"]
-          updated_at: string
-        }
-        SetofOptions: {
-          from: "*"
-          to: "profiles"
-          isOneToOne: true
-          isSetofReturn: false
-        }
       }
       reabrir_demanda: {
         Args: { p_demanda_id: string; p_motivo: string }
@@ -784,6 +768,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      tem_permissao: {
+        Args: { p_permissao: Database["public"]["Enums"]["app_permissao"] }
+        Returns: boolean
       }
     }
     Enums: {
