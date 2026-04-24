@@ -99,8 +99,8 @@ function PerfilPage() {
           <h2 className="text-lg font-semibold text-foreground">{profile.nome}</h2>
           <p className="text-sm text-muted-foreground">{user?.email}</p>
           <div>
-            <Badge variant="secondary" className="font-mono text-xs">
-              {profile.role}
+            <Badge variant="secondary" className="text-xs">
+              {profile.perfil_acesso?.nome ?? "—"}
             </Badge>
           </div>
         </div>

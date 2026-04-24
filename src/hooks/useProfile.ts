@@ -1,35 +1,72 @@
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/lib/supabase";
-import type { Database } from "@/integrations/supabase/types";
 
-export type Profile = Pick<
-  Database["public"]["Tables"]["profiles"]["Row"],
-  "id" | "nome" | "avatar_url" | "role" | "ativo"
->;
+export type AppPermissao =
+  | "criar_demanda"
+  | "ver_todas_demandas"
+  | "editar_qualquer_demanda"
+  | "deletar_demanda"
+  | "gerenciar_modulos"
+  | "gerenciar_submodulos"
+  | "gerenciar_areas"
+  | "gerenciar_usuarios"
+  | "gerenciar_perfis_acesso"
+  | "ver_dashboard_metricas";
+
+export type ProfileWithPerfil = {
+  id: string;
+  nome: string;
+  avatar_url: string | null;
+  ativo: boolean;
+  perfil_acesso: {
+    id: string;
+    nome: string;
+    permissoes: AppPermissao[];
+  } | null;
+};
 
 export function useProfile() {
   const { user } = useAuth();
-  const query = useQuery<Profile>({
+  const query = useQuery<ProfileWithPerfil>({
     queryKey: ["profile", user?.id],
     queryFn: async () => {
       if (!user?.id) throw new Error("no user");
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, nome, avatar_url, role, ativo")
+        .select(
+          "id, nome, avatar_url, ativo, perfil_acesso:perfis_acesso(id, nome, permissoes)",
+        )
         .eq("id", user.id)
         .single();
       if (error) throw error;
-      return data as Profile;
+      return data as unknown as ProfileWithPerfil;
     },
     enabled: !!user?.id,
     staleTime: 5 * 60_000,
   });
 
+  const permissoes = useMemo<AppPermissao[]>(
+    () => query.data?.perfil_acesso?.permissoes ?? [],
+    [query.data],
+  );
+
+  const helpers = useMemo(
+    () => ({
+      temPermissao: (p: AppPermissao) => permissoes.includes(p),
+      temAlgumaPermissao: (...ps: AppPermissao[]) =>
+        ps.some((p) => permissoes.includes(p)),
+    }),
+    [permissoes],
+  );
+
   return {
     profile: query.data,
     isLoading: query.isLoading,
-    isDevGestor: query.data?.role === "dev_gestor",
+    permissoes,
+    temPermissao: helpers.temPermissao,
+    temAlgumaPermissao: helpers.temAlgumaPermissao,
     refetch: query.refetch,
   };
 }

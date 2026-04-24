@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   LogOut,
   Network,
+  ShieldCheck,
   UserCircle,
   Users,
   type LucideIcon,
@@ -76,7 +77,7 @@ function NavItem({ to, icon: Icon, label, disabled, onClick }: NavItemProps) {
 }
 
 export function Sidebar() {
-  const { isDevGestor } = useProfile();
+  const { temPermissao, temAlgumaPermissao } = useProfile();
   const { signOut } = useAuth();
   const navigate = useNavigate();
 
@@ -88,6 +89,14 @@ export function Sidebar() {
       toast.error(translateAuthError(err));
     }
   }, [signOut, navigate]);
+
+  const mostraAdmin = temAlgumaPermissao(
+    "gerenciar_modulos",
+    "gerenciar_submodulos",
+    "gerenciar_areas",
+    "gerenciar_usuarios",
+    "gerenciar_perfis_acesso",
+  );
 
   return (
     <TooltipProvider delayDuration={150}>
@@ -101,20 +110,34 @@ export function Sidebar() {
           <NavItem to="/" icon={LayoutDashboard} label="Dashboard" />
           <NavItem icon={Inbox} label="Demandas" disabled />
 
-          {isDevGestor && (
+          {mostraAdmin && (
             <>
               <div className="mt-4 mb-2 px-3 text-xs uppercase tracking-wider text-muted-foreground">
                 Admin
               </div>
-              <NavItem to="/admin/modulos" icon={Layers} label="Módulos" />
-              <NavItem to="/admin/submodulos" icon={Network} label="Submódulos" />
-              <NavItem to="/admin/areas" icon={Building2} label="Áreas" />
-              <NavItem to="/admin/usuarios" icon={Users} label="Usuários" />
+              {temPermissao("gerenciar_modulos") && (
+                <NavItem to="/admin/modulos" icon={Layers} label="Módulos" />
+              )}
+              {temPermissao("gerenciar_submodulos") && (
+                <NavItem to="/admin/submodulos" icon={Network} label="Submódulos" />
+              )}
+              {temPermissao("gerenciar_areas") && (
+                <NavItem to="/admin/areas" icon={Building2} label="Áreas" />
+              )}
+              {temPermissao("gerenciar_usuarios") && (
+                <NavItem to="/admin/usuarios" icon={Users} label="Usuários" />
+              )}
+              {temPermissao("gerenciar_perfis_acesso") && (
+                <NavItem icon={ShieldCheck} label="Perfis de Acesso" disabled />
+              )}
+              <NavItem to="/perfil" icon={UserCircle} label="Perfil" />
             </>
           )}
 
           <div className="mt-auto flex flex-col gap-1 border-t border-border pt-3">
-            <NavItem to="/perfil" icon={UserCircle} label="Perfil" />
+            {!mostraAdmin && (
+              <NavItem to="/perfil" icon={UserCircle} label="Perfil" />
+            )}
             <NavItem icon={LogOut} label="Sair" onClick={handleSignOut} />
           </div>
         </nav>
