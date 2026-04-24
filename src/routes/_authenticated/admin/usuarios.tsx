@@ -1,11 +1,13 @@
 import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import {
+  Mail,
   MoreHorizontal,
   Pencil,
   Plus,
   Power,
   PowerOff,
+  Trash2,
   Users,
 } from "lucide-react";
 import { z } from "zod";
@@ -15,6 +17,7 @@ import { EmptyState } from "@/components/common/EmptyState";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { ModalForm } from "@/components/common/ModalForm";
 import { DataTable, type DataTableColumn } from "@/components/common/DataTable";
+import { DeleteUserConfirmDialog } from "@/components/admin/DeleteUserConfirmDialog";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -53,10 +56,13 @@ import {
   useUsuarios,
   useUpdateUsuario,
   useInviteUsuario,
+  useResendInvite,
+  useDeleteUsuario,
   type UsuarioAdmin,
 } from "@/hooks/useUsuarios";
 import { usePerfisAcesso } from "@/hooks/usePerfisAcesso";
 import type { AppPermissao } from "@/hooks/useProfile";
+import { isAdminPerfil, isLastAdmin } from "@/lib/permissions";
 import { formatRelativeSP } from "@/lib/format";
 import { initials } from "@/lib/utils";
 
@@ -78,20 +84,9 @@ const inviteSchema = z.object({
 });
 type InviteValues = z.infer<typeof inviteSchema>;
 
-function isAdmin(perms: AppPermissao[]) {
-  return (
-    perms.includes("gerenciar_usuarios") &&
-    perms.includes("gerenciar_perfis_acesso")
-  );
-}
-
-function isLastActiveAdmin(usuarios: UsuarioAdmin[], candidato: UsuarioAdmin) {
-  if (!isAdmin(candidato.permissoes) || !candidato.ativo) return false;
-  const ativosAdmin = usuarios.filter(
-    (u) => isAdmin(u.permissoes) && u.ativo,
-  );
-  return ativosAdmin.length === 1 && ativosAdmin[0].id === candidato.id;
-}
+// Local aliases — use shared helpers from "@/lib/permissions"
+const isAdmin = isAdminPerfil;
+const isLastActiveAdmin = isLastAdmin;
 
 function UsuariosPage() {
   const { user } = useAuth();
@@ -100,9 +95,13 @@ function UsuariosPage() {
   const { data: perfis } = usePerfisAcesso();
   const updateMutation = useUpdateUsuario();
   const inviteMutation = useInviteUsuario();
+  const resendMutation = useResendInvite();
+  const deleteMutation = useDeleteUsuario();
 
   const [editTarget, setEditTarget] = React.useState<UsuarioAdmin | null>(null);
   const [confirmDeactivate, setConfirmDeactivate] =
+    React.useState<UsuarioAdmin | null>(null);
+  const [deleteTarget, setDeleteTarget] =
     React.useState<UsuarioAdmin | null>(null);
   const [inviteOpen, setInviteOpen] = React.useState(false);
 
@@ -224,11 +223,16 @@ function UsuariosPage() {
 
   const renderRowActions = (row: UsuarioAdmin) => {
     const isSelf = row.id === meuId;
-    const isLastAdmin = isLastActiveAdmin(lista, row);
-    const deactivateDisabled = isLastAdmin || isSelf;
+    const isLastAdminFlag = isLastActiveAdmin(lista, row);
+    const deactivateDisabled = isLastAdminFlag || isSelf;
     const deactivateReason = isSelf
       ? "Você não pode desativar sua própria conta"
       : "Não é possível desativar o último administrador ativo";
+    const showResend = !row.last_sign_in_at && !isSelf;
+    const deleteDisabled = isSelf || isLastAdminFlag;
+    const deleteReason = isSelf
+      ? "Você não pode excluir sua própria conta"
+      : "Último administrador — não pode ser excluído";
 
     return (
       <DropdownMenu>
@@ -243,6 +247,15 @@ function UsuariosPage() {
             <Pencil className="mr-2 h-4 w-4" />
             Editar
           </DropdownMenuItem>
+          {showResend && (
+            <DropdownMenuItem
+              onClick={() => resendMutation.mutate(row.id)}
+              disabled={resendMutation.isPending}
+            >
+              <Mail className="mr-2 h-4 w-4" />
+              Reenviar convite
+            </DropdownMenuItem>
+          )}
           <DropdownMenuSeparator />
           {row.ativo ? (
             <DisabledTooltipItem
@@ -259,6 +272,14 @@ function UsuariosPage() {
               Reativar
             </DropdownMenuItem>
           )}
+          <DisabledTooltipItem
+            disabled={deleteDisabled}
+            reason={deleteReason}
+            onSelect={() => setDeleteTarget(row)}
+            icon={<Trash2 className="mr-2 h-4 w-4" />}
+            label="Excluir usuário"
+            destructive
+          />
         </DropdownMenuContent>
       </DropdownMenu>
     );
@@ -406,6 +427,17 @@ function UsuariosPage() {
           variant="destructive"
           onConfirm={handleConfirmDeactivate}
         />
+
+        {deleteTarget && (
+          <DeleteUserConfirmDialog
+            open={!!deleteTarget}
+            onOpenChange={(o) => !o && setDeleteTarget(null)}
+            userName={deleteTarget.nome}
+            onConfirm={async () => {
+              await deleteMutation.mutateAsync(deleteTarget.id);
+            }}
+          />
+        )}
       </div>
     </TooltipProvider>
   );

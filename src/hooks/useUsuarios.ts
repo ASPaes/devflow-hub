@@ -63,6 +63,42 @@ export function useUpdateUsuario() {
   });
 }
 
+export function useResendInvite() {
+  return useMutation({
+    mutationFn: async (userId: string) => {
+      const { data, error } = await supabase.functions.invoke("resend-invite", {
+        body: { userId },
+      });
+      if (error) throw error;
+      const errMsg = (data as { error?: string } | null)?.error;
+      if (errMsg) throw new Error(errMsg);
+      return data;
+    },
+    onSuccess: () => toast.success("Convite reenviado"),
+    onError: (err: Error) => toast.error(err.message || "Erro ao reenviar convite"),
+  });
+}
+
+export function useDeleteUsuario() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (userId: string) => {
+      const { data, error } = await supabase.functions.invoke("delete-user", {
+        body: { userId },
+      });
+      if (error) throw error;
+      const errMsg = (data as { error?: string } | null)?.error;
+      if (errMsg) throw new Error(errMsg);
+      return data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: usuariosKey });
+      toast.success("Usuário excluído");
+    },
+    onError: (err: Error) => toast.error(err.message || "Erro ao excluir usuário"),
+  });
+}
+
 export function useInviteUsuario() {
   const qc = useQueryClient();
   return useMutation({

@@ -48,6 +48,7 @@ const emptyValues: PerfilAcessoInput = {
   descricao: "",
   permissoes: [],
   ativo: true,
+  perfil_padrao_novos_usuarios: false,
 };
 
 const TOTAL_PERMS = 10;
@@ -69,6 +70,7 @@ function PerfisAcessoPage() {
       descricao: editing.descricao ?? "",
       permissoes: editing.permissoes,
       ativo: editing.ativo,
+      perfil_padrao_novos_usuarios: editing.perfil_padrao_novos_usuarios,
     };
   }, [editing]);
 
@@ -82,6 +84,11 @@ function PerfisAcessoPage() {
           {row.sistema && (
             <Badge variant="outline" className="text-xs">
               Sistema
+            </Badge>
+          )}
+          {row.perfil_padrao_novos_usuarios && (
+            <Badge variant="outline" className="text-xs">
+              padrão
             </Badge>
           )}
         </div>
@@ -191,7 +198,11 @@ function PerfisAcessoPage() {
           defaultValues={editValues}
           onSubmit={async (values) => {
             if (!editing) return;
-            await updateMut.mutateAsync({ id: editing.id, input: values });
+            await updateMut.mutateAsync({
+              id: editing.id,
+              input: values,
+              wasDefault: editing.perfil_padrao_novos_usuarios,
+            });
           }}
         >
           {(form) => <PerfilFields form={form} sistema={editing?.sistema} />}
@@ -316,10 +327,7 @@ function PerfilFields({
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div>
-                      <Switch
-                        checked={field.value}
-                        disabled
-                      />
+                      <Switch checked={field.value} disabled />
                     </div>
                   </TooltipTrigger>
                   <TooltipContent side="left">
@@ -332,6 +340,30 @@ function PerfilFields({
                   onCheckedChange={field.onChange}
                 />
               )}
+            </FormControl>
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="perfil_padrao_novos_usuarios"
+        render={({ field }) => (
+          <FormItem className="flex flex-row items-center justify-between rounded-lg border border-border p-3">
+            <div className="space-y-0.5">
+              <FormLabel className="text-base">
+                Perfil padrão pra novos usuários
+              </FormLabel>
+              <FormDescription>
+                Usuários criados via signup ou invite (sem perfil explícito)
+                recebem este perfil automaticamente.
+              </FormDescription>
+            </div>
+            <FormControl>
+              <Switch
+                checked={field.value}
+                onCheckedChange={field.onChange}
+              />
             </FormControl>
           </FormItem>
         )}
