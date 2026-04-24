@@ -29,7 +29,6 @@ import { formatRelativeSP } from "@/lib/format";
 import {
   TIPO_DEMANDA_LABEL,
   useDemanda,
-  useDemandaAnexos,
   useUpdateDemanda,
   type UpdateDemandaPatch,
 } from "@/hooks/useDemandas";
