@@ -114,7 +114,7 @@ function UsuariosPage() {
       header: "Perfil",
       render: (row) =>
         row.role === "dev_gestor" ? (
-          <Badge className="bg-violet-500/15 text-violet-300 hover:bg-violet-500/20">
+          <Badge className="border-transparent bg-status-desenvolvimento/15 text-status-desenvolvimento hover:bg-status-desenvolvimento/20">
             dev_gestor
           </Badge>
         ) : (
@@ -126,7 +126,7 @@ function UsuariosPage() {
       header: "Status",
       render: (row) =>
         row.ativo ? (
-          <Badge className="bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/20">
+          <Badge className="border-transparent bg-status-entregue/15 text-status-entregue hover:bg-status-entregue/20">
             Ativo
           </Badge>
         ) : (
