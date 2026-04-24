@@ -20,6 +20,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
@@ -121,12 +122,10 @@ function PerfilPage() {
               )}
             />
 
-            <FormItem>
-              <FormLabel>E-mail</FormLabel>
-              <FormControl>
-                <Input value={user?.email ?? ""} readOnly disabled />
-              </FormControl>
-            </FormItem>
+            <div className="space-y-2">
+              <Label htmlFor="perfil-email">E-mail</Label>
+              <Input id="perfil-email" value={user?.email ?? ""} readOnly disabled />
+            </div>
 
             <Button type="submit" disabled={mutation.isPending}>
               {mutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
