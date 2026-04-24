@@ -5,15 +5,14 @@ import {
   Scripts,
   createRootRouteWithContext,
 } from "@tanstack/react-router";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 import appCss from "../styles.css?url";
 import { Toaster } from "@/components/ui/sonner";
-
-interface RouterContext {
-  queryClient: QueryClient;
-}
+import { AuthProvider, useAuth } from "@/hooks/useAuth";
+import { SplashScreen } from "@/components/SplashScreen";
+import { RouterAuthSync, type RouterAppContext } from "@/router";
 
 function NotFoundComponent() {
   return (
@@ -34,7 +33,7 @@ function NotFoundComponent() {
   );
 }
 
-export const Route = createRootRouteWithContext<RouterContext>()({
+export const Route = createRootRouteWithContext<RouterAppContext>()({
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -71,13 +70,26 @@ function RootShell({ children }: { children: React.ReactNode }) {
   );
 }
 
+function AuthGate() {
+  const auth = useAuth();
+  if (auth.isLoading) return <SplashScreen />;
+  return (
+    <>
+      <RouterAuthSync />
+      <Outlet />
+    </>
+  );
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
-      <Toaster />
-      {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
+      <AuthProvider>
+        <AuthGate />
+        <Toaster />
+        {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
