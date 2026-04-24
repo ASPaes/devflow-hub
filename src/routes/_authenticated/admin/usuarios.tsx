@@ -65,6 +65,7 @@ import type { AppPermissao } from "@/hooks/useProfile";
 import { isAdminPerfil, isLastAdmin } from "@/lib/permissions";
 import { formatRelativeSP } from "@/lib/format";
 import { initials } from "@/lib/utils";
+import { getStatusUsuario } from "@/lib/usuarios";
 
 export const Route = createFileRoute("/_authenticated/admin/usuarios")({
   component: UsuariosPage,
@@ -189,14 +190,24 @@ function UsuariosPage() {
     {
       key: "ativo",
       header: "Status",
-      render: (row) =>
-        row.ativo ? (
-          <Badge className="border-transparent bg-status-entregue/15 text-status-entregue hover:bg-status-entregue/20">
-            Ativo
-          </Badge>
-        ) : (
-          <Badge variant="outline">Inativo</Badge>
-        ),
+      render: (row) => {
+        const status = getStatusUsuario(row);
+        if (status === "Ativo") {
+          return (
+            <Badge className="border-transparent bg-status-entregue/15 text-status-entregue hover:bg-status-entregue/20">
+              Ativo
+            </Badge>
+          );
+        }
+        if (status === "Pendente") {
+          return (
+            <Badge className="border-status-triagem/30 bg-status-triagem/15 text-status-triagem hover:bg-status-triagem/20">
+              Pendente
+            </Badge>
+          );
+        }
+        return <Badge variant="outline">Inativo</Badge>;
+      },
     },
     {
       key: "last_sign_in_at",
@@ -207,7 +218,7 @@ function UsuariosPage() {
             {formatRelativeSP(row.last_sign_in_at)}
           </span>
         ) : (
-          <span className="text-sm text-muted-foreground">Nunca</span>
+          <span className="text-sm text-muted-foreground">—</span>
         ),
     },
     {

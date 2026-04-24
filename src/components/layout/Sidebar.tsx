@@ -109,7 +109,7 @@ export function Sidebar() {
 
         <nav className="flex flex-1 flex-col gap-1 p-3">
           <NavItem to="/" icon={LayoutDashboard} label="Dashboard" />
-          <NavItem icon={Inbox} label="Demandas" disabled />
+          <NavItem to="/demandas" icon={Inbox} label="Demandas" />
           {temPermissao("criar_demanda") && (
             <NavItem
               to="/demandas/nova"
