@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import {
   MoreHorizontal,
   Pencil,
+  Plus,
   Power,
   PowerOff,
   Users,
@@ -30,10 +31,32 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useAuth } from "@/hooks/useAuth";
-import { useUsuarios, useUpdateUsuario, type UsuarioAdmin } from "@/hooks/useUsuarios";
+import {
+  useUsuarios,
+  useUpdateUsuario,
+  useInviteUsuario,
+  type UsuarioAdmin,
+} from "@/hooks/useUsuarios";
+import { usePerfisAcesso } from "@/hooks/usePerfisAcesso";
+import type { AppPermissao } from "@/hooks/useProfile";
 import { formatRelativeSP } from "@/lib/format";
 import { initials } from "@/lib/utils";
 
@@ -41,23 +64,32 @@ export const Route = createFileRoute("/_authenticated/admin/usuarios")({
   component: UsuariosPage,
 });
 
-const editNomeSchema = z.object({
+const editSchema = z.object({
   nome: z.string().trim().min(2, "Nome muito curto").max(80),
+  perfil_acesso_id: z.string().uuid("Selecione um perfil de acesso"),
+  ativo: z.boolean(),
 });
-type EditNomeValues = z.infer<typeof editNomeSchema>;
+type EditValues = z.infer<typeof editSchema>;
 
-type ConfirmState = { usuario: UsuarioAdmin } | null;
+const inviteSchema = z.object({
+  email: z.string().email("Email inválido"),
+  nome: z.string().trim().min(2).max(100),
+  perfil_acesso_id: z.string().uuid("Selecione um perfil de acesso"),
+});
+type InviteValues = z.infer<typeof inviteSchema>;
 
-function isAdmin(u: UsuarioAdmin) {
+function isAdmin(perms: AppPermissao[]) {
   return (
-    u.permissoes.includes("gerenciar_usuarios") &&
-    u.permissoes.includes("gerenciar_perfis_acesso")
+    perms.includes("gerenciar_usuarios") &&
+    perms.includes("gerenciar_perfis_acesso")
   );
 }
 
 function isLastActiveAdmin(usuarios: UsuarioAdmin[], candidato: UsuarioAdmin) {
-  if (!isAdmin(candidato) || !candidato.ativo) return false;
-  const ativosAdmin = usuarios.filter((u) => isAdmin(u) && u.ativo);
+  if (!isAdmin(candidato.permissoes) || !candidato.ativo) return false;
+  const ativosAdmin = usuarios.filter(
+    (u) => isAdmin(u.permissoes) && u.ativo,
+  );
   return ativosAdmin.length === 1 && ativosAdmin[0].id === candidato.id;
 }
 
@@ -65,28 +97,58 @@ function UsuariosPage() {
   const { user } = useAuth();
   const meuId = user?.id ?? null;
   const { data: usuarios, isLoading } = useUsuarios();
+  const { data: perfis } = usePerfisAcesso();
   const updateMutation = useUpdateUsuario();
+  const inviteMutation = useInviteUsuario();
 
   const [editTarget, setEditTarget] = React.useState<UsuarioAdmin | null>(null);
-  const [confirmState, setConfirmState] = React.useState<ConfirmState>(null);
+  const [confirmDeactivate, setConfirmDeactivate] =
+    React.useState<UsuarioAdmin | null>(null);
+  const [inviteOpen, setInviteOpen] = React.useState(false);
 
   const lista = usuarios ?? [];
+  const perfisAtivos = React.useMemo(
+    () => (perfis ?? []).filter((p) => p.ativo),
+    [perfis],
+  );
 
-  const handleEditNome = async (values: EditNomeValues) => {
+  const editValues = React.useMemo<EditValues>(() => {
+    if (!editTarget) {
+      return { nome: "", perfil_acesso_id: "", ativo: true };
+    }
+    return {
+      nome: editTarget.nome,
+      perfil_acesso_id: editTarget.perfil_acesso_id,
+      ativo: editTarget.ativo,
+    };
+  }, [editTarget]);
+
+  const handleEdit = async (values: EditValues) => {
     if (!editTarget) return;
-    await updateMutation.mutateAsync({ id: editTarget.id, patch: { nome: values.nome } });
+    await updateMutation.mutateAsync({
+      id: editTarget.id,
+      patch: {
+        nome: values.nome,
+        perfil_acesso_id: values.perfil_acesso_id,
+        ativo: values.ativo,
+      },
+    });
   };
 
-  const handleConfirm = async () => {
-    if (!confirmState) return;
+  const handleConfirmDeactivate = async () => {
+    if (!confirmDeactivate) return;
     await updateMutation.mutateAsync({
-      id: confirmState.usuario.id,
+      id: confirmDeactivate.id,
       patch: { ativo: false },
     });
   };
 
   const reativar = (u: UsuarioAdmin) =>
     updateMutation.mutate({ id: u.id, patch: { ativo: true } });
+
+  const handleInvite = async (values: InviteValues) => {
+    await inviteMutation.mutateAsync(values);
+  };
 
   const columns: DataTableColumn<UsuarioAdmin>[] = [
     {
@@ -106,7 +168,9 @@ function UsuariosPage() {
                 <span className="text-xs text-muted-foreground">(você)</span>
               )}
             </div>
-            <div className="truncate text-xs text-muted-foreground">{row.email}</div>
+            <div className="truncate text-xs text-muted-foreground">
+              {row.email}
+            </div>
           </div>
         </div>
       ),
@@ -115,7 +179,7 @@ function UsuariosPage() {
       key: "perfil_acesso_nome",
       header: "Perfil",
       render: (row) =>
-        isAdmin(row) ? (
+        isAdmin(row.permissoes) ? (
           <Badge className="border-transparent bg-status-desenvolvimento/15 text-status-desenvolvimento hover:bg-status-desenvolvimento/20">
             {row.perfil_acesso_nome}
           </Badge>
@@ -162,114 +226,326 @@ function UsuariosPage() {
     const isSelf = row.id === meuId;
     const isLastAdmin = isLastActiveAdmin(lista, row);
     const deactivateDisabled = isLastAdmin || isSelf;
-
     const deactivateReason = isSelf
       ? "Você não pode desativar sua própria conta"
       : "Não é possível desativar o último administrador ativo";
 
     return (
-      <TooltipProvider delayDuration={150}>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <MoreHorizontal className="h-4 w-4" />
-              <span className="sr-only">Ações</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuItem onClick={() => setEditTarget(row)}>
-              <Pencil className="mr-2 h-4 w-4" />
-              Editar nome
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" className="h-8 w-8">
+            <MoreHorizontal className="h-4 w-4" />
+            <span className="sr-only">Ações</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuItem onClick={() => setEditTarget(row)}>
+            <Pencil className="mr-2 h-4 w-4" />
+            Editar
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          {row.ativo ? (
+            <DisabledTooltipItem
+              disabled={deactivateDisabled}
+              reason={deactivateReason}
+              onSelect={() => setConfirmDeactivate(row)}
+              icon={<PowerOff className="mr-2 h-4 w-4" />}
+              label="Desativar"
+              destructive
+            />
+          ) : (
+            <DropdownMenuItem onClick={() => reativar(row)}>
+              <Power className="mr-2 h-4 w-4" />
+              Reativar
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
-
-            {row.ativo ? (
-              <DisabledTooltipItem
-                disabled={deactivateDisabled}
-                reason={deactivateReason}
-                onSelect={() => setConfirmState({ usuario: row })}
-                icon={<PowerOff className="mr-2 h-4 w-4" />}
-                label="Desativar"
-                destructive
-              />
-            ) : (
-              <DropdownMenuItem onClick={() => reativar(row)}>
-                <Power className="mr-2 h-4 w-4" />
-                Reativar
-              </DropdownMenuItem>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </TooltipProvider>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
     );
   };
 
   return (
-    <div className="p-8">
-      <PageHeader
-        title="Usuários"
-        description="Gerencie acesso e perfis da equipe"
-      />
+    <TooltipProvider delayDuration={150}>
+      <div className="p-8">
+        <PageHeader
+          title="Usuários"
+          description="Gerencie acesso e perfis da equipe"
+          action={
+            <Button onClick={() => setInviteOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Novo usuário
+            </Button>
+          }
+        />
 
-      <DataTable<UsuarioAdmin>
-        data={lista}
-        isLoading={isLoading}
-        columns={columns}
-        searchableFields={["nome", "email"]}
-        searchPlaceholder="Buscar por nome ou e-mail..."
-        rowActions={renderRowActions}
-        getRowKey={(row) => row.id}
-        emptyState={
-          <EmptyState
-            icon={Users}
-            title="Nenhum usuário"
-            description="Ainda não há usuários cadastrados no sistema."
-          />
-        }
-      />
+        <DataTable<UsuarioAdmin>
+          data={lista}
+          isLoading={isLoading}
+          columns={columns}
+          searchableFields={["nome", "email"]}
+          searchPlaceholder="Buscar por nome ou e-mail..."
+          rowActions={renderRowActions}
+          getRowKey={(row) => row.id}
+          emptyState={
+            <EmptyState
+              icon={Users}
+              title="Nenhum usuário"
+              description="Convide o primeiro usuário pelo botão acima."
+            />
+          }
+        />
 
-      {editTarget && (
-        <ModalForm<EditNomeValues>
-          open={!!editTarget}
-          onOpenChange={(o) => !o && setEditTarget(null)}
-          title="Editar nome"
-          description={editTarget.email}
-          schema={editNomeSchema}
-          defaultValues={{ nome: editTarget.nome }}
-          onSubmit={handleEditNome}
+        {editTarget && (
+          <ModalForm<EditValues>
+            open={!!editTarget}
+            onOpenChange={(o) => !o && setEditTarget(null)}
+            title={`Editar ${editTarget.nome}`}
+            description={editTarget.email}
+            schema={editSchema}
+            defaultValues={editValues}
+            onSubmit={handleEdit}
+          >
+            {(form) => (
+              <EditUserFields
+                form={form}
+                target={editTarget}
+                meuId={meuId}
+                lista={lista}
+                perfisAtivos={perfisAtivos}
+              />
+            )}
+          </ModalForm>
+        )}
+
+        <ModalForm<InviteValues>
+          open={inviteOpen}
+          onOpenChange={setInviteOpen}
+          title="Convidar usuário"
+          description="O usuário receberá um e-mail com link pra definir a senha."
+          schema={inviteSchema}
+          defaultValues={{ email: "", nome: "", perfil_acesso_id: "" }}
+          onSubmit={handleInvite}
+          submitLabel="Enviar convite"
         >
           {(form) => (
-            <FormField
-              control={form.control}
-              name="nome"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nome</FormLabel>
-                  <FormControl>
-                    <Input {...field} autoFocus />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <>
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>E-mail</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="email"
+                        placeholder="usuario@empresa.com"
+                        {...field}
+                        autoFocus
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="nome"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nome</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Nome completo" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="perfil_acesso_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Perfil de acesso</FormLabel>
+                    <Select
+                      value={field.value}
+                      onValueChange={field.onChange}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione um perfil" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {perfisAtivos.map((p) => (
+                          <SelectItem key={p.id} value={p.id}>
+                            {p.nome}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </>
           )}
         </ModalForm>
-      )}
 
-      <ConfirmDialog
-        open={!!confirmState}
-        onOpenChange={(o) => !o && setConfirmState(null)}
-        title={confirmState ? `Desativar ${confirmState.usuario.nome}?` : ""}
-        description={
-          confirmState
-            ? `${confirmState.usuario.nome} não conseguirá mais fazer login até ser reativado.`
-            : ""
-        }
-        confirmLabel="Desativar"
-        variant="destructive"
-        onConfirm={handleConfirm}
+        <ConfirmDialog
+          open={!!confirmDeactivate}
+          onOpenChange={(o) => !o && setConfirmDeactivate(null)}
+          title={
+            confirmDeactivate ? `Desativar ${confirmDeactivate.nome}?` : ""
+          }
+          description={
+            confirmDeactivate
+              ? `${confirmDeactivate.nome} não conseguirá mais fazer login até ser reativado.`
+              : ""
+          }
+          confirmLabel="Desativar"
+          variant="destructive"
+          onConfirm={handleConfirmDeactivate}
+        />
+      </div>
+    </TooltipProvider>
+  );
+}
+
+interface EditUserFieldsProps {
+  form: ReturnType<
+    typeof import("react-hook-form").useForm<EditValues>
+  > extends infer R
+    ? R
+    : never;
+  target: UsuarioAdmin;
+  meuId: string | null;
+  lista: UsuarioAdmin[];
+  perfisAtivos: Array<{
+    id: string;
+    nome: string;
+    permissoes: AppPermissao[];
+  }>;
+}
+
+function EditUserFields({
+  form,
+  target,
+  meuId,
+  lista,
+  perfisAtivos,
+}: EditUserFieldsProps) {
+  const isSelf = target.id === meuId;
+  const isLastAdmin = isLastActiveAdmin(lista, target);
+
+  const ativoDisabled = isSelf || isLastAdmin;
+  const ativoReason = isSelf
+    ? "Você não pode desativar sua própria conta"
+    : "Não é possível desativar o último administrador ativo";
+
+  return (
+    <>
+      <FormField
+        control={form.control}
+        name="nome"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Nome</FormLabel>
+            <FormControl>
+              <Input {...field} autoFocus />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
       />
-    </div>
+
+      <FormField
+        control={form.control}
+        name="perfil_acesso_id"
+        render={({ field }) => {
+          return (
+            <FormItem>
+              <FormLabel>Perfil de acesso</FormLabel>
+              <Select value={field.value} onValueChange={field.onChange}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um perfil" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {perfisAtivos.map((p) => {
+                    const wouldRemoveAdmin =
+                      isLastAdmin && !isAdmin(p.permissoes);
+                    const selfDemote =
+                      isSelf &&
+                      isAdmin(target.permissoes) &&
+                      !isAdmin(p.permissoes);
+                    const disabled = wouldRemoveAdmin || selfDemote;
+                    const reason = wouldRemoveAdmin
+                      ? "Último administrador — não pode ser rebaixado"
+                      : "Você não pode remover seu próprio acesso de administrador";
+
+                    if (disabled) {
+                      return (
+                        <Tooltip key={p.id}>
+                          <TooltipTrigger asChild>
+                            <div>
+                              <SelectItem value={p.id} disabled>
+                                {p.nome}
+                              </SelectItem>
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent side="left">
+                            {reason}
+                          </TooltipContent>
+                        </Tooltip>
+                      );
+                    }
+                    return (
+                      <SelectItem key={p.id} value={p.id}>
+                        {p.nome}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          );
+        }}
+      />
+
+      <FormField
+        control={form.control}
+        name="ativo"
+        render={({ field }) => (
+          <FormItem className="flex flex-row items-center justify-between rounded-lg border border-border p-3">
+            <div className="space-y-0.5">
+              <FormLabel className="text-base">Ativo</FormLabel>
+              <FormDescription>
+                Usuários inativos não conseguem fazer login.
+              </FormDescription>
+            </div>
+            <FormControl>
+              {ativoDisabled ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div>
+                      <Switch checked={field.value} disabled />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="left">{ativoReason}</TooltipContent>
+                </Tooltip>
+              ) : (
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              )}
+            </FormControl>
+          </FormItem>
+        )}
+      />
+    </>
   );
 }
 
@@ -300,7 +576,9 @@ function DisabledTooltipItem({
         onSelect();
       }}
       disabled={disabled}
-      className={destructive ? "text-destructive focus:text-destructive" : undefined}
+      className={
+        destructive ? "text-destructive focus:text-destructive" : undefined
+      }
     >
       {icon}
       {label}

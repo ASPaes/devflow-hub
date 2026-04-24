@@ -18,6 +18,7 @@ import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAdminUsuariosRouteImport } from './routes/_authenticated/admin/usuarios'
 import { Route as AuthenticatedAdminSubmodulosRouteImport } from './routes/_authenticated/admin/submodulos'
+import { Route as AuthenticatedAdminPerfisAcessoRouteImport } from './routes/_authenticated/admin/perfis-acesso'
 import { Route as AuthenticatedAdminModulosRouteImport } from './routes/_authenticated/admin/modulos'
 import { Route as AuthenticatedAdminAreasRouteImport } from './routes/_authenticated/admin/areas'
 
@@ -67,6 +68,12 @@ const AuthenticatedAdminSubmodulosRoute =
     path: '/submodulos',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminPerfisAcessoRoute =
+  AuthenticatedAdminPerfisAcessoRouteImport.update({
+    id: '/perfis-acesso',
+    path: '/perfis-acesso',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminModulosRoute =
   AuthenticatedAdminModulosRouteImport.update({
     id: '/modulos',
@@ -88,6 +95,7 @@ export interface FileRoutesByFullPath {
   '/perfil': typeof AuthenticatedPerfilRoute
   '/admin/areas': typeof AuthenticatedAdminAreasRoute
   '/admin/modulos': typeof AuthenticatedAdminModulosRoute
+  '/admin/perfis-acesso': typeof AuthenticatedAdminPerfisAcessoRoute
   '/admin/submodulos': typeof AuthenticatedAdminSubmodulosRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
 }
@@ -100,6 +108,7 @@ export interface FileRoutesByTo {
   '/': typeof AuthenticatedIndexRoute
   '/admin/areas': typeof AuthenticatedAdminAreasRoute
   '/admin/modulos': typeof AuthenticatedAdminModulosRoute
+  '/admin/perfis-acesso': typeof AuthenticatedAdminPerfisAcessoRoute
   '/admin/submodulos': typeof AuthenticatedAdminSubmodulosRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
 }
@@ -114,6 +123,7 @@ export interface FileRoutesById {
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/admin/areas': typeof AuthenticatedAdminAreasRoute
   '/_authenticated/admin/modulos': typeof AuthenticatedAdminModulosRoute
+  '/_authenticated/admin/perfis-acesso': typeof AuthenticatedAdminPerfisAcessoRoute
   '/_authenticated/admin/submodulos': typeof AuthenticatedAdminSubmodulosRoute
   '/_authenticated/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
 }
@@ -128,6 +138,7 @@ export interface FileRouteTypes {
     | '/perfil'
     | '/admin/areas'
     | '/admin/modulos'
+    | '/admin/perfis-acesso'
     | '/admin/submodulos'
     | '/admin/usuarios'
   fileRoutesByTo: FileRoutesByTo
@@ -140,6 +151,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin/areas'
     | '/admin/modulos'
+    | '/admin/perfis-acesso'
     | '/admin/submodulos'
     | '/admin/usuarios'
   id:
@@ -153,6 +165,7 @@ export interface FileRouteTypes {
     | '/_authenticated/'
     | '/_authenticated/admin/areas'
     | '/_authenticated/admin/modulos'
+    | '/_authenticated/admin/perfis-acesso'
     | '/_authenticated/admin/submodulos'
     | '/_authenticated/admin/usuarios'
   fileRoutesById: FileRoutesById
@@ -229,6 +242,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminSubmodulosRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/perfis-acesso': {
+      id: '/_authenticated/admin/perfis-acesso'
+      path: '/perfis-acesso'
+      fullPath: '/admin/perfis-acesso'
+      preLoaderRoute: typeof AuthenticatedAdminPerfisAcessoRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/modulos': {
       id: '/_authenticated/admin/modulos'
       path: '/modulos'
@@ -249,6 +269,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAreasRoute: typeof AuthenticatedAdminAreasRoute
   AuthenticatedAdminModulosRoute: typeof AuthenticatedAdminModulosRoute
+  AuthenticatedAdminPerfisAcessoRoute: typeof AuthenticatedAdminPerfisAcessoRoute
   AuthenticatedAdminSubmodulosRoute: typeof AuthenticatedAdminSubmodulosRoute
   AuthenticatedAdminUsuariosRoute: typeof AuthenticatedAdminUsuariosRoute
 }
@@ -256,6 +277,7 @@ interface AuthenticatedAdminRouteChildren {
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminAreasRoute: AuthenticatedAdminAreasRoute,
   AuthenticatedAdminModulosRoute: AuthenticatedAdminModulosRoute,
+  AuthenticatedAdminPerfisAcessoRoute: AuthenticatedAdminPerfisAcessoRoute,
   AuthenticatedAdminSubmodulosRoute: AuthenticatedAdminSubmodulosRoute,
   AuthenticatedAdminUsuariosRoute: AuthenticatedAdminUsuariosRoute,
 }
