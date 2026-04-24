@@ -19,6 +19,7 @@ import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedDemandasIndexRouteImport } from './routes/_authenticated/demandas.index'
 import { Route as AuthenticatedDemandasNovaRouteImport } from './routes/_authenticated/demandas.nova'
+import { Route as AuthenticatedDemandasCodigoRouteImport } from './routes/_authenticated/demandas.$codigo'
 import { Route as AuthenticatedAdminUsuariosRouteImport } from './routes/_authenticated/admin/usuarios'
 import { Route as AuthenticatedAdminSubmodulosRouteImport } from './routes/_authenticated/admin/submodulos'
 import { Route as AuthenticatedAdminPerfisAcessoRouteImport } from './routes/_authenticated/admin/perfis-acesso'
@@ -76,6 +77,12 @@ const AuthenticatedDemandasNovaRoute =
     path: '/demandas/nova',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedDemandasCodigoRoute =
+  AuthenticatedDemandasCodigoRouteImport.update({
+    id: '/demandas/$codigo',
+    path: '/demandas/$codigo',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedAdminUsuariosRoute =
   AuthenticatedAdminUsuariosRouteImport.update({
     id: '/usuarios',
@@ -119,6 +126,7 @@ export interface FileRoutesByFullPath {
   '/admin/perfis-acesso': typeof AuthenticatedAdminPerfisAcessoRoute
   '/admin/submodulos': typeof AuthenticatedAdminSubmodulosRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
+  '/demandas/$codigo': typeof AuthenticatedDemandasCodigoRoute
   '/demandas/nova': typeof AuthenticatedDemandasNovaRoute
   '/demandas/': typeof AuthenticatedDemandasIndexRoute
 }
@@ -135,6 +143,7 @@ export interface FileRoutesByTo {
   '/admin/perfis-acesso': typeof AuthenticatedAdminPerfisAcessoRoute
   '/admin/submodulos': typeof AuthenticatedAdminSubmodulosRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
+  '/demandas/$codigo': typeof AuthenticatedDemandasCodigoRoute
   '/demandas/nova': typeof AuthenticatedDemandasNovaRoute
   '/demandas': typeof AuthenticatedDemandasIndexRoute
 }
@@ -153,6 +162,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/perfis-acesso': typeof AuthenticatedAdminPerfisAcessoRoute
   '/_authenticated/admin/submodulos': typeof AuthenticatedAdminSubmodulosRoute
   '/_authenticated/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
+  '/_authenticated/demandas/$codigo': typeof AuthenticatedDemandasCodigoRoute
   '/_authenticated/demandas/nova': typeof AuthenticatedDemandasNovaRoute
   '/_authenticated/demandas/': typeof AuthenticatedDemandasIndexRoute
 }
@@ -171,6 +181,7 @@ export interface FileRouteTypes {
     | '/admin/perfis-acesso'
     | '/admin/submodulos'
     | '/admin/usuarios'
+    | '/demandas/$codigo'
     | '/demandas/nova'
     | '/demandas/'
   fileRoutesByTo: FileRoutesByTo
@@ -187,6 +198,7 @@ export interface FileRouteTypes {
     | '/admin/perfis-acesso'
     | '/admin/submodulos'
     | '/admin/usuarios'
+    | '/demandas/$codigo'
     | '/demandas/nova'
     | '/demandas'
   id:
@@ -204,6 +216,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/perfis-acesso'
     | '/_authenticated/admin/submodulos'
     | '/_authenticated/admin/usuarios'
+    | '/_authenticated/demandas/$codigo'
     | '/_authenticated/demandas/nova'
     | '/_authenticated/demandas/'
   fileRoutesById: FileRoutesById
@@ -288,6 +301,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDemandasNovaRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/demandas/$codigo': {
+      id: '/_authenticated/demandas/$codigo'
+      path: '/demandas/$codigo'
+      fullPath: '/demandas/$codigo'
+      preLoaderRoute: typeof AuthenticatedDemandasCodigoRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/admin/usuarios': {
       id: '/_authenticated/admin/usuarios'
       path: '/usuarios'
@@ -349,6 +369,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedDemandasCodigoRoute: typeof AuthenticatedDemandasCodigoRoute
   AuthenticatedDemandasNovaRoute: typeof AuthenticatedDemandasNovaRoute
   AuthenticatedDemandasIndexRoute: typeof AuthenticatedDemandasIndexRoute
 }
@@ -357,6 +378,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedDemandasCodigoRoute: AuthenticatedDemandasCodigoRoute,
   AuthenticatedDemandasNovaRoute: AuthenticatedDemandasNovaRoute,
   AuthenticatedDemandasIndexRoute: AuthenticatedDemandasIndexRoute,
 }

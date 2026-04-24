@@ -131,3 +131,34 @@ export function useInviteUsuario() {
     },
   });
 }
+
+export type UsuarioComPermissao = {
+  id: string;
+  nome: string;
+  avatar_url: string | null;
+};
+
+export function useUsuariosComPermissao(permissao: AppPermissao) {
+  return useQuery<UsuarioComPermissao[]>({
+    queryKey: ["usuarios-com-permissao", permissao],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select(
+          "id, nome, avatar_url, perfil_acesso:perfis_acesso!inner(permissoes)",
+        )
+        .eq("ativo", true)
+        .order("nome");
+      if (error) throw error;
+      return ((data ?? []) as Array<{
+        id: string;
+        nome: string;
+        avatar_url: string | null;
+        perfil_acesso: { permissoes: AppPermissao[] } | null;
+      }>)
+        .filter((p) => p.perfil_acesso?.permissoes?.includes(permissao))
+        .map(({ id, nome, avatar_url }) => ({ id, nome, avatar_url }));
+    },
+    staleTime: 5 * 60_000,
+  });
+}

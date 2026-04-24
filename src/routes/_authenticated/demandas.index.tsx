@@ -176,9 +176,12 @@ function DemandasListagem() {
             rows={rows}
             isLoading={isLoading}
             onRowClick={(row) => {
-              // Página de detalhe vem no Prompt 3.3
-              // eslint-disable-next-line no-console
-              console.log("navegaria pra /demandas/" + row.codigo);
+              if (row.codigo) {
+                navigate({
+                  to: "/demandas/$codigo",
+                  params: { codigo: row.codigo },
+                });
+              }
             }}
           />
           {!isLoading && (

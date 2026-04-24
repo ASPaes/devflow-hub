@@ -11,6 +11,47 @@ export type Demanda = Database["public"]["Tables"]["demandas"]["Row"];
 export type DemandaListaRow =
   Database["public"]["Views"]["vw_demandas_lista"]["Row"];
 
+export type DemandaCompleta = Demanda & {
+  modulo: Pick<
+    Database["public"]["Tables"]["modulos"]["Row"],
+    "id" | "nome" | "cor"
+  > | null;
+  submodulo: Pick<
+    Database["public"]["Tables"]["submodulos"]["Row"],
+    "id" | "nome"
+  > | null;
+  area: Pick<Database["public"]["Tables"]["areas"]["Row"], "id" | "nome"> | null;
+  solicitante: Pick<
+    Database["public"]["Tables"]["profiles"]["Row"],
+    "id" | "nome" | "avatar_url"
+  > | null;
+  responsavel: Pick<
+    Database["public"]["Tables"]["profiles"]["Row"],
+    "id" | "nome" | "avatar_url"
+  > | null;
+};
+
+export type DemandaAnexo =
+  Database["public"]["Tables"]["demanda_anexos"]["Row"] & {
+    autor: Pick<
+      Database["public"]["Tables"]["profiles"]["Row"],
+      "id" | "nome" | "avatar_url"
+    > | null;
+  };
+
+export type UpdateDemandaPatch = Partial<
+  Pick<
+    Demanda,
+    | "titulo"
+    | "descricao"
+    | "status"
+    | "prioridade"
+    | "responsavel_id"
+    | "deadline"
+    | "estimativa_horas"
+  >
+>;
+
 export const TIPO_DEMANDA_VALUES = [
   "erro",
   "melhoria",
@@ -204,3 +245,93 @@ export function useDemandasLista(
     staleTime: 30_000,
   });
 }
+
+export function useDemanda(codigo: string) {
+  return useQuery<DemandaCompleta | null>({
+    queryKey: ["demanda", codigo],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("demandas")
+        .select(
+          `*,
+          modulo:modulos(id, nome, cor),
+          submodulo:submodulos(id, nome),
+          area:areas(id, nome),
+          solicitante:profiles!demandas_solicitante_id_fkey(id, nome, avatar_url),
+          responsavel:profiles!demandas_responsavel_id_fkey(id, nome, avatar_url)`,
+        )
+        .eq("codigo", codigo)
+        .maybeSingle();
+      if (error) throw error;
+      return (data as unknown as DemandaCompleta | null) ?? null;
+    },
+    staleTime: 30_000,
+  });
+}
+
+export function useDemandaAnexos(demandaId: string | undefined) {
+  return useQuery<DemandaAnexo[]>({
+    queryKey: ["demanda-anexos", demandaId],
+    queryFn: async () => {
+      if (!demandaId) return [];
+      const { data, error } = await supabase
+        .from("demanda_anexos")
+        .select("*, autor:profiles(id, nome, avatar_url)")
+        .eq("demanda_id", demandaId)
+        .order("created_at", { ascending: true });
+      if (error) throw error;
+      return (data ?? []) as unknown as DemandaAnexo[];
+    },
+    enabled: !!demandaId,
+    staleTime: 30_000,
+  });
+}
+
+export function useUpdateDemanda() {
+  const qc = useQueryClient();
+  return useMutation<Demanda, unknown, { id: string; patch: UpdateDemandaPatch }>({
+    mutationFn: async ({ id, patch }) => {
+      const { data, error } = await supabase
+        .from("demandas")
+        .update(patch)
+        .eq("id", id)
+        .select()
+        .single();
+      if (error) throw error;
+      return data as Demanda;
+    },
+    onSuccess: (data) => {
+      if (data.codigo) {
+        qc.invalidateQueries({ queryKey: ["demanda", data.codigo] });
+      }
+      qc.invalidateQueries({ queryKey: ["demandas"] });
+    },
+    onError: (err) => {
+      toast.error(translateSupabaseError(err, "demanda"));
+    },
+  });
+}
+
+// Status workflow ---------------------------------------------------
+
+export const PROXIMOS_STATUS: Record<StatusDemanda, StatusDemanda[]> = {
+  triagem: ["analise", "cancelada"],
+  analise: ["desenvolvimento", "triagem", "cancelada"],
+  desenvolvimento: ["teste", "analise", "cancelada"],
+  teste: ["entregue", "desenvolvimento", "cancelada"],
+  entregue: [],
+  reaberta: ["desenvolvimento", "teste", "cancelada"],
+  encerrada: [],
+  cancelada: ["triagem"],
+};
+
+export const TRANSICAO_LABEL: Record<StatusDemanda, string> = {
+  triagem: "Voltar pra triagem",
+  analise: "Iniciar análise",
+  desenvolvimento: "Enviar pra desenvolvimento",
+  teste: "Enviar pra teste",
+  entregue: "Marcar como entregue",
+  reaberta: "Reabrir",
+  encerrada: "Encerrar",
+  cancelada: "Cancelar",
+};
