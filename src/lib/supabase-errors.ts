@@ -11,7 +11,8 @@ export type EntityName =
   | "usuario"
   | "perfil_acesso"
   | "demanda"
-  | "comentario";
+  | "comentario"
+  | "vinculo";
 
 export function translateSupabaseError(
   err: unknown,
@@ -36,7 +37,11 @@ export function translateSupabaseError(
     if (entity === "usuario") return "Já existe um usuário com esses dados";
     if (entity === "perfil_acesso")
       return "Já existe um perfil com esse nome";
+    if (entity === "vinculo") return "Este vínculo já existe";
     return "Registro duplicado";
+  }
+  if (code === "23514" && entity === "vinculo") {
+    return "Não é possível vincular uma demanda a si mesma";
   }
   if (code === "23503") {
     if (entity === "perfil_acesso")
@@ -51,6 +56,8 @@ export function translateSupabaseError(
       return "Você não tem permissão para criar demandas";
     if (entity === "comentario")
       return "Você não tem permissão para este comentário";
+    if (entity === "vinculo")
+      return "Sem permissão para gerenciar vínculos";
     return "Você não tem permissão para esta ação";
   }
   if (entity === "comentario" && code === "23503") {

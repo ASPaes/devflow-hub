@@ -36,6 +36,11 @@ import {
 import { EditableField } from "@/components/demandas/EditableField";
 import { AnexoCard, AnexoCardSkeleton } from "@/components/demandas/AnexoCard";
 import { ComentariosSecao } from "@/components/demandas/ComentariosSecao";
+import { TimelineHistorico } from "@/components/demandas/TimelineHistorico";
+import { VinculosSecao } from "@/components/demandas/VinculosSecao";
+import { useComentarios } from "@/hooks/useComentarios";
+import { useVinculos } from "@/hooks/useVinculos";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   MetadataSidebar,
   SolicitanteSummary,
@@ -177,8 +182,12 @@ function DemandaDetalhe() {
             </Card>
           )}
 
-          {/* Comentários */}
-          <ComentariosSecao demandaId={demanda.id} />
+          {/* Tabs: Comentários | Histórico | Vínculos */}
+          <DetalheTabs
+            demandaId={demanda.id}
+            podeAdicionarVinculo={canEditAny || canEditOwnTriagem}
+            podeRemoverVinculo={canEditAny}
+          />
         </div>
 
         <MetadataSidebar
@@ -245,5 +254,57 @@ function DemandaNaoEncontrada() {
         <Link to="/demandas">Voltar para lista</Link>
       </Button>
     </div>
+  );
+}
+
+interface DetalheTabsProps {
+  demandaId: string;
+  podeAdicionarVinculo: boolean;
+  podeRemoverVinculo: boolean;
+}
+
+function DetalheTabs({
+  demandaId,
+  podeAdicionarVinculo,
+  podeRemoverVinculo,
+}: DetalheTabsProps) {
+  const { data: comentarios = [] } = useComentarios(demandaId);
+  const { data: vinculos = [] } = useVinculos(demandaId);
+
+  return (
+    <Tabs defaultValue="comentarios" className="w-full">
+      <TabsList>
+        <TabsTrigger value="comentarios">
+          Comentários
+          {comentarios.length > 0 && (
+            <span className="ml-1.5 rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+              {comentarios.length}
+            </span>
+          )}
+        </TabsTrigger>
+        <TabsTrigger value="historico">Histórico</TabsTrigger>
+        <TabsTrigger value="vinculos">
+          Vínculos
+          {vinculos.length > 0 && (
+            <span className="ml-1.5 rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+              {vinculos.length}
+            </span>
+          )}
+        </TabsTrigger>
+      </TabsList>
+      <TabsContent value="comentarios" className="mt-4">
+        <ComentariosSecao demandaId={demandaId} />
+      </TabsContent>
+      <TabsContent value="historico" className="mt-4 rounded-lg border border-border bg-card p-6">
+        <TimelineHistorico demandaId={demandaId} />
+      </TabsContent>
+      <TabsContent value="vinculos" className="mt-4 rounded-lg border border-border bg-card p-6">
+        <VinculosSecao
+          demandaId={demandaId}
+          podeAdicionar={podeAdicionarVinculo}
+          podeRemover={podeRemoverVinculo}
+        />
+      </TabsContent>
+    </Tabs>
   );
 }

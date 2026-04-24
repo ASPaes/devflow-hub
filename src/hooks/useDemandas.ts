@@ -305,6 +305,7 @@ export function useUpdateDemanda() {
         qc.invalidateQueries({ queryKey: ["demanda", data.codigo] });
       }
       qc.invalidateQueries({ queryKey: ["demandas"] });
+      qc.invalidateQueries({ queryKey: ["historico", data.id] });
     },
     onError: (err) => {
       toast.error(translateSupabaseError(err, "demanda"));
