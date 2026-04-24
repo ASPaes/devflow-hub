@@ -121,12 +121,7 @@ function Dashboard() {
                       </span>
                       <Badge
                         variant="outline"
-                        className="font-normal"
-                        style={{
-                          color: `var(--color-status-${status})`,
-                          backgroundColor: `color-mix(in oklab, var(--color-status-${status}) 15%, transparent)`,
-                          borderColor: `color-mix(in oklab, var(--color-status-${status}) 30%, transparent)`,
-                        }}
+                        className={`font-normal ${STATUS_BADGE_STYLES[status]}`}
                       >
                         {STATUS_DEMANDA_LABEL[status]}
                       </Badge>
