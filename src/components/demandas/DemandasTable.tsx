@@ -12,6 +12,10 @@ import {
   TIPO_DEMANDA_LABEL,
   type DemandaListaRow,
 } from "@/hooks/useDemandas";
+import {
+  PRIORIDADE_BADGE_STYLES,
+  STATUS_BADGE_STYLES,
+} from "@/components/demandas/MetadataSidebar";
 
 interface DemandasTableProps {
   rows: DemandaListaRow[];
