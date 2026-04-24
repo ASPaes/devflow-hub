@@ -38,8 +38,16 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "ASP Demandas" },
+      { title: "Doctor Dev" },
       { name: "description", content: "Gestão de demandas de desenvolvimento — ASP Softwares" },
+      { property: "og:title", content: "Doctor Dev" },
+      { name: "twitter:title", content: "Doctor Dev" },
+      { property: "og:description", content: "Gestão de demandas de desenvolvimento — ASP Softwares" },
+      { name: "twitter:description", content: "Gestão de demandas de desenvolvimento — ASP Softwares" },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/135197d5-ca57-4a6a-864b-c6029aa5e010/id-preview-7b185a9d--2cca93b6-8762-4515-ada2-02c729de4369.lovable.app-1777032165152.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/135197d5-ca57-4a6a-864b-c6029aa5e010/id-preview-7b185a9d--2cca93b6-8762-4515-ada2-02c729de4369.lovable.app-1777032165152.png" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:type", content: "website" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
