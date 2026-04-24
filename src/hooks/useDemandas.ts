@@ -355,6 +355,46 @@ export function useDeleteAnexo() {
   });
 }
 
+export function useReabrirDemanda() {
+  const qc = useQueryClient();
+  return useMutation<
+    Demanda,
+    Error,
+    { demandaId: string; motivo: string }
+  >({
+    mutationFn: async ({ demandaId, motivo }) => {
+      const { data, error } = await supabase.rpc("reabrir_demanda", {
+        p_demanda_id: demandaId,
+        p_motivo: motivo,
+      });
+      if (error) throw error;
+      return data as unknown as Demanda;
+    },
+    onSuccess: (data) => {
+      if (data.codigo) {
+        qc.invalidateQueries({ queryKey: ["demanda", data.codigo] });
+      }
+      qc.invalidateQueries({ queryKey: ["demandas"] });
+      qc.invalidateQueries({ queryKey: ["dashboard-metrics"] });
+      qc.invalidateQueries({ queryKey: ["comentarios", data.id] });
+      qc.invalidateQueries({ queryKey: ["historico", data.id] });
+      toast.success("Demanda reaberta");
+    },
+    onError: (err: Error) => {
+      const msg = err.message || "";
+      if (msg.includes("Apenas o solicitante")) {
+        toast.error("Só o solicitante original pode reabrir");
+      } else if (msg.includes("status atual")) {
+        toast.error("Apenas demandas entregues podem ser reabertas");
+      } else if (msg.includes("Janela de reabertura expirou")) {
+        toast.error("Prazo de reabertura expirou (14 dias)");
+      } else {
+        toast.error(translateSupabaseError(err, "demanda"));
+      }
+    },
+  });
+}
+
 export function useUpdateDemanda() {
   const qc = useQueryClient();
   return useMutation<Demanda, unknown, { id: string; patch: UpdateDemandaPatch }>({
