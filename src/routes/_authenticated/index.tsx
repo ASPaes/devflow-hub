@@ -17,6 +17,7 @@ import {
   STATUS_DEMANDA_LABEL,
   useDemandasLista,
 } from "@/hooks/useDemandas";
+import { STATUS_BADGE_STYLES } from "@/components/demandas/MetadataSidebar";
 import { formatRelativeSP } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/")({
