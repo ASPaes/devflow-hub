@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -8,6 +8,8 @@ import { uploadAnexo } from "@/lib/upload-anexos";
 import type { Database } from "@/integrations/supabase/types";
 
 export type Demanda = Database["public"]["Tables"]["demandas"]["Row"];
+export type DemandaListaRow =
+  Database["public"]["Views"]["vw_demandas_lista"]["Row"];
 
 export const TIPO_DEMANDA_VALUES = [
   "erro",
@@ -19,6 +21,19 @@ export const TIPO_DEMANDA_VALUES = [
 
 export type TipoDemanda = (typeof TIPO_DEMANDA_VALUES)[number];
 
+export const STATUS_DEMANDA_VALUES = [
+  "triagem",
+  "analise",
+  "desenvolvimento",
+  "teste",
+  "entregue",
+  "reaberta",
+  "encerrada",
+  "cancelada",
+] as const;
+
+export type StatusDemanda = (typeof STATUS_DEMANDA_VALUES)[number];
+
 export const TIPO_DEMANDA_LABEL: Record<TipoDemanda, string> = {
   erro: "🐛 Erro",
   melhoria: "✨ Melhoria",
@@ -27,12 +42,31 @@ export const TIPO_DEMANDA_LABEL: Record<TipoDemanda, string> = {
   tarefa: "📋 Tarefa",
 };
 
+export const STATUS_DEMANDA_LABEL: Record<StatusDemanda, string> = {
+  triagem: "Triagem",
+  analise: "Análise",
+  desenvolvimento: "Desenvolvimento",
+  teste: "Teste",
+  entregue: "Entregue",
+  reaberta: "Reaberta",
+  encerrada: "Encerrada",
+  cancelada: "Cancelada",
+};
+
 export const PRIORIDADE_LABEL: Record<number, string> = {
   1: "1 — Baixa",
   2: "2 — Menor",
   3: "3 — Normal",
   4: "4 — Alta",
   5: "5 — Urgente",
+};
+
+export const PRIORIDADE_LABEL_CURTA: Record<number, string> = {
+  1: "Baixa",
+  2: "Menor",
+  3: "Normal",
+  4: "Alta",
+  5: "Urgente",
 };
 
 export const novaDemandaSchema = z.object({
@@ -111,5 +145,62 @@ export function useCreateDemanda() {
     onError: (err) => {
       toast.error(translateSupabaseError(err, "demanda"));
     },
+  });
+}
+
+export type FiltrosDemanda = {
+  status?: StatusDemanda[];
+  prioridade?: number[];
+  tipo?: TipoDemanda[];
+  modulo_id?: string;
+  area_id?: string;
+  /** null = "sem responsável" */
+  responsavel_id?: string | null;
+  solicitante_id?: string;
+  busca?: string;
+};
+
+export interface UseDemandasListaOptions {
+  limit?: number;
+}
+
+export function useDemandasLista(
+  filtros: FiltrosDemanda,
+  options: UseDemandasListaOptions = {},
+) {
+  const { limit } = options;
+  return useQuery<DemandaListaRow[]>({
+    queryKey: ["demandas", "lista", filtros, limit ?? null],
+    queryFn: async () => {
+      let q = supabase.from("vw_demandas_lista").select("*");
+
+      if (filtros.status?.length) q = q.in("status", filtros.status);
+      if (filtros.prioridade?.length)
+        q = q.in("prioridade", filtros.prioridade);
+      if (filtros.tipo?.length) q = q.in("tipo", filtros.tipo);
+      if (filtros.modulo_id) q = q.eq("modulo_id", filtros.modulo_id);
+      if (filtros.area_id) q = q.eq("area_id", filtros.area_id);
+      if (filtros.responsavel_id === null) {
+        q = q.is("responsavel_id", null);
+      } else if (filtros.responsavel_id) {
+        q = q.eq("responsavel_id", filtros.responsavel_id);
+      }
+      if (filtros.solicitante_id)
+        q = q.eq("solicitante_id", filtros.solicitante_id);
+      if (filtros.busca?.trim()) {
+        const t = filtros.busca.trim().replace(/[%,]/g, " ");
+        q = q.or(
+          `titulo.ilike.%${t}%,codigo.ilike.%${t}%,descricao.ilike.%${t}%`,
+        );
+      }
+
+      q = q.order("created_at", { ascending: false });
+      if (limit) q = q.limit(limit);
+
+      const { data, error } = await q;
+      if (error) throw error;
+      return (data ?? []) as DemandaListaRow[];
+    },
+    staleTime: 30_000,
   });
 }
