@@ -11,6 +11,47 @@ export type Demanda = Database["public"]["Tables"]["demandas"]["Row"];
 export type DemandaListaRow =
   Database["public"]["Views"]["vw_demandas_lista"]["Row"];
 
+export type DemandaCompleta = Demanda & {
+  modulo: Pick<
+    Database["public"]["Tables"]["modulos"]["Row"],
+    "id" | "nome" | "cor"
+  > | null;
+  submodulo: Pick<
+    Database["public"]["Tables"]["submodulos"]["Row"],
+    "id" | "nome"
+  > | null;
+  area: Pick<Database["public"]["Tables"]["areas"]["Row"], "id" | "nome"> | null;
+  solicitante: Pick<
+    Database["public"]["Tables"]["profiles"]["Row"],
+    "id" | "nome" | "avatar_url"
+  > | null;
+  responsavel: Pick<
+    Database["public"]["Tables"]["profiles"]["Row"],
+    "id" | "nome" | "avatar_url"
+  > | null;
+};
+
+export type DemandaAnexo =
+  Database["public"]["Tables"]["demanda_anexos"]["Row"] & {
+    autor: Pick<
+      Database["public"]["Tables"]["profiles"]["Row"],
+      "id" | "nome" | "avatar_url"
+    > | null;
+  };
+
+export type UpdateDemandaPatch = Partial<
+  Pick<
+    Demanda,
+    | "titulo"
+    | "descricao"
+    | "status"
+    | "prioridade"
+    | "responsavel_id"
+    | "deadline"
+    | "estimativa_horas"
+  >
+>;
+
 export const TIPO_DEMANDA_VALUES = [
   "erro",
   "melhoria",
