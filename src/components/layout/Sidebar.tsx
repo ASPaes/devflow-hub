@@ -107,8 +107,8 @@ export function Sidebar() {
                 Admin
               </div>
               <NavItem to="/admin/produtos" icon={Package} label="Produtos" />
-              <NavItem icon={Layers} label="Módulos" disabled />
-              <NavItem icon={Building2} label="Áreas" disabled />
+              <NavItem to="/admin/modulos" icon={Layers} label="Módulos" />
+              <NavItem to="/admin/areas" icon={Building2} label="Áreas" />
               <NavItem icon={Users} label="Usuários" disabled />
             </>
           )}

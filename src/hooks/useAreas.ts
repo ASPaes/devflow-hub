@@ -6,9 +6,9 @@ import { supabase } from "@/lib/supabase";
 import { translateSupabaseError } from "@/lib/supabase-errors";
 import type { Database } from "@/integrations/supabase/types";
 
-export type Produto = Database["public"]["Tables"]["produtos"]["Row"];
+export type Area = Database["public"]["Tables"]["areas"]["Row"];
 
-export const produtoSchema = z.object({
+export const areaSchema = z.object({
   nome: z.string().trim().min(2, "Nome muito curto").max(80, "Nome muito longo"),
   descricao: z
     .string()
@@ -16,22 +16,19 @@ export const produtoSchema = z.object({
     .max(300, "Descrição muito longa")
     .optional()
     .or(z.literal("")),
-  cor: z
-    .string()
-    .regex(/^#[0-9a-f]{6}$/i, "Cor deve ser hex (#RRGGBB)"),
   ativo: z.boolean(),
 });
 
-export type ProdutoInput = z.infer<typeof produtoSchema>;
+export type AreaInput = z.infer<typeof areaSchema>;
 
-const produtosKey = ["produtos"] as const;
+const areasKey = ["areas"] as const;
 
-export function useProdutos() {
-  return useQuery<Produto[]>({
-    queryKey: produtosKey,
+export function useAreas() {
+  return useQuery<Area[]>({
+    queryKey: areasKey,
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("produtos")
+        .from("areas")
         .select("*")
         .order("nome", { ascending: true });
       if (error) throw error;
@@ -41,21 +38,20 @@ export function useProdutos() {
   });
 }
 
-function normalizeInput(input: ProdutoInput) {
+function normalizeInput(input: AreaInput) {
   return {
     nome: input.nome.trim(),
     descricao: input.descricao?.trim() ? input.descricao.trim() : null,
-    cor: input.cor.toUpperCase(),
     ativo: input.ativo,
   };
 }
 
-export function useCreateProduto() {
+export function useCreateArea() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (input: ProdutoInput) => {
+    mutationFn: async (input: AreaInput) => {
       const { data, error } = await supabase
-        .from("produtos")
+        .from("areas")
         .insert(normalizeInput(input))
         .select()
         .single();
@@ -63,22 +59,21 @@ export function useCreateProduto() {
       return data;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: produtosKey });
-      qc.invalidateQueries({ queryKey: ["modulos"] });
-      toast.success("Produto criado");
+      qc.invalidateQueries({ queryKey: areasKey });
+      toast.success("Área criada");
     },
     onError: (err) => {
-      toast.error(translateSupabaseError(err, "produto"));
+      toast.error(translateSupabaseError(err, "area"));
     },
   });
 }
 
-export function useUpdateProduto() {
+export function useUpdateArea() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, input }: { id: string; input: ProdutoInput }) => {
+    mutationFn: async ({ id, input }: { id: string; input: AreaInput }) => {
       const { data, error } = await supabase
-        .from("produtos")
+        .from("areas")
         .update(normalizeInput(input))
         .eq("id", id)
         .select()
@@ -87,30 +82,28 @@ export function useUpdateProduto() {
       return data;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: produtosKey });
-      qc.invalidateQueries({ queryKey: ["modulos"] });
-      toast.success("Produto atualizado");
+      qc.invalidateQueries({ queryKey: areasKey });
+      toast.success("Área atualizada");
     },
     onError: (err) => {
-      toast.error(translateSupabaseError(err, "produto"));
+      toast.error(translateSupabaseError(err, "area"));
     },
   });
 }
 
-export function useDeleteProduto() {
+export function useDeleteArea() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("produtos").delete().eq("id", id);
+      const { error } = await supabase.from("areas").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: produtosKey });
-      qc.invalidateQueries({ queryKey: ["modulos"] });
-      toast.success("Produto excluído");
+      qc.invalidateQueries({ queryKey: areasKey });
+      toast.success("Área excluída");
     },
     onError: (err) => {
-      toast.error(translateSupabaseError(err, "produto"));
+      toast.error(translateSupabaseError(err, "area"));
     },
   });
 }
