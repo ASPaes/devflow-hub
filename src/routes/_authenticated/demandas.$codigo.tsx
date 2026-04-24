@@ -37,8 +37,10 @@ import { AnexosSecao } from "@/components/demandas/AnexosSecao";
 import { ComentariosSecao } from "@/components/demandas/ComentariosSecao";
 import { TimelineHistorico } from "@/components/demandas/TimelineHistorico";
 import { VinculosSecao } from "@/components/demandas/VinculosSecao";
+import { ReaberturaBanner } from "@/components/demandas/ReaberturaBanner";
 import { useComentarios } from "@/hooks/useComentarios";
 import { useVinculos } from "@/hooks/useVinculos";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   MetadataSidebar,
