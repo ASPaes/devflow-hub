@@ -51,6 +51,7 @@ function KanbanPage() {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: "/demandas/kanban" });
   const { temPermissao } = useProfile();
+  useDocumentTitle("Kanban");
 
   const filtrosState: FiltrosState = React.useMemo(
     () => ({
