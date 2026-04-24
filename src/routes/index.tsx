@@ -1,26 +1,22 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
-  component: Index,
+  component: Dashboard,
 });
 
-// IMPORTANT: Replace this placeholder. For sites with multiple pages (About, Services, Contact, etc.),
-// create separate route files (about.tsx, services.tsx, contact.tsx) — don't put all pages in this file.
-function PlaceholderIndex() {
+function Dashboard() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+    <div className="min-h-screen bg-background p-6">
+      <h1 className="font-sans text-3xl font-semibold text-foreground">Dashboard</h1>
+      <p className="mt-2 text-sm text-muted-foreground">
+        Código de demanda exemplo: <span className="font-mono text-primary">DEM-0001</span>
+      </p>
+      <nav className="mt-6 flex flex-wrap gap-3 text-sm">
+        <Link to="/login" className="text-accent hover:underline">/login</Link>
+        <Link to="/cadastro" className="text-accent hover:underline">/cadastro</Link>
+        <Link to="/reset-password" className="text-accent hover:underline">/reset-password</Link>
+        <Link to="/perfil" className="text-accent hover:underline">/perfil</Link>
+      </nav>
     </div>
   );
-}
-
-function Index() {
-  return <PlaceholderIndex />;
 }
