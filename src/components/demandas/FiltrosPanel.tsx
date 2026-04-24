@@ -52,9 +52,16 @@ interface FiltrosPanelProps {
   value: FiltrosState;
   onChange: (patch: Partial<FiltrosState>) => void;
   onClear: () => void;
+  /** Esconde o dropdown de Status (usado no Kanban, onde status é o board). */
+  hideStatus?: boolean;
 }
 
-export function FiltrosPanel({ value, onChange, onClear }: FiltrosPanelProps) {
+export function FiltrosPanel({
+  value,
+  onChange,
+  onClear,
+  hideStatus,
+}: FiltrosPanelProps) {
   const modulosQuery = useModulos();
   const areasQuery = useAreas();
   const usuariosQuery = useUsuarios();
