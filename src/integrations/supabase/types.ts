@@ -473,6 +473,39 @@ export type Database = {
         }
         Relationships: []
       }
+      perfis_acesso: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          descricao: string | null
+          id: string
+          nome: string
+          permissoes: Database["public"]["Enums"]["app_permissao"][]
+          sistema: boolean
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          nome: string
+          permissoes?: Database["public"]["Enums"]["app_permissao"][]
+          sistema?: boolean
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          nome?: string
+          permissoes?: Database["public"]["Enums"]["app_permissao"][]
+          sistema?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           ativo: boolean
@@ -480,6 +513,7 @@ export type Database = {
           created_at: string
           id: string
           nome: string
+          perfil_acesso_id: string
           role: Database["public"]["Enums"]["app_role"]
           updated_at: string
         }
@@ -489,6 +523,7 @@ export type Database = {
           created_at?: string
           id: string
           nome: string
+          perfil_acesso_id: string
           role?: Database["public"]["Enums"]["app_role"]
           updated_at?: string
         }
@@ -498,10 +533,19 @@ export type Database = {
           created_at?: string
           id?: string
           nome?: string
+          perfil_acesso_id?: string
           role?: Database["public"]["Enums"]["app_role"]
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_perfil_acesso_id_fkey"
+            columns: ["perfil_acesso_id"]
+            isOneToOne: false
+            referencedRelation: "perfis_acesso"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       submodulos: {
         Row: {
@@ -700,6 +744,7 @@ export type Database = {
           created_at: string
           id: string
           nome: string
+          perfil_acesso_id: string
           role: Database["public"]["Enums"]["app_role"]
           updated_at: string
         }
@@ -742,6 +787,17 @@ export type Database = {
       }
     }
     Enums: {
+      app_permissao:
+        | "criar_demanda"
+        | "ver_todas_demandas"
+        | "editar_qualquer_demanda"
+        | "deletar_demanda"
+        | "gerenciar_modulos"
+        | "gerenciar_submodulos"
+        | "gerenciar_areas"
+        | "gerenciar_usuarios"
+        | "gerenciar_perfis_acesso"
+        | "ver_dashboard_metricas"
       app_role: "solicitante" | "dev_gestor"
       status_demanda:
         | "triagem"
@@ -886,6 +942,18 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_permissao: [
+        "criar_demanda",
+        "ver_todas_demandas",
+        "editar_qualquer_demanda",
+        "deletar_demanda",
+        "gerenciar_modulos",
+        "gerenciar_submodulos",
+        "gerenciar_areas",
+        "gerenciar_usuarios",
+        "gerenciar_perfis_acesso",
+        "ver_dashboard_metricas",
+      ],
       app_role: ["solicitante", "dev_gestor"],
       status_demanda: [
         "triagem",
