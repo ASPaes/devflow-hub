@@ -61,7 +61,7 @@ function NavItem({ to, icon: Icon, label, disabled, onClick }: NavItemProps) {
       <Link
         to={to}
         className={baseClasses}
-        activeOptions={{ exact: to === "/" }}
+        activeOptions={{ exact: to === "/" || to === "/demandas" }}
         activeProps={{ className: "bg-secondary text-primary" }}
       >
         <Icon className="h-4 w-4" />
