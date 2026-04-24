@@ -343,7 +343,7 @@ export type Database = {
       }
       demandas: {
         Row: {
-          area_id: string | null
+          area_id: string
           closed_at: string | null
           codigo: string | null
           created_at: string
@@ -352,19 +352,19 @@ export type Database = {
           descricao: string
           estimativa_horas: number | null
           id: string
-          modulo_id: string | null
+          modulo_id: string
           prioridade: number
-          produto_id: string | null
           reopen_deadline: string | null
           responsavel_id: string | null
           solicitante_id: string
           status: Database["public"]["Enums"]["status_demanda"]
+          submodulo_id: string
           tipo: Database["public"]["Enums"]["tipo_demanda"]
           titulo: string
           updated_at: string
         }
         Insert: {
-          area_id?: string | null
+          area_id: string
           closed_at?: string | null
           codigo?: string | null
           created_at?: string
@@ -373,19 +373,19 @@ export type Database = {
           descricao: string
           estimativa_horas?: number | null
           id?: string
-          modulo_id?: string | null
+          modulo_id: string
           prioridade: number
-          produto_id?: string | null
           reopen_deadline?: string | null
           responsavel_id?: string | null
           solicitante_id: string
           status?: Database["public"]["Enums"]["status_demanda"]
+          submodulo_id: string
           tipo: Database["public"]["Enums"]["tipo_demanda"]
           titulo: string
           updated_at?: string
         }
         Update: {
-          area_id?: string | null
+          area_id?: string
           closed_at?: string | null
           codigo?: string | null
           created_at?: string
@@ -394,13 +394,13 @@ export type Database = {
           descricao?: string
           estimativa_horas?: number | null
           id?: string
-          modulo_id?: string | null
+          modulo_id?: string
           prioridade?: number
-          produto_id?: string | null
           reopen_deadline?: string | null
           responsavel_id?: string | null
           solicitante_id?: string
           status?: Database["public"]["Enums"]["status_demanda"]
+          submodulo_id?: string
           tipo?: Database["public"]["Enums"]["tipo_demanda"]
           titulo?: string
           updated_at?: string
@@ -421,13 +421,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "demandas_produto_id_fkey"
-            columns: ["produto_id"]
-            isOneToOne: false
-            referencedRelation: "produtos"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "demandas_responsavel_id_fkey"
             columns: ["responsavel_id"]
             isOneToOne: false
@@ -441,44 +434,16 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
-        ]
-      }
-      modulos: {
-        Row: {
-          ativo: boolean
-          created_at: string
-          id: string
-          nome: string
-          produto_id: string
-          updated_at: string
-        }
-        Insert: {
-          ativo?: boolean
-          created_at?: string
-          id?: string
-          nome: string
-          produto_id: string
-          updated_at?: string
-        }
-        Update: {
-          ativo?: boolean
-          created_at?: string
-          id?: string
-          nome?: string
-          produto_id?: string
-          updated_at?: string
-        }
-        Relationships: [
           {
-            foreignKeyName: "modulos_produto_id_fkey"
-            columns: ["produto_id"]
+            foreignKeyName: "demandas_submodulo_id_fkey"
+            columns: ["submodulo_id"]
             isOneToOne: false
-            referencedRelation: "produtos"
+            referencedRelation: "submodulos"
             referencedColumns: ["id"]
           },
         ]
       }
-      produtos: {
+      modulos: {
         Row: {
           ativo: boolean
           cor: string | null
@@ -538,6 +503,44 @@ export type Database = {
         }
         Relationships: []
       }
+      submodulos: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          descricao: string | null
+          id: string
+          modulo_id: string
+          nome: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          modulo_id: string
+          nome: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          modulo_id?: string
+          nome?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submodulos_modulo_id_fkey"
+            columns: ["modulo_id"]
+            isOneToOne: false
+            referencedRelation: "modulos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       cobranca_outbox_stats: {
@@ -562,12 +565,10 @@ export type Database = {
           descricao: string | null
           estimativa_horas: number | null
           id: string | null
+          modulo_cor: string | null
           modulo_id: string | null
           modulo_nome: string | null
           prioridade: number | null
-          produto_cor: string | null
-          produto_id: string | null
-          produto_nome: string | null
           reopen_deadline: string | null
           responsavel_avatar: string | null
           responsavel_id: string | null
@@ -576,6 +577,8 @@ export type Database = {
           solicitante_id: string | null
           solicitante_nome: string | null
           status: Database["public"]["Enums"]["status_demanda"] | null
+          submodulo_id: string | null
+          submodulo_nome: string | null
           tipo: Database["public"]["Enums"]["tipo_demanda"] | null
           titulo: string | null
           total_anexos: number | null
@@ -599,13 +602,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "demandas_produto_id_fkey"
-            columns: ["produto_id"]
-            isOneToOne: false
-            referencedRelation: "produtos"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "demandas_responsavel_id_fkey"
             columns: ["responsavel_id"]
             isOneToOne: false
@@ -617,6 +613,13 @@ export type Database = {
             columns: ["solicitante_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demandas_submodulo_id_fkey"
+            columns: ["submodulo_id"]
+            isOneToOne: false
+            referencedRelation: "submodulos"
             referencedColumns: ["id"]
           },
         ]
@@ -710,7 +713,7 @@ export type Database = {
       reabrir_demanda: {
         Args: { p_demanda_id: string; p_motivo: string }
         Returns: {
-          area_id: string | null
+          area_id: string
           closed_at: string | null
           codigo: string | null
           created_at: string
@@ -719,13 +722,13 @@ export type Database = {
           descricao: string
           estimativa_horas: number | null
           id: string
-          modulo_id: string | null
+          modulo_id: string
           prioridade: number
-          produto_id: string | null
           reopen_deadline: string | null
           responsavel_id: string | null
           solicitante_id: string
           status: Database["public"]["Enums"]["status_demanda"]
+          submodulo_id: string
           tipo: Database["public"]["Enums"]["tipo_demanda"]
           titulo: string
           updated_at: string
