@@ -49,7 +49,8 @@ export function ModalForm<T extends Record<string, unknown>>({
 }: ModalFormProps<T>) {
   const form = useForm<T>({
     // Cast to bypass cross-version zod/resolvers generic clash
-    resolver: zodResolver(schema as unknown as ZodType<T>) as unknown as Resolver<T>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(schema as any) as unknown as Resolver<T>,
     defaultValues: defaultValues as DefaultValues<T>,
   }) as UseFormReturn<T>;
 
