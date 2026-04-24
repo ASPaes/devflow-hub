@@ -21,6 +21,7 @@ import {
   type FiltrosState,
 } from "@/components/demandas/FiltrosPanel";
 import { DemandasTable } from "@/components/demandas/DemandasTable";
+import { ViewToggle } from "@/components/demandas/ViewToggle";
 
 const demandasSearchSchema = z.object({
   status: fallback(z.array(z.enum(STATUS_DEMANDA_VALUES)), []).default([]),
@@ -128,14 +129,17 @@ function DemandasListagem() {
         title="Demandas"
         description="Acompanhe o andamento das suas solicitações"
         action={
-          podeCriar && (
-            <Button asChild>
-              <Link to="/demandas/nova">
-                <Plus className="mr-2 h-4 w-4" />
-                Nova demanda
-              </Link>
-            </Button>
-          )
+          <div className="flex items-center gap-2">
+            <ViewToggle />
+            {podeCriar && (
+              <Button asChild>
+                <Link to="/demandas/nova">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Nova demanda
+                </Link>
+              </Button>
+            )}
+          </div>
         }
       />
 

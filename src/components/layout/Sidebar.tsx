@@ -2,6 +2,7 @@ import * as React from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
   Building2,
+  Columns3,
   Inbox,
   Layers,
   LayoutDashboard,
@@ -110,6 +111,7 @@ export function Sidebar() {
         <nav className="flex flex-1 flex-col gap-1 p-3">
           <NavItem to="/" icon={LayoutDashboard} label="Dashboard" />
           <NavItem to="/demandas" icon={Inbox} label="Demandas" />
+          <NavItem to="/demandas/kanban" icon={Columns3} label="Kanban" />
           {temPermissao("criar_demanda") && (
             <NavItem
               to="/demandas/nova"
