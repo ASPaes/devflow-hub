@@ -1,11 +1,13 @@
 import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import {
+  Mail,
   MoreHorizontal,
   Pencil,
   Plus,
   Power,
   PowerOff,
+  Trash2,
   Users,
 } from "lucide-react";
 import { z } from "zod";
@@ -15,6 +17,7 @@ import { EmptyState } from "@/components/common/EmptyState";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { ModalForm } from "@/components/common/ModalForm";
 import { DataTable, type DataTableColumn } from "@/components/common/DataTable";
+import { DeleteUserConfirmDialog } from "@/components/admin/DeleteUserConfirmDialog";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -53,10 +56,13 @@ import {
   useUsuarios,
   useUpdateUsuario,
   useInviteUsuario,
+  useResendInvite,
+  useDeleteUsuario,
   type UsuarioAdmin,
 } from "@/hooks/useUsuarios";
 import { usePerfisAcesso } from "@/hooks/usePerfisAcesso";
 import type { AppPermissao } from "@/hooks/useProfile";
+import { isAdminPerfil, isLastAdmin } from "@/lib/permissions";
 import { formatRelativeSP } from "@/lib/format";
 import { initials } from "@/lib/utils";
 
