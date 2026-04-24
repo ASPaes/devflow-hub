@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import { supabase } from "@/lib/supabase";
 import { translateSupabaseError } from "@/lib/supabase-errors";
-import { uploadAnexo } from "@/lib/upload-anexos";
+import { ANEXO_BUCKET, uploadAnexo } from "@/lib/upload-anexos";
 import type { Database } from "@/integrations/supabase/types";
 
 export type Demanda = Database["public"]["Tables"]["demandas"]["Row"];
@@ -284,6 +284,73 @@ export function useDemandaAnexos(demandaId: string | undefined) {
     },
     enabled: !!demandaId,
     staleTime: 30_000,
+  });
+}
+
+export function useUploadAnexos() {
+  const qc = useQueryClient();
+  return useMutation<
+    { demandaId: string; total: number; failed: number },
+    unknown,
+    { demandaId: string; files: File[]; userId: string }
+  >({
+    mutationFn: async ({ demandaId, files, userId }) => {
+      const results = await Promise.allSettled(
+        files.map((file) => uploadAnexo({ demandaId, file, userId })),
+      );
+      const failed = results.filter((r) => r.status === "rejected").length;
+      if (failed > 0 && failed === files.length) {
+        const first = results.find((r) => r.status === "rejected") as
+          | PromiseRejectedResult
+          | undefined;
+        throw first?.reason ?? new Error("Nenhum anexo foi enviado");
+      }
+      return { demandaId, total: files.length, failed };
+    },
+    onSuccess: ({ demandaId, total, failed }) => {
+      qc.invalidateQueries({ queryKey: ["demanda-anexos", demandaId] });
+      qc.invalidateQueries({ queryKey: ["demandas"] });
+      const enviados = total - failed;
+      if (failed > 0) {
+        toast.warning(
+          `${enviados} de ${total} anexos enviados (${failed} falharam)`,
+        );
+      } else {
+        toast.success(total === 1 ? "Anexo enviado" : `${total} anexos enviados`);
+      }
+    },
+    onError: (err) => toast.error(translateSupabaseError(err, "anexo")),
+  });
+}
+
+export function useDeleteAnexo() {
+  const qc = useQueryClient();
+  return useMutation<
+    { demandaId: string },
+    unknown,
+    { anexoId: string; storagePath: string; demandaId: string }
+  >({
+    mutationFn: async ({ anexoId, storagePath, demandaId }) => {
+      // Storage primeiro: se falhar, metadata fica intacta.
+      const { error: storageErr } = await supabase.storage
+        .from(ANEXO_BUCKET)
+        .remove([storagePath]);
+      if (storageErr) throw storageErr;
+
+      const { error: metaErr } = await supabase
+        .from("demanda_anexos")
+        .delete()
+        .eq("id", anexoId);
+      if (metaErr) throw metaErr;
+
+      return { demandaId };
+    },
+    onSuccess: ({ demandaId }) => {
+      qc.invalidateQueries({ queryKey: ["demanda-anexos", demandaId] });
+      qc.invalidateQueries({ queryKey: ["demandas"] });
+      toast.success("Anexo removido");
+    },
+    onError: (err) => toast.error(translateSupabaseError(err, "anexo")),
   });
 }
 

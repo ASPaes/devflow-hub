@@ -29,12 +29,11 @@ import { formatRelativeSP } from "@/lib/format";
 import {
   TIPO_DEMANDA_LABEL,
   useDemanda,
-  useDemandaAnexos,
   useUpdateDemanda,
   type UpdateDemandaPatch,
 } from "@/hooks/useDemandas";
 import { EditableField } from "@/components/demandas/EditableField";
-import { AnexoCard, AnexoCardSkeleton } from "@/components/demandas/AnexoCard";
+import { AnexosSecao } from "@/components/demandas/AnexosSecao";
 import { ComentariosSecao } from "@/components/demandas/ComentariosSecao";
 import { TimelineHistorico } from "@/components/demandas/TimelineHistorico";
 import { VinculosSecao } from "@/components/demandas/VinculosSecao";
@@ -58,9 +57,6 @@ function DemandaDetalhe() {
   const { user } = useAuth();
   const { temPermissao } = useProfile();
   const { data: demanda, isLoading, error } = useDemanda(codigo);
-  const { data: anexos = [], isLoading: anexosLoading } = useDemandaAnexos(
-    demanda?.id,
-  );
   const updateMutation = useUpdateDemanda();
 
   if (isLoading) return <DetalheSkeleton />;
@@ -163,23 +159,12 @@ function DemandaDetalhe() {
           </Card>
 
           {/* Anexos */}
-          {(anexosLoading || anexos.length > 0) && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">
-                  Anexos {anexos.length > 0 && `(${anexos.length})`}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-                  {anexosLoading
-                    ? Array.from({ length: 3 }).map((_, i) => (
-                        <AnexoCardSkeleton key={i} />
-                      ))
-                    : anexos.map((a) => <AnexoCard key={a.id} anexo={a} />)}
-                </div>
-              </CardContent>
-            </Card>
+          {user && (
+            <AnexosSecao
+              demandaId={demanda.id}
+              userId={user.id}
+              podeRemoverDeOutros={canEditAny}
+            />
           )}
 
           {/* Tabs: Comentários | Histórico | Vínculos */}

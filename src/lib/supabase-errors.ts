@@ -12,7 +12,8 @@ export type EntityName =
   | "perfil_acesso"
   | "demanda"
   | "comentario"
-  | "vinculo";
+  | "vinculo"
+  | "anexo";
 
 export function translateSupabaseError(
   err: unknown,
@@ -62,6 +63,17 @@ export function translateSupabaseError(
   }
   if (entity === "comentario" && code === "23503") {
     return "Demanda não encontrada";
+  }
+
+  if (entity === "anexo") {
+    if (code === "23514") return "Arquivo inválido";
+    const msg = rawMessage ?? "";
+    if (msg.includes("exceeded the maximum allowed size"))
+      return "Arquivo maior que 25MB";
+    if (msg.includes("mime type") && msg.includes("not supported"))
+      return "Tipo de arquivo não permitido";
+    if (msg.includes("The resource already exists"))
+      return "Já existe um arquivo com esse nome";
   }
 
   if (e?.message) return e.message;
