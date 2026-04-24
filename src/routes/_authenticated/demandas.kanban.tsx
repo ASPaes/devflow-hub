@@ -20,6 +20,7 @@ import {
   type FiltrosState,
 } from "@/components/demandas/FiltrosPanel";
 import { ViewToggle } from "@/components/demandas/ViewToggle";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import {
   KanbanBoard,
   STATUS_NO_BOARD,
