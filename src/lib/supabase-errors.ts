@@ -12,6 +12,12 @@ export function translateSupabaseError(
 ): string {
   const e = err as PostgrestLikeError;
   const code = e?.code;
+  const rawMessage = e?.message;
+
+  // Mensagens de RAISE EXCEPTION do Postgres vêm em PT — mostrar direto
+  if (rawMessage && rawMessage.includes("último dev_gestor")) {
+    return rawMessage;
+  }
 
   if (code === "23505") {
     if (entity === "modulo") return "Já existe um módulo com esse nome";

@@ -34,6 +34,9 @@ interface DataTableProps<T> {
   columns: DataTableColumn<T>[];
   onEdit?: (row: T) => void;
   onDelete?: (row: T) => void;
+  /** Custom action cell rendered in place of the default Edit/Delete menu. */
+  rowActions?: (row: T) => React.ReactNode;
+  actionsHeader?: string;
   searchableFields?: (keyof T)[];
   searchPlaceholder?: string;
   emptyState: React.ReactNode;
@@ -47,6 +50,8 @@ export function DataTable<T extends Record<string, unknown>>({
   columns,
   onEdit,
   onDelete,
+  rowActions,
+  actionsHeader = "Ações",
   searchableFields,
   searchPlaceholder = "Buscar...",
   emptyState,
@@ -54,7 +59,7 @@ export function DataTable<T extends Record<string, unknown>>({
   getRowKey,
 }: DataTableProps<T>) {
   const [search, setSearch] = React.useState("");
-  const hasActions = !!onEdit || !!onDelete;
+  const hasActions = !!rowActions || !!onEdit || !!onDelete;
 
   const filtered = React.useMemo(() => {
     if (!data) return [];
@@ -99,7 +104,7 @@ export function DataTable<T extends Record<string, unknown>>({
                   </TableHead>
                 ))}
                 {hasActions && (
-                  <TableHead className="w-[60px] text-right">Ações</TableHead>
+                  <TableHead className="w-[60px] text-right">{actionsHeader}</TableHead>
                 )}
               </TableRow>
             </TableHeader>
@@ -141,32 +146,36 @@ export function DataTable<T extends Record<string, unknown>>({
                     ))}
                     {hasActions && (
                       <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <MoreHorizontal className="h-4 w-4" />
-                              <span className="sr-only">Ações</span>
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            {onEdit && (
-                              <DropdownMenuItem onClick={() => onEdit(row)}>
-                                <Pencil className="mr-2 h-4 w-4" />
-                                Editar
-                              </DropdownMenuItem>
-                            )}
-                            {onEdit && onDelete && <DropdownMenuSeparator />}
-                            {onDelete && (
-                              <DropdownMenuItem
-                                onClick={() => onDelete(row)}
-                                className="text-destructive focus:text-destructive"
-                              >
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Excluir
-                              </DropdownMenuItem>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        {rowActions ? (
+                          rowActions(row)
+                        ) : (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <MoreHorizontal className="h-4 w-4" />
+                                <span className="sr-only">Ações</span>
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              {onEdit && (
+                                <DropdownMenuItem onClick={() => onEdit(row)}>
+                                  <Pencil className="mr-2 h-4 w-4" />
+                                  Editar
+                                </DropdownMenuItem>
+                              )}
+                              {onEdit && onDelete && <DropdownMenuSeparator />}
+                              {onDelete && (
+                                <DropdownMenuItem
+                                  onClick={() => onDelete(row)}
+                                  className="text-destructive focus:text-destructive"
+                                >
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  Excluir
+                                </DropdownMenuItem>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        )}
                       </TableCell>
                     )}
                   </TableRow>
