@@ -13,6 +13,7 @@ export type PerfilAcesso = {
   permissoes: AppPermissao[];
   sistema: boolean;
   ativo: boolean;
+  perfil_padrao_novos_usuarios: boolean;
   created_at: string;
   updated_at: string;
 };
@@ -42,6 +43,7 @@ export const perfilAcessoSchema = z.object({
     .array(z.enum(PERMISSAO_VALUES))
     .min(1, "Selecione ao menos uma permissão"),
   ativo: z.boolean(),
+  perfil_padrao_novos_usuarios: z.boolean(),
 });
 
 export type PerfilAcessoInput = z.infer<typeof perfilAcessoSchema>;
@@ -72,6 +74,23 @@ function normalize(input: PerfilAcessoInput) {
   };
 }
 
+async function applyDefaultFlag(perfilId: string, makeDefault: boolean) {
+  if (makeDefault) {
+    // RPC ensures only one default exists
+    const { error } = await supabase.rpc("set_perfil_padrao_novos_usuarios", {
+      p_perfil_id: perfilId,
+    });
+    if (error) throw error;
+  } else {
+    // Unset directly — partial unique index allows multiple `false`
+    const { error } = await supabase
+      .from("perfis_acesso")
+      .update({ perfil_padrao_novos_usuarios: false })
+      .eq("id", perfilId);
+    if (error) throw error;
+  }
+}
+
 export function useCreatePerfilAcesso() {
   const qc = useQueryClient();
   return useMutation({
@@ -82,6 +101,9 @@ export function useCreatePerfilAcesso() {
         .select()
         .single();
       if (error) throw error;
+      if (input.perfil_padrao_novos_usuarios && data) {
+        await applyDefaultFlag(data.id, true);
+      }
       return data;
     },
     onSuccess: () => {
@@ -98,9 +120,11 @@ export function useUpdatePerfilAcesso() {
     mutationFn: async ({
       id,
       input,
+      wasDefault,
     }: {
       id: string;
       input: PerfilAcessoInput;
+      wasDefault: boolean;
     }) => {
       const { data, error } = await supabase
         .from("perfis_acesso")
@@ -109,6 +133,15 @@ export function useUpdatePerfilAcesso() {
         .select()
         .single();
       if (error) throw error;
+
+      if (input.perfil_padrao_novos_usuarios && !wasDefault) {
+        await applyDefaultFlag(id, true);
+      } else if (!input.perfil_padrao_novos_usuarios && wasDefault) {
+        // Block: must always have at least one default
+        throw new Error(
+          "Deve haver pelo menos um perfil padrão. Marque outro como padrão antes.",
+        );
+      }
       return data;
     },
     onSuccess: () => {
@@ -117,7 +150,13 @@ export function useUpdatePerfilAcesso() {
       qc.invalidateQueries({ queryKey: ["profile"] });
       toast.success("Perfil atualizado");
     },
-    onError: (err) => toast.error(translateSupabaseError(err, "perfil_acesso")),
+    onError: (err) => {
+      const msg =
+        err instanceof Error && err.message.includes("perfil padrão")
+          ? err.message
+          : translateSupabaseError(err, "perfil_acesso");
+      toast.error(msg);
+    },
   });
 }
 
