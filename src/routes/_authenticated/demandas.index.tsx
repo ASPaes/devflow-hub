@@ -49,6 +49,7 @@ function DemandasListagem() {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: "/demandas/" });
   const { temPermissao } = useProfile();
+  useDocumentTitle("Demandas");
 
   const filtrosState: FiltrosState = React.useMemo(
     () => ({
