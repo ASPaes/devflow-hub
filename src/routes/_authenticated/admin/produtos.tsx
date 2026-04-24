@@ -94,7 +94,7 @@ function ProdutosPage() {
       header: "Status",
       render: (row) =>
         row.ativo ? (
-          <Badge className="border-transparent bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/20">
+          <Badge className="border-transparent bg-status-entregue/15 text-status-entregue hover:bg-status-entregue/20">
             Ativo
           </Badge>
         ) : (
