@@ -7,6 +7,7 @@ import {
   Flame,
   Inbox,
   PlusCircle,
+  RefreshCw,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,8 @@ import {
   type DashboardMetrics,
 } from "@/hooks/useDashboardMetrics";
 import { formatRelativeSP } from "@/lib/format";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/")({
   component: Dashboard,
