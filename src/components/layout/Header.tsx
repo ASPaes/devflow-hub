@@ -5,6 +5,10 @@ import { UserMenu } from "@/components/layout/UserMenu";
 const TITLES: Record<string, string> = {
   "/": "Dashboard",
   "/perfil": "Perfil",
+  "/admin/produtos": "Produtos",
+  "/admin/modulos": "Módulos",
+  "/admin/areas": "Áreas",
+  "/admin/usuarios": "Usuários",
 };
 
 export function Header() {
