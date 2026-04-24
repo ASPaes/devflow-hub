@@ -10,7 +10,8 @@ export type EntityName =
   | "area"
   | "usuario"
   | "perfil_acesso"
-  | "demanda";
+  | "demanda"
+  | "comentario";
 
 export function translateSupabaseError(
   err: unknown,
@@ -48,7 +49,12 @@ export function translateSupabaseError(
   if (code === "42501" || code === "PGRST301") {
     if (entity === "demanda")
       return "Você não tem permissão para criar demandas";
+    if (entity === "comentario")
+      return "Você não tem permissão para este comentário";
     return "Você não tem permissão para esta ação";
+  }
+  if (entity === "comentario" && code === "23503") {
+    return "Demanda não encontrada";
   }
 
   if (e?.message) return e.message;
