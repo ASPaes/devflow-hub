@@ -4,7 +4,7 @@ interface PostgrestLikeError {
   details?: string;
 }
 
-export type EntityName = "produto" | "modulo" | "area" | "usuario";
+export type EntityName = "modulo" | "submodulo" | "area" | "usuario";
 
 export function translateSupabaseError(
   err: unknown,
@@ -14,9 +14,9 @@ export function translateSupabaseError(
   const code = e?.code;
 
   if (code === "23505") {
-    if (entity === "modulo")
-      return "Já existe um módulo com esse nome neste produto";
-    if (entity === "produto") return "Já existe um produto com esse nome";
+    if (entity === "modulo") return "Já existe um módulo com esse nome";
+    if (entity === "submodulo")
+      return "Já existe um submódulo com esse nome neste módulo";
     if (entity === "area") return "Já existe uma área com esse nome";
     if (entity === "usuario") return "Já existe um usuário com esses dados";
     return "Registro duplicado";
