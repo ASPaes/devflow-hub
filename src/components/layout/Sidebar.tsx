@@ -128,7 +128,11 @@ export function Sidebar() {
                 <NavItem to="/admin/usuarios" icon={Users} label="Usuários" />
               )}
               {temPermissao("gerenciar_perfis_acesso") && (
-                <NavItem icon={ShieldCheck} label="Perfis de Acesso" disabled />
+                <NavItem
+                  to="/admin/perfis-acesso"
+                  icon={ShieldCheck}
+                  label="Perfis de Acesso"
+                />
               )}
               <NavItem to="/perfil" icon={UserCircle} label="Perfil" />
             </>
