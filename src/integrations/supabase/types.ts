@@ -480,6 +480,7 @@ export type Database = {
           descricao: string | null
           id: string
           nome: string
+          perfil_padrao_novos_usuarios: boolean
           permissoes: Database["public"]["Enums"]["app_permissao"][]
           sistema: boolean
           updated_at: string
@@ -490,6 +491,7 @@ export type Database = {
           descricao?: string | null
           id?: string
           nome: string
+          perfil_padrao_novos_usuarios?: boolean
           permissoes?: Database["public"]["Enums"]["app_permissao"][]
           sistema?: boolean
           updated_at?: string
@@ -500,6 +502,7 @@ export type Database = {
           descricao?: string | null
           id?: string
           nome?: string
+          perfil_padrao_novos_usuarios?: boolean
           permissoes?: Database["public"]["Enums"]["app_permissao"][]
           sistema?: boolean
           updated_at?: string
