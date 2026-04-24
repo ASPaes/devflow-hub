@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import {
   ArrowRightToLine,
   Ban,
@@ -7,7 +7,6 @@ import {
   ChevronsUpDown,
   Copy,
   Link2,
-  Loader2,
   Plus,
   Trash2,
   type LucideIcon,
@@ -276,7 +275,6 @@ function AddVinculoDialog({
 }) {
   const { user } = useAuth();
   const createMutation = useCreateVinculo();
-  const navigate = useNavigate();
 
   const handleSubmit = async (values: VinculoFormValues) => {
     if (!user) {
@@ -290,8 +288,6 @@ function AddVinculoDialog({
       user_id: user.id,
     });
     toast.success("Vínculo criado");
-    // ensure no stale navigation
-    void navigate;
   };
 
   return (
