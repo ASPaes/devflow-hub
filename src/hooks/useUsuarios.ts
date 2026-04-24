@@ -33,7 +33,11 @@ export function useUsuarios() {
   });
 }
 
-export type UsuarioPatch = Partial<Pick<UsuarioAdmin, "nome" | "ativo">>;
+export type UsuarioPatch = Partial<{
+  nome: string;
+  ativo: boolean;
+  perfil_acesso_id: string;
+}>;
 
 export function useUpdateUsuario() {
   const qc = useQueryClient();
@@ -55,6 +59,39 @@ export function useUpdateUsuario() {
     },
     onError: (err) => {
       toast.error(translateSupabaseError(err, "usuario"));
+    },
+  });
+}
+
+export function useInviteUsuario() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: {
+      email: string;
+      nome: string;
+      perfil_acesso_id: string;
+    }) => {
+      const { data, error } = await supabase.functions.invoke("invite-user", {
+        body: input,
+      });
+      if (error) throw error;
+      const errMsg = (data as { error?: string } | null)?.error;
+      if (errMsg) throw new Error(errMsg);
+      return data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: usuariosKey });
+      toast.success(
+        "Convite enviado. O usuário receberá um e-mail com link pra definir a senha.",
+      );
+    },
+    onError: (err: Error) => {
+      const msg = err.message || "";
+      if (msg.toLowerCase().includes("rate limit")) {
+        toast.error("Limite de envios atingido. Aguarde alguns minutos.");
+      } else {
+        toast.error(msg || "Erro ao enviar convite");
+      }
     },
   });
 }
