@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   LogOut,
   Network,
+  PlusCircle,
   ShieldCheck,
   UserCircle,
   Users,
@@ -109,6 +110,13 @@ export function Sidebar() {
         <nav className="flex flex-1 flex-col gap-1 p-3">
           <NavItem to="/" icon={LayoutDashboard} label="Dashboard" />
           <NavItem icon={Inbox} label="Demandas" disabled />
+          {temPermissao("criar_demanda") && (
+            <NavItem
+              to="/demandas/nova"
+              icon={PlusCircle}
+              label="Nova demanda"
+            />
+          )}
 
           {mostraAdmin && (
             <>

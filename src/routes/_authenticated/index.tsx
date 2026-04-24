@@ -1,8 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { CheckCircle2, Clock, Flame, Inbox } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { CheckCircle2, Clock, Flame, Inbox, PlusCircle } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useProfile } from "@/hooks/useProfile";
 
 export const Route = createFileRoute("/_authenticated/")({
   component: Dashboard,
@@ -31,9 +33,22 @@ function Kpi({ label, icon: Icon, iconClassName }: KpiProps) {
 }
 
 function Dashboard() {
+  const { temPermissao } = useProfile();
+  const podeCriar = temPermissao("criar_demanda");
+
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-semibold text-foreground">Dashboard</h1>
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-2xl font-semibold text-foreground">Dashboard</h1>
+        {podeCriar && (
+          <Button asChild size="lg">
+            <Link to="/demandas/nova">
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Abrir nova demanda
+            </Link>
+          </Button>
+        )}
+      </div>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Kpi label="Total de demandas" icon={Inbox} iconClassName="h-4 w-4 text-muted-foreground" />
@@ -48,10 +63,12 @@ function Dashboard() {
 
       <Card className="mt-6">
         <CardHeader>
-          <CardTitle className="text-base font-medium">Fase 1 completa</CardTitle>
+          <CardTitle className="text-base font-medium">Próximos passos</CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground">
-          Cadastro, autenticação e layout prontos. Próximo passo: gestão de demandas.
+          {podeCriar
+            ? "Use o botão acima ou o item “Nova demanda” na barra lateral pra abrir uma solicitação."
+            : "A listagem e o Kanban de demandas chegam nas próximas etapas."}
         </CardContent>
       </Card>
     </div>

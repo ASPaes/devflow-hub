@@ -17,6 +17,7 @@ import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/
 import { Route as AuthConfirmRouteImport } from './routes/auth/confirm'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedDemandasNovaRouteImport } from './routes/_authenticated/demandas.nova'
 import { Route as AuthenticatedAdminUsuariosRouteImport } from './routes/_authenticated/admin/usuarios'
 import { Route as AuthenticatedAdminSubmodulosRouteImport } from './routes/_authenticated/admin/submodulos'
 import { Route as AuthenticatedAdminPerfisAcessoRouteImport } from './routes/_authenticated/admin/perfis-acesso'
@@ -62,6 +63,12 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedDemandasNovaRoute =
+  AuthenticatedDemandasNovaRouteImport.update({
+    id: '/demandas/nova',
+    path: '/demandas/nova',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedAdminUsuariosRoute =
   AuthenticatedAdminUsuariosRouteImport.update({
     id: '/usuarios',
@@ -105,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/admin/perfis-acesso': typeof AuthenticatedAdminPerfisAcessoRoute
   '/admin/submodulos': typeof AuthenticatedAdminSubmodulosRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
+  '/demandas/nova': typeof AuthenticatedDemandasNovaRoute
 }
 export interface FileRoutesByTo {
   '/cadastro': typeof CadastroRoute
@@ -119,6 +127,7 @@ export interface FileRoutesByTo {
   '/admin/perfis-acesso': typeof AuthenticatedAdminPerfisAcessoRoute
   '/admin/submodulos': typeof AuthenticatedAdminSubmodulosRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
+  '/demandas/nova': typeof AuthenticatedDemandasNovaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -135,6 +144,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/perfis-acesso': typeof AuthenticatedAdminPerfisAcessoRoute
   '/_authenticated/admin/submodulos': typeof AuthenticatedAdminSubmodulosRoute
   '/_authenticated/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
+  '/_authenticated/demandas/nova': typeof AuthenticatedDemandasNovaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -151,6 +161,7 @@ export interface FileRouteTypes {
     | '/admin/perfis-acesso'
     | '/admin/submodulos'
     | '/admin/usuarios'
+    | '/demandas/nova'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/cadastro'
@@ -165,6 +176,7 @@ export interface FileRouteTypes {
     | '/admin/perfis-acesso'
     | '/admin/submodulos'
     | '/admin/usuarios'
+    | '/demandas/nova'
   id:
     | '__root__'
     | '/_authenticated'
@@ -180,6 +192,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/perfis-acesso'
     | '/_authenticated/admin/submodulos'
     | '/_authenticated/admin/usuarios'
+    | '/_authenticated/demandas/nova'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -248,6 +261,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/demandas/nova': {
+      id: '/_authenticated/demandas/nova'
+      path: '/demandas/nova'
+      fullPath: '/demandas/nova'
+      preLoaderRoute: typeof AuthenticatedDemandasNovaRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/admin/usuarios': {
       id: '/_authenticated/admin/usuarios'
       path: '/usuarios'
@@ -309,12 +329,14 @@ interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedDemandasNovaRoute: typeof AuthenticatedDemandasNovaRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedDemandasNovaRoute: AuthenticatedDemandasNovaRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(

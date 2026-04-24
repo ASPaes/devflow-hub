@@ -9,7 +9,8 @@ export type EntityName =
   | "submodulo"
   | "area"
   | "usuario"
-  | "perfil_acesso";
+  | "perfil_acesso"
+  | "demanda";
 
 export function translateSupabaseError(
   err: unknown,
@@ -39,11 +40,16 @@ export function translateSupabaseError(
   if (code === "23503") {
     if (entity === "perfil_acesso")
       return "Este perfil está em uso por um ou mais usuários. Altere o perfil desses usuários antes de excluir.";
+    if (entity === "demanda")
+      return "Um dos campos referencia um item que não existe. Recarregue e tente novamente.";
     return "Este registro está em uso e não pode ser removido. Considere desativá-lo.";
   }
   if (code === "23502") return "Campo obrigatório não preenchido";
-  if (code === "42501" || code === "PGRST301")
+  if (code === "42501" || code === "PGRST301") {
+    if (entity === "demanda")
+      return "Você não tem permissão para criar demandas";
     return "Você não tem permissão para esta ação";
+  }
 
   if (e?.message) return e.message;
   return "Erro inesperado. Tente novamente.";

@@ -517,7 +517,6 @@ export type Database = {
           id: string
           nome: string
           perfil_acesso_id: string
-          role: Database["public"]["Enums"]["app_role"]
           updated_at: string
         }
         Insert: {
@@ -527,7 +526,6 @@ export type Database = {
           id: string
           nome: string
           perfil_acesso_id: string
-          role?: Database["public"]["Enums"]["app_role"]
           updated_at?: string
         }
         Update: {
@@ -537,7 +535,6 @@ export type Database = {
           id?: string
           nome?: string
           perfil_acesso_id?: string
-          role?: Database["public"]["Enums"]["app_role"]
           updated_at?: string
         }
         Relationships: [
@@ -713,7 +710,6 @@ export type Database = {
           status: string
         }[]
       }
-      is_dev_gestor: { Args: never; Returns: boolean }
       list_usuarios_admin: {
         Args: never
         Returns: {
@@ -793,7 +789,6 @@ export type Database = {
         | "gerenciar_usuarios"
         | "gerenciar_perfis_acesso"
         | "ver_dashboard_metricas"
-      app_role: "solicitante" | "dev_gestor"
       status_demanda:
         | "triagem"
         | "analise"
@@ -949,7 +944,6 @@ export const Constants = {
         "gerenciar_perfis_acesso",
         "ver_dashboard_metricas",
       ],
-      app_role: ["solicitante", "dev_gestor"],
       status_demanda: [
         "triagem",
         "analise",
