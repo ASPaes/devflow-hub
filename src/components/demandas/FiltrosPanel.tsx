@@ -52,9 +52,16 @@ interface FiltrosPanelProps {
   value: FiltrosState;
   onChange: (patch: Partial<FiltrosState>) => void;
   onClear: () => void;
+  /** Esconde o dropdown de Status (usado no Kanban, onde status é o board). */
+  hideStatus?: boolean;
 }
 
-export function FiltrosPanel({ value, onChange, onClear }: FiltrosPanelProps) {
+export function FiltrosPanel({
+  value,
+  onChange,
+  onClear,
+  hideStatus,
+}: FiltrosPanelProps) {
   const modulosQuery = useModulos();
   const areasQuery = useAreas();
   const usuariosQuery = useUsuarios();
@@ -112,29 +119,31 @@ export function FiltrosPanel({ value, onChange, onClear }: FiltrosPanelProps) {
       </div>
 
       {/* Status (multi) */}
-      <MultiDropdown
-        label="Status"
-        count={value.status.length}
-        renderItems={() =>
-          STATUS_DEMANDA_VALUES.map((s) => (
-            <DropdownMenuCheckboxItem
-              key={s}
-              checked={value.status.includes(s)}
-              onCheckedChange={() =>
-                onChange({ status: toggleArray(value.status, s) })
-              }
-              onSelect={(e) => e.preventDefault()}
-            >
-              <span
-                className="mr-2 inline-block h-2 w-2 rounded-full"
-                style={{ backgroundColor: `var(--color-status-${s})` }}
-                aria-hidden
-              />
-              {STATUS_DEMANDA_LABEL[s]}
-            </DropdownMenuCheckboxItem>
-          ))
-        }
-      />
+      {!hideStatus && (
+        <MultiDropdown
+          label="Status"
+          count={value.status.length}
+          renderItems={() =>
+            STATUS_DEMANDA_VALUES.map((s) => (
+              <DropdownMenuCheckboxItem
+                key={s}
+                checked={value.status.includes(s)}
+                onCheckedChange={() =>
+                  onChange({ status: toggleArray(value.status, s) })
+                }
+                onSelect={(e) => e.preventDefault()}
+              >
+                <span
+                  className="mr-2 inline-block h-2 w-2 rounded-full"
+                  style={{ backgroundColor: `var(--color-status-${s})` }}
+                  aria-hidden
+                />
+                {STATUS_DEMANDA_LABEL[s]}
+              </DropdownMenuCheckboxItem>
+            ))
+          }
+        />
+      )}
 
       {/* Prioridade (multi) */}
       <MultiDropdown

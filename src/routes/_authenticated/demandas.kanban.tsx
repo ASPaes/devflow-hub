@@ -1,11 +1,10 @@
 import * as React from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
-import { Inbox, Plus, SearchX } from "lucide-react";
+import { Plus } from "lucide-react";
 import { z } from "zod";
 
 import { PageHeader } from "@/components/common/PageHeader";
-import { EmptyState } from "@/components/common/EmptyState";
 import { Button } from "@/components/ui/button";
 import { useProfile } from "@/hooks/useProfile";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
@@ -20,10 +19,13 @@ import {
   RESPONSAVEL_SEM,
   type FiltrosState,
 } from "@/components/demandas/FiltrosPanel";
-import { DemandasTable } from "@/components/demandas/DemandasTable";
 import { ViewToggle } from "@/components/demandas/ViewToggle";
+import {
+  KanbanBoard,
+  STATUS_NO_BOARD,
+} from "@/components/demandas/KanbanBoard";
 
-const demandasSearchSchema = z.object({
+const kanbanSearchSchema = z.object({
   status: fallback(z.array(z.enum(STATUS_DEMANDA_VALUES)), []).default([]),
   prioridade: fallback(
     z.array(z.coerce.number().int().min(1).max(5)),
@@ -39,19 +41,20 @@ const demandasSearchSchema = z.object({
   busca: fallback(z.string(), "").default(""),
 });
 
-export const Route = createFileRoute("/_authenticated/demandas/")({
-  validateSearch: zodValidator(demandasSearchSchema),
-  component: DemandasListagem,
+export const Route = createFileRoute("/_authenticated/demandas/kanban")({
+  validateSearch: zodValidator(kanbanSearchSchema),
+  component: KanbanPage,
 });
 
-function DemandasListagem() {
+function KanbanPage() {
   const search = Route.useSearch();
-  const navigate = useNavigate({ from: "/demandas/" });
+  const navigate = useNavigate({ from: "/demandas/kanban" });
   const { temPermissao } = useProfile();
 
   const filtrosState: FiltrosState = React.useMemo(
     () => ({
       busca: search.busca,
+      // No Kanban, status é controlado pelo board, mas mantemos no state pra compatibilidade
       status: search.status,
       prioridade: search.prioridade,
       tipo: search.tipo,
@@ -65,8 +68,10 @@ function DemandasListagem() {
   const buscaDebounced = useDebouncedValue(filtrosState.busca, 300);
 
   const filtrosQuery: FiltrosDemanda = React.useMemo(() => {
-    const f: FiltrosDemanda = {};
-    if (filtrosState.status.length) f.status = filtrosState.status;
+    const f: FiltrosDemanda = {
+      // Restringe ao que cabe no board (ignora encerrada/cancelada)
+      status: STATUS_NO_BOARD,
+    };
     if (filtrosState.prioridade.length) f.prioridade = filtrosState.prioridade;
     if (filtrosState.tipo.length) f.tipo = filtrosState.tipo;
     if (filtrosState.modulo_id) f.modulo_id = filtrosState.modulo_id;
@@ -85,12 +90,7 @@ function DemandasListagem() {
   const setPatch = React.useCallback(
     (patch: Partial<FiltrosState>) => {
       navigate({
-        search: (old) => {
-          const next = { ...old, ...patch };
-          // Normaliza vazios para limpar a URL
-          if (next.busca === "") next.busca = "";
-          return next;
-        },
+        search: (old) => ({ ...old, ...patch }),
         replace: true,
       });
     },
@@ -112,22 +112,13 @@ function DemandasListagem() {
     });
   }, [navigate]);
 
-  const hasFiltros =
-    !!filtrosState.busca?.trim() ||
-    filtrosState.status.length > 0 ||
-    filtrosState.prioridade.length > 0 ||
-    filtrosState.tipo.length > 0 ||
-    !!filtrosState.modulo_id ||
-    !!filtrosState.area_id ||
-    !!filtrosState.responsavel_id;
-
   const podeCriar = temPermissao("criar_demanda");
 
   return (
     <div>
       <PageHeader
-        title="Demandas"
-        description="Acompanhe o andamento das suas solicitações"
+        title="Demandas — Kanban"
+        description="Visão panorâmica do pipeline por status"
         action={
           <div className="flex items-center gap-2">
             <ViewToggle />
@@ -143,59 +134,25 @@ function DemandasListagem() {
         }
       />
 
-      <FiltrosPanel value={filtrosState} onChange={setPatch} onClear={limpar} />
+      <FiltrosPanel
+        value={filtrosState}
+        onChange={setPatch}
+        onClear={limpar}
+        hideStatus
+      />
 
-      {!isLoading && rows.length === 0 ? (
-        hasFiltros ? (
-          <EmptyState
-            icon={SearchX}
-            title="Nenhuma demanda encontrada"
-            description="Tente ajustar os filtros pra encontrar o que procura."
-            action={
-              <Button variant="outline" onClick={limpar}>
-                Limpar filtros
-              </Button>
-            }
-          />
-        ) : (
-          <EmptyState
-            icon={Inbox}
-            title="Nenhuma demanda ainda"
-            description="Comece abrindo sua primeira solicitação."
-            action={
-              podeCriar ? (
-                <Button asChild>
-                  <Link to="/demandas/nova">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Nova demanda
-                  </Link>
-                </Button>
-              ) : undefined
-            }
-          />
-        )
-      ) : (
-        <>
-          <DemandasTable
-            rows={rows}
-            isLoading={isLoading}
-            onRowClick={(row) => {
-              if (row.codigo) {
-                navigate({
-                  to: "/demandas/$codigo",
-                  params: { codigo: row.codigo },
-                });
-              }
-            }}
-          />
-          {!isLoading && (
-            <div className="mt-3 text-xs text-muted-foreground">
-              Exibindo {rows.length}{" "}
-              {rows.length === 1 ? "demanda" : "demandas"}
-            </div>
-          )}
-        </>
-      )}
+      <KanbanBoard
+        rows={rows}
+        isLoading={isLoading}
+        onCardClick={(row) => {
+          if (row.codigo) {
+            navigate({
+              to: "/demandas/$codigo",
+              params: { codigo: row.codigo },
+            });
+          }
+        }}
+      />
     </div>
   );
 }

@@ -19,6 +19,7 @@ import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedDemandasIndexRouteImport } from './routes/_authenticated/demandas.index'
 import { Route as AuthenticatedDemandasNovaRouteImport } from './routes/_authenticated/demandas.nova'
+import { Route as AuthenticatedDemandasKanbanRouteImport } from './routes/_authenticated/demandas.kanban'
 import { Route as AuthenticatedDemandasCodigoRouteImport } from './routes/_authenticated/demandas.$codigo'
 import { Route as AuthenticatedAdminUsuariosRouteImport } from './routes/_authenticated/admin/usuarios'
 import { Route as AuthenticatedAdminSubmodulosRouteImport } from './routes/_authenticated/admin/submodulos'
@@ -77,6 +78,12 @@ const AuthenticatedDemandasNovaRoute =
     path: '/demandas/nova',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedDemandasKanbanRoute =
+  AuthenticatedDemandasKanbanRouteImport.update({
+    id: '/demandas/kanban',
+    path: '/demandas/kanban',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedDemandasCodigoRoute =
   AuthenticatedDemandasCodigoRouteImport.update({
     id: '/demandas/$codigo',
@@ -127,6 +134,7 @@ export interface FileRoutesByFullPath {
   '/admin/submodulos': typeof AuthenticatedAdminSubmodulosRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/demandas/$codigo': typeof AuthenticatedDemandasCodigoRoute
+  '/demandas/kanban': typeof AuthenticatedDemandasKanbanRoute
   '/demandas/nova': typeof AuthenticatedDemandasNovaRoute
   '/demandas/': typeof AuthenticatedDemandasIndexRoute
 }
@@ -144,6 +152,7 @@ export interface FileRoutesByTo {
   '/admin/submodulos': typeof AuthenticatedAdminSubmodulosRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/demandas/$codigo': typeof AuthenticatedDemandasCodigoRoute
+  '/demandas/kanban': typeof AuthenticatedDemandasKanbanRoute
   '/demandas/nova': typeof AuthenticatedDemandasNovaRoute
   '/demandas': typeof AuthenticatedDemandasIndexRoute
 }
@@ -163,6 +172,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/submodulos': typeof AuthenticatedAdminSubmodulosRoute
   '/_authenticated/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/_authenticated/demandas/$codigo': typeof AuthenticatedDemandasCodigoRoute
+  '/_authenticated/demandas/kanban': typeof AuthenticatedDemandasKanbanRoute
   '/_authenticated/demandas/nova': typeof AuthenticatedDemandasNovaRoute
   '/_authenticated/demandas/': typeof AuthenticatedDemandasIndexRoute
 }
@@ -182,6 +192,7 @@ export interface FileRouteTypes {
     | '/admin/submodulos'
     | '/admin/usuarios'
     | '/demandas/$codigo'
+    | '/demandas/kanban'
     | '/demandas/nova'
     | '/demandas/'
   fileRoutesByTo: FileRoutesByTo
@@ -199,6 +210,7 @@ export interface FileRouteTypes {
     | '/admin/submodulos'
     | '/admin/usuarios'
     | '/demandas/$codigo'
+    | '/demandas/kanban'
     | '/demandas/nova'
     | '/demandas'
   id:
@@ -217,6 +229,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/submodulos'
     | '/_authenticated/admin/usuarios'
     | '/_authenticated/demandas/$codigo'
+    | '/_authenticated/demandas/kanban'
     | '/_authenticated/demandas/nova'
     | '/_authenticated/demandas/'
   fileRoutesById: FileRoutesById
@@ -301,6 +314,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDemandasNovaRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/demandas/kanban': {
+      id: '/_authenticated/demandas/kanban'
+      path: '/demandas/kanban'
+      fullPath: '/demandas/kanban'
+      preLoaderRoute: typeof AuthenticatedDemandasKanbanRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/demandas/$codigo': {
       id: '/_authenticated/demandas/$codigo'
       path: '/demandas/$codigo'
@@ -370,6 +390,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedDemandasCodigoRoute: typeof AuthenticatedDemandasCodigoRoute
+  AuthenticatedDemandasKanbanRoute: typeof AuthenticatedDemandasKanbanRoute
   AuthenticatedDemandasNovaRoute: typeof AuthenticatedDemandasNovaRoute
   AuthenticatedDemandasIndexRoute: typeof AuthenticatedDemandasIndexRoute
 }
@@ -379,6 +400,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedDemandasCodigoRoute: AuthenticatedDemandasCodigoRoute,
+  AuthenticatedDemandasKanbanRoute: AuthenticatedDemandasKanbanRoute,
   AuthenticatedDemandasNovaRoute: AuthenticatedDemandasNovaRoute,
   AuthenticatedDemandasIndexRoute: AuthenticatedDemandasIndexRoute,
 }
@@ -397,3 +419,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
