@@ -1,8 +1,6 @@
 import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import {
-  ArrowDownCircle,
-  ArrowUpCircle,
   MoreHorizontal,
   Pencil,
   Power,
@@ -48,13 +46,19 @@ const editNomeSchema = z.object({
 });
 type EditNomeValues = z.infer<typeof editNomeSchema>;
 
-type ConfirmKind = "rebaixar" | "desativar";
-type ConfirmState = { kind: ConfirmKind; usuario: UsuarioAdmin } | null;
+type ConfirmState = { usuario: UsuarioAdmin } | null;
 
-function isLastActiveDevGestor(usuarios: UsuarioAdmin[], candidato: UsuarioAdmin) {
-  if (candidato.role !== "dev_gestor" || !candidato.ativo) return false;
-  const ativosDevGestor = usuarios.filter((u) => u.role === "dev_gestor" && u.ativo);
-  return ativosDevGestor.length === 1 && ativosDevGestor[0].id === candidato.id;
+function isAdmin(u: UsuarioAdmin) {
+  return (
+    u.permissoes.includes("gerenciar_usuarios") &&
+    u.permissoes.includes("gerenciar_perfis_acesso")
+  );
+}
+
+function isLastActiveAdmin(usuarios: UsuarioAdmin[], candidato: UsuarioAdmin) {
+  if (!isAdmin(candidato) || !candidato.ativo) return false;
+  const ativosAdmin = usuarios.filter((u) => isAdmin(u) && u.ativo);
+  return ativosAdmin.length === 1 && ativosAdmin[0].id === candidato.id;
 }
 
 function UsuariosPage() {
@@ -75,14 +79,12 @@ function UsuariosPage() {
 
   const handleConfirm = async () => {
     if (!confirmState) return;
-    const { kind, usuario } = confirmState;
-    const patch =
-      kind === "rebaixar" ? { role: "solicitante" as const } : { ativo: false };
-    await updateMutation.mutateAsync({ id: usuario.id, patch });
+    await updateMutation.mutateAsync({
+      id: confirmState.usuario.id,
+      patch: { ativo: false },
+    });
   };
 
-  const promover = (u: UsuarioAdmin) =>
-    updateMutation.mutate({ id: u.id, patch: { role: "dev_gestor" } });
   const reativar = (u: UsuarioAdmin) =>
     updateMutation.mutate({ id: u.id, patch: { ativo: true } });
 
@@ -110,15 +112,15 @@ function UsuariosPage() {
       ),
     },
     {
-      key: "role",
+      key: "perfil_acesso_nome",
       header: "Perfil",
       render: (row) =>
-        row.role === "dev_gestor" ? (
+        isAdmin(row) ? (
           <Badge className="border-transparent bg-status-desenvolvimento/15 text-status-desenvolvimento hover:bg-status-desenvolvimento/20">
-            dev_gestor
+            {row.perfil_acesso_nome}
           </Badge>
         ) : (
-          <Badge variant="secondary">solicitante</Badge>
+          <Badge variant="secondary">{row.perfil_acesso_nome}</Badge>
         ),
     },
     {
@@ -158,17 +160,12 @@ function UsuariosPage() {
 
   const renderRowActions = (row: UsuarioAdmin) => {
     const isSelf = row.id === meuId;
-    const isLastDev = isLastActiveDevGestor(lista, row);
-    const blockSelf = isSelf;
-    const demoteDisabled = isLastDev || blockSelf;
-    const deactivateDisabled = isLastDev || blockSelf;
+    const isLastAdmin = isLastActiveAdmin(lista, row);
+    const deactivateDisabled = isLastAdmin || isSelf;
 
-    const demoteReason = blockSelf
-      ? "Você não pode rebaixar sua própria conta"
-      : "Não é possível rebaixar o último dev_gestor ativo";
-    const deactivateReason = blockSelf
+    const deactivateReason = isSelf
       ? "Você não pode desativar sua própria conta"
-      : "Não é possível desativar o último dev_gestor ativo";
+      : "Não é possível desativar o último administrador ativo";
 
     return (
       <TooltipProvider delayDuration={150}>
@@ -186,28 +183,11 @@ function UsuariosPage() {
             </DropdownMenuItem>
             <DropdownMenuSeparator />
 
-            {row.role === "solicitante" && row.ativo && (
-              <DropdownMenuItem onClick={() => promover(row)}>
-                <ArrowUpCircle className="mr-2 h-4 w-4" />
-                Promover a dev_gestor
-              </DropdownMenuItem>
-            )}
-
-            {row.role === "dev_gestor" && (
-              <DisabledTooltipItem
-                disabled={demoteDisabled}
-                reason={demoteReason}
-                onSelect={() => setConfirmState({ kind: "rebaixar", usuario: row })}
-                icon={<ArrowDownCircle className="mr-2 h-4 w-4" />}
-                label="Rebaixar a solicitante"
-              />
-            )}
-
             {row.ativo ? (
               <DisabledTooltipItem
                 disabled={deactivateDisabled}
                 reason={deactivateReason}
-                onSelect={() => setConfirmState({ kind: "desativar", usuario: row })}
+                onSelect={() => setConfirmState({ usuario: row })}
                 icon={<PowerOff className="mr-2 h-4 w-4" />}
                 label="Desativar"
                 destructive
@@ -279,21 +259,13 @@ function UsuariosPage() {
       <ConfirmDialog
         open={!!confirmState}
         onOpenChange={(o) => !o && setConfirmState(null)}
-        title={
-          confirmState?.kind === "rebaixar"
-            ? `Rebaixar ${confirmState.usuario.nome} para solicitante?`
-            : confirmState
-              ? `Desativar ${confirmState.usuario.nome}?`
-              : ""
-        }
+        title={confirmState ? `Desativar ${confirmState.usuario.nome}?` : ""}
         description={
-          confirmState?.kind === "rebaixar"
-            ? `${confirmState.usuario.nome} perderá acesso administrativo imediatamente.`
-            : confirmState
-              ? `${confirmState.usuario.nome} não conseguirá mais fazer login até ser reativado.`
-              : ""
+          confirmState
+            ? `${confirmState.usuario.nome} não conseguirá mais fazer login até ser reativado.`
+            : ""
         }
-        confirmLabel={confirmState?.kind === "rebaixar" ? "Rebaixar" : "Desativar"}
+        confirmLabel="Desativar"
         variant="destructive"
         onConfirm={handleConfirm}
       />

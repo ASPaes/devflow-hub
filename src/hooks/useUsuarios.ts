@@ -3,14 +3,16 @@ import { toast } from "sonner";
 
 import { supabase } from "@/lib/supabase";
 import { translateSupabaseError } from "@/lib/supabase-errors";
-import type { Database } from "@/integrations/supabase/types";
+import type { AppPermissao } from "@/hooks/useProfile";
 
 export type UsuarioAdmin = {
   id: string;
   nome: string;
   email: string;
   avatar_url: string | null;
-  role: Database["public"]["Enums"]["app_role"];
+  perfil_acesso_id: string;
+  perfil_acesso_nome: string;
+  permissoes: AppPermissao[];
   ativo: boolean;
   created_at: string;
   updated_at: string;
@@ -25,13 +27,13 @@ export function useUsuarios() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc("list_usuarios_admin");
       if (error) throw error;
-      return (data ?? []) as UsuarioAdmin[];
+      return (data ?? []) as unknown as UsuarioAdmin[];
     },
     staleTime: 2 * 60_000,
   });
 }
 
-export type UsuarioPatch = Partial<Pick<UsuarioAdmin, "nome" | "role" | "ativo">>;
+export type UsuarioPatch = Partial<Pick<UsuarioAdmin, "nome" | "ativo">>;
 
 export function useUpdateUsuario() {
   const qc = useQueryClient();
