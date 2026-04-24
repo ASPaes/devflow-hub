@@ -174,6 +174,7 @@ export function useCreateDemanda() {
     },
     onSuccess: (result) => {
       qc.invalidateQueries({ queryKey: ["demandas"] });
+      qc.invalidateQueries({ queryKey: ["dashboard-metrics"] });
       const codigo = result.demanda.codigo ?? "nova";
       if (result.anexosFalhos > 0) {
         toast.warning(
@@ -373,6 +374,7 @@ export function useUpdateDemanda() {
       }
       qc.invalidateQueries({ queryKey: ["demandas"] });
       qc.invalidateQueries({ queryKey: ["historico", data.id] });
+      qc.invalidateQueries({ queryKey: ["dashboard-metrics"] });
     },
     onError: (err) => {
       toast.error(translateSupabaseError(err, "demanda"));
