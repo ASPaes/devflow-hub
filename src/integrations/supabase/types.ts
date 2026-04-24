@@ -772,6 +772,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      set_perfil_padrao_novos_usuarios: {
+        Args: { p_perfil_id: string }
+        Returns: undefined
+      }
       tem_permissao: {
         Args: { p_permissao: Database["public"]["Enums"]["app_permissao"] }
         Returns: boolean
