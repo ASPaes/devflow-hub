@@ -35,6 +35,7 @@ import {
 } from "@/hooks/useDemandas";
 import { EditableField } from "@/components/demandas/EditableField";
 import { AnexoCard, AnexoCardSkeleton } from "@/components/demandas/AnexoCard";
+import { ComentariosSecao } from "@/components/demandas/ComentariosSecao";
 import {
   MetadataSidebar,
   SolicitanteSummary,
@@ -175,6 +176,9 @@ function DemandaDetalhe() {
               </CardContent>
             </Card>
           )}
+
+          {/* Comentários */}
+          <ComentariosSecao demandaId={demanda.id} />
         </div>
 
         <MetadataSidebar
