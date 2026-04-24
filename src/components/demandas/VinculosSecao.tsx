@@ -450,6 +450,3 @@ function DemandaComboItem({
     </CommandItem>
   );
 }
-
-// helper to silence unused import warning during render (not used in JSX above)
-void Loader2;
