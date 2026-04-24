@@ -36,6 +36,11 @@ import {
 import { EditableField } from "@/components/demandas/EditableField";
 import { AnexoCard, AnexoCardSkeleton } from "@/components/demandas/AnexoCard";
 import { ComentariosSecao } from "@/components/demandas/ComentariosSecao";
+import { TimelineHistorico } from "@/components/demandas/TimelineHistorico";
+import { VinculosSecao } from "@/components/demandas/VinculosSecao";
+import { useComentarios } from "@/hooks/useComentarios";
+import { useVinculos } from "@/hooks/useVinculos";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   MetadataSidebar,
   SolicitanteSummary,
