@@ -20,6 +20,7 @@ import {
   type FiltrosState,
 } from "@/components/demandas/FiltrosPanel";
 import { ViewToggle } from "@/components/demandas/ViewToggle";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import {
   KanbanBoard,
   STATUS_NO_BOARD,
@@ -50,6 +51,7 @@ function KanbanPage() {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: "/demandas/kanban" });
   const { temPermissao } = useProfile();
+  useDocumentTitle("Kanban");
 
   const filtrosState: FiltrosState = React.useMemo(
     () => ({

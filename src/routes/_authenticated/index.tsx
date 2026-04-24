@@ -7,6 +7,7 @@ import {
   Flame,
   Inbox,
   PlusCircle,
+  RefreshCw,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,8 @@ import {
   type DashboardMetrics,
 } from "@/hooks/useDashboardMetrics";
 import { formatRelativeSP } from "@/lib/format";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/")({
   component: Dashboard,
@@ -242,20 +245,43 @@ function Dashboard() {
   const podeCriar = temPermissao("criar_demanda");
   const podeVerMetricas = temPermissao("ver_dashboard_metricas");
 
+  useDocumentTitle("Dashboard");
+
   const metricsQuery = useDashboardMetrics(podeVerMetricas);
   const metrics = metricsQuery.data;
   const metricsLoading = metricsQuery.isLoading;
+  const metricsRefetching = metricsQuery.isFetching && !metricsQuery.isLoading;
 
   const primeiroNome = profile?.nome?.split(" ")[0] ?? "";
 
   const header = (
     <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
-      <div>
-        <h1 className="text-2xl font-semibold text-foreground">Dashboard</h1>
-        {!profileLoading && primeiroNome && (
-          <p className="mt-1 text-sm text-muted-foreground">
-            Bem-vindo, {primeiroNome}. Visão geral das demandas em andamento.
-          </p>
+      <div className="flex items-start gap-2">
+        <div>
+          <h1 className="text-2xl font-semibold text-foreground">Dashboard</h1>
+          {!profileLoading && primeiroNome && (
+            <p className="mt-1 text-sm text-muted-foreground">
+              Bem-vindo, {primeiroNome}. Visão geral das demandas em andamento.
+            </p>
+          )}
+        </div>
+        {podeVerMetricas && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="mt-0.5 h-8 w-8 text-muted-foreground hover:text-foreground"
+            onClick={() => void metricsQuery.refetch()}
+            disabled={metricsRefetching}
+            aria-label="Atualizar métricas"
+            title="Atualizar métricas"
+          >
+            <RefreshCw
+              className={cn(
+                "h-4 w-4",
+                metricsRefetching && "animate-spin",
+              )}
+            />
+          </Button>
         )}
       </div>
       {podeCriar && (

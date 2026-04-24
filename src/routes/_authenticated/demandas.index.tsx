@@ -22,6 +22,7 @@ import {
 } from "@/components/demandas/FiltrosPanel";
 import { DemandasTable } from "@/components/demandas/DemandasTable";
 import { ViewToggle } from "@/components/demandas/ViewToggle";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 const demandasSearchSchema = z.object({
   status: fallback(z.array(z.enum(STATUS_DEMANDA_VALUES)), []).default([]),
@@ -48,6 +49,7 @@ function DemandasListagem() {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: "/demandas/" });
   const { temPermissao } = useProfile();
+  useDocumentTitle("Demandas");
 
   const filtrosState: FiltrosState = React.useMemo(
     () => ({

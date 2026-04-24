@@ -31,6 +31,7 @@ import { cn } from "@/lib/utils";
 
 import { requirePermission } from "@/lib/auth-guards";
 import { useAuth } from "@/hooks/useAuth";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useAreas } from "@/hooks/useAreas";
 import { useModulos } from "@/hooks/useModulos";
 import { useSubmodulos } from "@/hooks/useSubmodulos";
@@ -56,6 +57,7 @@ function NovaDemandaPage() {
   const { user } = useAuth();
   const [anexos, setAnexos] = React.useState<File[]>([]);
   const createDemanda = useCreateDemanda();
+  useDocumentTitle("Nova demanda");
 
   const modulosQuery = useModulos();
   const submodulosQuery = useSubmodulos();
