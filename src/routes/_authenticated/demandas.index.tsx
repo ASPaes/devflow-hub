@@ -22,6 +22,7 @@ import {
 } from "@/components/demandas/FiltrosPanel";
 import { DemandasTable } from "@/components/demandas/DemandasTable";
 import { ViewToggle } from "@/components/demandas/ViewToggle";
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 const demandasSearchSchema = z.object({
   status: fallback(z.array(z.enum(STATUS_DEMANDA_VALUES)), []).default([]),
