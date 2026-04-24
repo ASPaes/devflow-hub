@@ -130,11 +130,10 @@ export function EditableField({
   return (
     <div className={cn("flex flex-col gap-2", className)}>
       <InputComp
-        // @ts-expect-error union type
         value={draft}
-        onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-          setDraft(e.target.value)
-        }
+        onChange={(
+          e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+        ) => setDraft(e.target.value)}
         onKeyDown={onKeyDown}
         autoFocus
         disabled={saving}
