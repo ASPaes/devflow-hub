@@ -109,7 +109,7 @@ export function Sidebar() {
               <NavItem to="/admin/modulos" icon={Layers} label="Módulos" />
               <NavItem to="/admin/submodulos" icon={Network} label="Submódulos" />
               <NavItem to="/admin/areas" icon={Building2} label="Áreas" />
-              <NavItem icon={Users} label="Usuários" disabled />
+              <NavItem to="/admin/usuarios" icon={Users} label="Usuários" />
             </>
           )}
 
