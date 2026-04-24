@@ -45,7 +45,7 @@ export const Route = createFileRoute("/_authenticated/demandas/")({
 
 function DemandasListagem() {
   const search = Route.useSearch();
-  const navigate = useNavigate({ from: "/demandas" });
+  const navigate = useNavigate({ from: "/demandas/" });
   const { temPermissao } = useProfile();
 
   const filtrosState: FiltrosState = React.useMemo(
