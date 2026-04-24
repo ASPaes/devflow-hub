@@ -427,6 +427,17 @@ function UsuariosPage() {
           variant="destructive"
           onConfirm={handleConfirmDeactivate}
         />
+
+        {deleteTarget && (
+          <DeleteUserConfirmDialog
+            open={!!deleteTarget}
+            onOpenChange={(o) => !o && setDeleteTarget(null)}
+            userName={deleteTarget.nome}
+            onConfirm={async () => {
+              await deleteMutation.mutateAsync(deleteTarget.id);
+            }}
+          />
+        )}
       </div>
     </TooltipProvider>
   );
