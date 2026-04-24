@@ -211,15 +211,36 @@ function Label({ children }: { children: React.ReactNode }) {
   );
 }
 
+export const STATUS_BADGE_STYLES: Record<StatusDemanda, string> = {
+  triagem:
+    "bg-status-triagem/15 text-status-triagem border-status-triagem/30",
+  analise:
+    "bg-status-analise/15 text-status-analise border-status-analise/30",
+  desenvolvimento:
+    "bg-status-desenvolvimento/15 text-status-desenvolvimento border-status-desenvolvimento/30",
+  teste: "bg-status-teste/15 text-status-teste border-status-teste/30",
+  entregue:
+    "bg-status-entregue/15 text-status-entregue border-status-entregue/30",
+  reaberta:
+    "bg-status-reaberta/15 text-status-reaberta border-status-reaberta/30",
+  encerrada:
+    "bg-status-encerrada/15 text-status-encerrada border-status-encerrada/30",
+  cancelada:
+    "bg-status-cancelada/15 text-status-cancelada border-status-cancelada/30",
+};
+
+export const PRIORIDADE_BADGE_STYLES: Record<1 | 2 | 3 | 4 | 5, string> = {
+  1: "bg-prioridade-1/15 text-prioridade-1 border-prioridade-1/30",
+  2: "bg-prioridade-2/15 text-prioridade-2 border-prioridade-2/30",
+  3: "bg-prioridade-3/15 text-prioridade-3 border-prioridade-3/30",
+  4: "bg-prioridade-4/15 text-prioridade-4 border-prioridade-4/30",
+  5: "bg-prioridade-5/15 text-prioridade-5 border-prioridade-5/30",
+};
+
 export function StatusBadge({ status }: { status: StatusDemanda }) {
   return (
     <span
-      className="inline-flex items-center rounded-md border px-2.5 py-1 text-sm font-medium"
-      style={{
-        color: `var(--color-status-${status})`,
-        backgroundColor: `color-mix(in oklab, var(--color-status-${status}) 15%, transparent)`,
-        borderColor: `color-mix(in oklab, var(--color-status-${status}) 30%, transparent)`,
-      }}
+      className={`inline-flex items-center rounded-md border px-2.5 py-1 text-sm font-medium ${STATUS_BADGE_STYLES[status]}`}
     >
       {STATUS_DEMANDA_LABEL[status]}
     </span>
