@@ -56,6 +56,7 @@ function NovaDemandaPage() {
   const { user } = useAuth();
   const [anexos, setAnexos] = React.useState<File[]>([]);
   const createDemanda = useCreateDemanda();
+  useDocumentTitle("Nova demanda");
 
   const modulosQuery = useModulos();
   const submodulosQuery = useSubmodulos();
