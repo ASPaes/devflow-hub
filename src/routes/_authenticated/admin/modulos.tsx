@@ -11,14 +11,8 @@ import { DataTable, type DataTableColumn } from "@/components/common/DataTable";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   FormControl,
   FormDescription,
@@ -33,79 +27,67 @@ import {
   useDeleteModulo,
   useModulos,
   useUpdateModulo,
-  type ModuloComProduto,
+  type Modulo,
   type ModuloInput,
 } from "@/hooks/useModulos";
-import { useProdutos } from "@/hooks/useProdutos";
 import { formatRelativeSP } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/admin/modulos")({
   component: ModulosPage,
 });
 
-const ALL = "__todos__";
 const DEFAULT_COLOR = "#8B5CF6";
 
 const emptyValues: ModuloInput = {
-  produto_id: "",
   nome: "",
+  descricao: "",
+  cor: DEFAULT_COLOR,
   ativo: true,
 };
 
 function ModulosPage() {
   const { data: modulos, isLoading } = useModulos();
-  const { data: produtos } = useProdutos();
   const createMut = useCreateModulo();
   const updateMut = useUpdateModulo();
   const deleteMut = useDeleteModulo();
 
-  const [filtroProduto, setFiltroProduto] = React.useState<string>(ALL);
   const [createOpen, setCreateOpen] = React.useState(false);
-  const [editing, setEditing] = React.useState<ModuloComProduto | null>(null);
-  const [deleting, setDeleting] = React.useState<ModuloComProduto | null>(null);
-
-  const produtosAtivos = React.useMemo(
-    () => (produtos ?? []).filter((p) => p.ativo),
-    [produtos],
-  );
-
-  const filtered = React.useMemo(() => {
-    if (!modulos) return undefined;
-    if (filtroProduto === ALL) return modulos;
-    return modulos.filter((m) => m.produto_id === filtroProduto);
-  }, [modulos, filtroProduto]);
+  const [editing, setEditing] = React.useState<Modulo | null>(null);
+  const [deleting, setDeleting] = React.useState<Modulo | null>(null);
 
   const editValues = React.useMemo<ModuloInput>(() => {
     if (!editing) return emptyValues;
     return {
-      produto_id: editing.produto_id,
       nome: editing.nome,
+      descricao: editing.descricao ?? "",
+      cor: editing.cor ?? DEFAULT_COLOR,
       ativo: editing.ativo,
     };
   }, [editing]);
 
-  const columns: DataTableColumn<ModuloComProduto>[] = [
+  const columns: DataTableColumn<Modulo>[] = [
     {
-      key: "produto",
-      header: "Produto",
+      key: "nome",
+      header: "Nome",
       render: (row) => (
         <div className="flex items-center gap-2">
           <span
             className="inline-block h-2.5 w-2.5 rounded-full"
-            style={{ backgroundColor: row.produto?.cor ?? DEFAULT_COLOR }}
+            style={{ backgroundColor: row.cor ?? DEFAULT_COLOR }}
             aria-hidden
           />
-          <span className="font-mono text-xs text-muted-foreground">
-            {row.produto?.nome ?? "—"}
-          </span>
+          <span className="font-medium text-foreground">{row.nome}</span>
         </div>
       ),
     },
     {
-      key: "nome",
-      header: "Módulo",
+      key: "descricao",
+      header: "Descrição",
+      className: "max-w-md",
       render: (row) => (
-        <span className="font-medium text-foreground">{row.nome}</span>
+        <span className="block truncate text-sm text-muted-foreground">
+          {row.descricao ?? "—"}
+        </span>
       ),
     },
     {
@@ -135,7 +117,7 @@ function ModulosPage() {
     <div>
       <PageHeader
         title="Módulos"
-        description="Módulos e telas de cada sistema"
+        description="Módulos do sistema ASP"
         action={
           <Button onClick={() => setCreateOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
@@ -144,36 +126,20 @@ function ModulosPage() {
         }
       />
 
-      <div className="mb-4">
-        <Select value={filtroProduto} onValueChange={setFiltroProduto}>
-          <SelectTrigger className="w-60">
-            <SelectValue placeholder="Todos os produtos" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ALL}>Todos os produtos</SelectItem>
-            {(produtos ?? []).map((p) => (
-              <SelectItem key={p.id} value={p.id}>
-                {p.nome}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
       <DataTable
-        data={filtered}
+        data={modulos}
         isLoading={isLoading}
         columns={columns}
         onEdit={(row) => setEditing(row)}
         onDelete={(row) => setDeleting(row)}
-        searchableFields={["nome"]}
+        searchableFields={["nome", "descricao"]}
         searchPlaceholder="Buscar módulos..."
         getRowKey={(row) => row.id}
         emptyState={
           <EmptyState
             icon={Layers}
             title="Nenhum módulo cadastrado"
-            description="Cadastre o primeiro módulo para organizar as demandas."
+            description="Cadastre o primeiro módulo. O submódulo 'Geral' será criado automaticamente."
             action={
               <Button onClick={() => setCreateOpen(true)}>
                 <Plus className="mr-2 h-4 w-4" />
@@ -188,14 +154,14 @@ function ModulosPage() {
         open={createOpen}
         onOpenChange={setCreateOpen}
         title="Novo módulo"
-        description="Cadastre um módulo de um produto."
+        description="Cadastre um módulo do sistema."
         schema={moduloSchema}
         defaultValues={emptyValues}
         onSubmit={async (values) => {
           await createMut.mutateAsync(values);
         }}
       >
-        {(form) => <ModuloFields form={form} produtos={produtosAtivos} />}
+        {(form) => <ModuloFields form={form} />}
       </ModalForm>
 
       <ModalForm<ModuloInput>
@@ -209,7 +175,7 @@ function ModulosPage() {
           await updateMut.mutateAsync({ id: editing.id, input: values });
         }}
       >
-        {(form) => <ModuloFields form={form} produtos={produtosAtivos} />}
+        {(form) => <ModuloFields form={form} />}
       </ModalForm>
 
       <ConfirmDialog
@@ -236,46 +202,9 @@ function ModulosPage() {
   );
 }
 
-interface ModuloFieldsProps {
-  form: UseFormReturn<ModuloInput>;
-  produtos: Array<{ id: string; nome: string; cor: string | null }>;
-}
-
-function ModuloFields({ form, produtos }: ModuloFieldsProps) {
+function ModuloFields({ form }: { form: UseFormReturn<ModuloInput> }) {
   return (
     <>
-      <FormField
-        control={form.control}
-        name="produto_id"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Produto</FormLabel>
-            <Select value={field.value} onValueChange={field.onChange}>
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione um produto" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                {produtos.map((p) => (
-                  <SelectItem key={p.id} value={p.id}>
-                    <span className="flex items-center gap-2">
-                      <span
-                        className="inline-block h-2.5 w-2.5 rounded-full"
-                        style={{ backgroundColor: p.cor ?? DEFAULT_COLOR }}
-                        aria-hidden
-                      />
-                      {p.nome}
-                    </span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
       <FormField
         control={form.control}
         name="nome"
@@ -283,8 +212,51 @@ function ModuloFields({ form, produtos }: ModuloFieldsProps) {
           <FormItem>
             <FormLabel>Nome</FormLabel>
             <FormControl>
-              <Input placeholder="Ex: Cadastros" {...field} />
+              <Input placeholder="Ex: Chat" {...field} />
             </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="descricao"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Descrição</FormLabel>
+            <FormControl>
+              <Textarea
+                rows={3}
+                placeholder="Breve descrição do módulo (opcional)"
+                {...field}
+                value={field.value ?? ""}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="cor"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Cor</FormLabel>
+            <div className="flex items-center gap-3">
+              <FormControl>
+                <input
+                  type="color"
+                  value={field.value}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  className="h-10 w-14 cursor-pointer rounded-md border border-border bg-background"
+                />
+              </FormControl>
+              <span className="font-mono text-sm text-muted-foreground">
+                {field.value?.toUpperCase()}
+              </span>
+            </div>
             <FormMessage />
           </FormItem>
         )}

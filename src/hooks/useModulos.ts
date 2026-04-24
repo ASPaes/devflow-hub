@@ -6,16 +6,17 @@ import { supabase } from "@/lib/supabase";
 import { translateSupabaseError } from "@/lib/supabase-errors";
 import type { Database } from "@/integrations/supabase/types";
 
-type ModuloRow = Database["public"]["Tables"]["modulos"]["Row"];
-type ProdutoRow = Database["public"]["Tables"]["produtos"]["Row"];
-
-export type ModuloComProduto = ModuloRow & {
-  produto: Pick<ProdutoRow, "id" | "nome" | "cor"> | null;
-};
+export type Modulo = Database["public"]["Tables"]["modulos"]["Row"];
 
 export const moduloSchema = z.object({
-  produto_id: z.string().uuid("Selecione um produto"),
   nome: z.string().trim().min(2, "Nome muito curto").max(80, "Nome muito longo"),
+  descricao: z
+    .string()
+    .trim()
+    .max(300, "Descrição muito longa")
+    .optional()
+    .or(z.literal("")),
+  cor: z.string().regex(/^#[0-9a-f]{6}$/i, "Cor deve ser hex (#RRGGBB)"),
   ativo: z.boolean(),
 });
 
@@ -24,17 +25,15 @@ export type ModuloInput = z.infer<typeof moduloSchema>;
 const modulosKey = ["modulos"] as const;
 
 export function useModulos() {
-  return useQuery<ModuloComProduto[]>({
+  return useQuery<Modulo[]>({
     queryKey: modulosKey,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("modulos")
-        .select(
-          "id, produto_id, nome, ativo, created_at, updated_at, produto:produtos(id, nome, cor)",
-        )
+        .select("*")
         .order("nome", { ascending: true });
       if (error) throw error;
-      return (data ?? []) as unknown as ModuloComProduto[];
+      return data ?? [];
     },
     staleTime: 5 * 60_000,
   });
@@ -42,8 +41,9 @@ export function useModulos() {
 
 function normalizeInput(input: ModuloInput) {
   return {
-    produto_id: input.produto_id,
     nome: input.nome.trim(),
+    descricao: input.descricao?.trim() ? input.descricao.trim() : null,
+    cor: input.cor.toUpperCase(),
     ativo: input.ativo,
   };
 }
@@ -62,6 +62,7 @@ export function useCreateModulo() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: modulosKey });
+      qc.invalidateQueries({ queryKey: ["submodulos"] });
       toast.success("Módulo criado");
     },
     onError: (err) => {
@@ -85,6 +86,7 @@ export function useUpdateModulo() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: modulosKey });
+      qc.invalidateQueries({ queryKey: ["submodulos"] });
       toast.success("Módulo atualizado");
     },
     onError: (err) => {
@@ -102,6 +104,7 @@ export function useDeleteModulo() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: modulosKey });
+      qc.invalidateQueries({ queryKey: ["submodulos"] });
       toast.success("Módulo excluído");
     },
     onError: (err) => {

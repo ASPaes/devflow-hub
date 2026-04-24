@@ -6,7 +6,7 @@ import {
   Layers,
   LayoutDashboard,
   LogOut,
-  Package,
+  Network,
   UserCircle,
   Users,
   type LucideIcon,
@@ -106,8 +106,8 @@ export function Sidebar() {
               <div className="mt-4 mb-2 px-3 text-xs uppercase tracking-wider text-muted-foreground">
                 Admin
               </div>
-              <NavItem to="/admin/produtos" icon={Package} label="Produtos" />
               <NavItem to="/admin/modulos" icon={Layers} label="Módulos" />
+              <NavItem to="/admin/submodulos" icon={Network} label="Submódulos" />
               <NavItem to="/admin/areas" icon={Building2} label="Áreas" />
               <NavItem icon={Users} label="Usuários" disabled />
             </>

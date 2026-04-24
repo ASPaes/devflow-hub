@@ -16,7 +16,7 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
-import { Route as AuthenticatedAdminProdutosRouteImport } from './routes/_authenticated/admin/produtos'
+import { Route as AuthenticatedAdminSubmodulosRouteImport } from './routes/_authenticated/admin/submodulos'
 import { Route as AuthenticatedAdminModulosRouteImport } from './routes/_authenticated/admin/modulos'
 import { Route as AuthenticatedAdminAreasRouteImport } from './routes/_authenticated/admin/areas'
 
@@ -54,10 +54,10 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedAdminProdutosRoute =
-  AuthenticatedAdminProdutosRouteImport.update({
-    id: '/produtos',
-    path: '/produtos',
+const AuthenticatedAdminSubmodulosRoute =
+  AuthenticatedAdminSubmodulosRouteImport.update({
+    id: '/submodulos',
+    path: '/submodulos',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminModulosRoute =
@@ -81,7 +81,7 @@ export interface FileRoutesByFullPath {
   '/perfil': typeof AuthenticatedPerfilRoute
   '/admin/areas': typeof AuthenticatedAdminAreasRoute
   '/admin/modulos': typeof AuthenticatedAdminModulosRoute
-  '/admin/produtos': typeof AuthenticatedAdminProdutosRoute
+  '/admin/submodulos': typeof AuthenticatedAdminSubmodulosRoute
 }
 export interface FileRoutesByTo {
   '/cadastro': typeof CadastroRoute
@@ -92,7 +92,7 @@ export interface FileRoutesByTo {
   '/': typeof AuthenticatedIndexRoute
   '/admin/areas': typeof AuthenticatedAdminAreasRoute
   '/admin/modulos': typeof AuthenticatedAdminModulosRoute
-  '/admin/produtos': typeof AuthenticatedAdminProdutosRoute
+  '/admin/submodulos': typeof AuthenticatedAdminSubmodulosRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -105,7 +105,7 @@ export interface FileRoutesById {
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/admin/areas': typeof AuthenticatedAdminAreasRoute
   '/_authenticated/admin/modulos': typeof AuthenticatedAdminModulosRoute
-  '/_authenticated/admin/produtos': typeof AuthenticatedAdminProdutosRoute
+  '/_authenticated/admin/submodulos': typeof AuthenticatedAdminSubmodulosRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -118,7 +118,7 @@ export interface FileRouteTypes {
     | '/perfil'
     | '/admin/areas'
     | '/admin/modulos'
-    | '/admin/produtos'
+    | '/admin/submodulos'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/cadastro'
@@ -129,7 +129,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin/areas'
     | '/admin/modulos'
-    | '/admin/produtos'
+    | '/admin/submodulos'
   id:
     | '__root__'
     | '/_authenticated'
@@ -141,7 +141,7 @@ export interface FileRouteTypes {
     | '/_authenticated/'
     | '/_authenticated/admin/areas'
     | '/_authenticated/admin/modulos'
-    | '/_authenticated/admin/produtos'
+    | '/_authenticated/admin/submodulos'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -202,11 +202,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/admin/produtos': {
-      id: '/_authenticated/admin/produtos'
-      path: '/produtos'
-      fullPath: '/admin/produtos'
-      preLoaderRoute: typeof AuthenticatedAdminProdutosRouteImport
+    '/_authenticated/admin/submodulos': {
+      id: '/_authenticated/admin/submodulos'
+      path: '/submodulos'
+      fullPath: '/admin/submodulos'
+      preLoaderRoute: typeof AuthenticatedAdminSubmodulosRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/modulos': {
@@ -229,13 +229,13 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAreasRoute: typeof AuthenticatedAdminAreasRoute
   AuthenticatedAdminModulosRoute: typeof AuthenticatedAdminModulosRoute
-  AuthenticatedAdminProdutosRoute: typeof AuthenticatedAdminProdutosRoute
+  AuthenticatedAdminSubmodulosRoute: typeof AuthenticatedAdminSubmodulosRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminAreasRoute: AuthenticatedAdminAreasRoute,
   AuthenticatedAdminModulosRoute: AuthenticatedAdminModulosRoute,
-  AuthenticatedAdminProdutosRoute: AuthenticatedAdminProdutosRoute,
+  AuthenticatedAdminSubmodulosRoute: AuthenticatedAdminSubmodulosRoute,
 }
 
 const AuthenticatedAdminRouteWithChildren =
