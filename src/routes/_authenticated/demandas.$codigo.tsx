@@ -61,6 +61,10 @@ function DemandaDetalhe() {
   const { data: demanda, isLoading, error } = useDemanda(codigo);
   const updateMutation = useUpdateDemanda();
 
+  useDocumentTitle(
+    demanda ? `${demanda.codigo ?? codigo} · ${demanda.titulo}` : codigo,
+  );
+
   if (isLoading) return <DetalheSkeleton />;
   if (error) {
     return (
