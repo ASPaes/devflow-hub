@@ -4,11 +4,23 @@ interface PostgrestLikeError {
   details?: string;
 }
 
-export function translateSupabaseError(err: unknown): string {
+export type EntityName = "produto" | "modulo" | "area" | "usuario";
+
+export function translateSupabaseError(
+  err: unknown,
+  entity?: EntityName,
+): string {
   const e = err as PostgrestLikeError;
   const code = e?.code;
 
-  if (code === "23505") return "Já existe um registro com esse nome";
+  if (code === "23505") {
+    if (entity === "modulo")
+      return "Já existe um módulo com esse nome neste produto";
+    if (entity === "produto") return "Já existe um produto com esse nome";
+    if (entity === "area") return "Já existe uma área com esse nome";
+    if (entity === "usuario") return "Já existe um usuário com esses dados";
+    return "Registro duplicado";
+  }
   if (code === "23503")
     return "Este registro está em uso e não pode ser removido. Considere desativá-lo.";
   if (code === "23502") return "Campo obrigatório não preenchido";
