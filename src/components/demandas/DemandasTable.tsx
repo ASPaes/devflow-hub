@@ -132,12 +132,10 @@ function DemandaRow({ row, onClick }: DemandaRowProps) {
       </td>
       <td className="px-4 py-3 align-middle">
         <span
-          className="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-semibold"
-          style={{
-            color: `var(--color-prioridade-${prioridade})`,
-            backgroundColor: `color-mix(in oklab, var(--color-prioridade-${prioridade}) 12%, transparent)`,
-            borderColor: `color-mix(in oklab, var(--color-prioridade-${prioridade}) 30%, transparent)`,
-          }}
+          className={cn(
+            "inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-semibold",
+            PRIORIDADE_BADGE_STYLES[prioridade as 1 | 2 | 3 | 4 | 5],
+          )}
           title={PRIORIDADE_LABEL_CURTA[prioridade]}
         >
           {prioridade}
@@ -145,12 +143,10 @@ function DemandaRow({ row, onClick }: DemandaRowProps) {
       </td>
       <td className="px-4 py-3 align-middle">
         <span
-          className="inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium"
-          style={{
-            color: `var(--color-status-${status})`,
-            backgroundColor: `color-mix(in oklab, var(--color-status-${status}) 15%, transparent)`,
-            borderColor: `color-mix(in oklab, var(--color-status-${status}) 30%, transparent)`,
-          }}
+          className={cn(
+            "inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium",
+            STATUS_BADGE_STYLES[status],
+          )}
         >
           {STATUS_DEMANDA_LABEL[status]}
         </span>
