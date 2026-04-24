@@ -223,11 +223,16 @@ function UsuariosPage() {
 
   const renderRowActions = (row: UsuarioAdmin) => {
     const isSelf = row.id === meuId;
-    const isLastAdmin = isLastActiveAdmin(lista, row);
-    const deactivateDisabled = isLastAdmin || isSelf;
+    const isLastAdminFlag = isLastActiveAdmin(lista, row);
+    const deactivateDisabled = isLastAdminFlag || isSelf;
     const deactivateReason = isSelf
       ? "Você não pode desativar sua própria conta"
       : "Não é possível desativar o último administrador ativo";
+    const showResend = !row.last_sign_in_at && !isSelf;
+    const deleteDisabled = isSelf || isLastAdminFlag;
+    const deleteReason = isSelf
+      ? "Você não pode excluir sua própria conta"
+      : "Último administrador — não pode ser excluído";
 
     return (
       <DropdownMenu>
@@ -242,6 +247,15 @@ function UsuariosPage() {
             <Pencil className="mr-2 h-4 w-4" />
             Editar
           </DropdownMenuItem>
+          {showResend && (
+            <DropdownMenuItem
+              onClick={() => resendMutation.mutate(row.id)}
+              disabled={resendMutation.isPending}
+            >
+              <Mail className="mr-2 h-4 w-4" />
+              Reenviar convite
+            </DropdownMenuItem>
+          )}
           <DropdownMenuSeparator />
           {row.ativo ? (
             <DisabledTooltipItem
@@ -258,6 +272,14 @@ function UsuariosPage() {
               Reativar
             </DropdownMenuItem>
           )}
+          <DisabledTooltipItem
+            disabled={deleteDisabled}
+            reason={deleteReason}
+            onSelect={() => setDeleteTarget(row)}
+            icon={<Trash2 className="mr-2 h-4 w-4" />}
+            label="Excluir usuário"
+            destructive
+          />
         </DropdownMenuContent>
       </DropdownMenu>
     );
