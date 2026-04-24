@@ -106,9 +106,13 @@ function UsuariosPage() {
   const { data: perfis } = usePerfisAcesso();
   const updateMutation = useUpdateUsuario();
   const inviteMutation = useInviteUsuario();
+  const resendMutation = useResendInvite();
+  const deleteMutation = useDeleteUsuario();
 
   const [editTarget, setEditTarget] = React.useState<UsuarioAdmin | null>(null);
   const [confirmDeactivate, setConfirmDeactivate] =
+    React.useState<UsuarioAdmin | null>(null);
+  const [deleteTarget, setDeleteTarget] =
     React.useState<UsuarioAdmin | null>(null);
   const [inviteOpen, setInviteOpen] = React.useState(false);
 
