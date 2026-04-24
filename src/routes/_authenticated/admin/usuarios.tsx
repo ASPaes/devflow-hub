@@ -84,20 +84,9 @@ const inviteSchema = z.object({
 });
 type InviteValues = z.infer<typeof inviteSchema>;
 
-function isAdmin(perms: AppPermissao[]) {
-  return (
-    perms.includes("gerenciar_usuarios") &&
-    perms.includes("gerenciar_perfis_acesso")
-  );
-}
-
-function isLastActiveAdmin(usuarios: UsuarioAdmin[], candidato: UsuarioAdmin) {
-  if (!isAdmin(candidato.permissoes) || !candidato.ativo) return false;
-  const ativosAdmin = usuarios.filter(
-    (u) => isAdmin(u.permissoes) && u.ativo,
-  );
-  return ativosAdmin.length === 1 && ativosAdmin[0].id === candidato.id;
-}
+// Local aliases — use shared helpers from "@/lib/permissions"
+const isAdmin = isAdminPerfil;
+const isLastActiveAdmin = isLastAdmin;
 
 function UsuariosPage() {
   const { user } = useAuth();
