@@ -182,8 +182,12 @@ function DemandaDetalhe() {
             </Card>
           )}
 
-          {/* Comentários */}
-          <ComentariosSecao demandaId={demanda.id} />
+          {/* Tabs: Comentários | Histórico | Vínculos */}
+          <DetalheTabs
+            demandaId={demanda.id}
+            podeAdicionarVinculo={canEditAny || canEditOwnTriagem}
+            podeRemoverVinculo={canEditAny}
+          />
         </div>
 
         <MetadataSidebar
