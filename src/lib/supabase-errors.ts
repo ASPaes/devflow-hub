@@ -4,7 +4,12 @@ interface PostgrestLikeError {
   details?: string;
 }
 
-export type EntityName = "modulo" | "submodulo" | "area" | "usuario";
+export type EntityName =
+  | "modulo"
+  | "submodulo"
+  | "area"
+  | "usuario"
+  | "perfil_acesso";
 
 export function translateSupabaseError(
   err: unknown,
@@ -14,10 +19,12 @@ export function translateSupabaseError(
   const code = e?.code;
   const rawMessage = e?.message;
 
-  // Mensagens de RAISE EXCEPTION do Postgres vêm em PT — mostrar direto
-  if (rawMessage && rawMessage.includes("último dev_gestor")) {
+  // Mensagens de RAISE EXCEPTION do Postgres (P0001) vêm em PT — mostrar direto
+  if (code === "P0001" && rawMessage) return rawMessage;
+  if (rawMessage && rawMessage.includes("último dev_gestor")) return rawMessage;
+  if (rawMessage && rawMessage.includes("último administrador"))
     return rawMessage;
-  }
+  if (rawMessage && rawMessage.includes("perfil de sistema")) return rawMessage;
 
   if (code === "23505") {
     if (entity === "modulo") return "Já existe um módulo com esse nome";
@@ -25,10 +32,15 @@ export function translateSupabaseError(
       return "Já existe um submódulo com esse nome neste módulo";
     if (entity === "area") return "Já existe uma área com esse nome";
     if (entity === "usuario") return "Já existe um usuário com esses dados";
+    if (entity === "perfil_acesso")
+      return "Já existe um perfil com esse nome";
     return "Registro duplicado";
   }
-  if (code === "23503")
+  if (code === "23503") {
+    if (entity === "perfil_acesso")
+      return "Este perfil está em uso por um ou mais usuários. Altere o perfil desses usuários antes de excluir.";
     return "Este registro está em uso e não pode ser removido. Considere desativá-lo.";
+  }
   if (code === "23502") return "Campo obrigatório não preenchido";
   if (code === "42501" || code === "PGRST301")
     return "Você não tem permissão para esta ação";
