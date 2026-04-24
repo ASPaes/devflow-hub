@@ -1,5 +1,10 @@
 import * as React from "react";
-import { useForm, type DefaultValues, type UseFormReturn } from "react-hook-form";
+import {
+  useForm,
+  type DefaultValues,
+  type Resolver,
+  type UseFormReturn,
+} from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { ZodType } from "zod";
 import { Loader2 } from "lucide-react";
@@ -43,9 +48,10 @@ export function ModalForm<T extends Record<string, unknown>>({
   children,
 }: ModalFormProps<T>) {
   const form = useForm<T>({
-    resolver: zodResolver(schema),
+    // Cast to bypass cross-version zod/resolvers generic clash
+    resolver: zodResolver(schema as unknown as ZodType<T>) as unknown as Resolver<T>,
     defaultValues: defaultValues as DefaultValues<T>,
-  });
+  }) as UseFormReturn<T>;
 
   const [submitting, setSubmitting] = React.useState(false);
 
