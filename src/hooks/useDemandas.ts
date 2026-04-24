@@ -245,3 +245,93 @@ export function useDemandasLista(
     staleTime: 30_000,
   });
 }
+
+export function useDemanda(codigo: string) {
+  return useQuery<DemandaCompleta | null>({
+    queryKey: ["demanda", codigo],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("demandas")
+        .select(
+          `*,
+          modulo:modulos(id, nome, cor),
+          submodulo:submodulos(id, nome),
+          area:areas(id, nome),
+          solicitante:profiles!demandas_solicitante_id_fkey(id, nome, avatar_url),
+          responsavel:profiles!demandas_responsavel_id_fkey(id, nome, avatar_url)`,
+        )
+        .eq("codigo", codigo)
+        .maybeSingle();
+      if (error) throw error;
+      return (data as unknown as DemandaCompleta | null) ?? null;
+    },
+    staleTime: 30_000,
+  });
+}
+
+export function useDemandaAnexos(demandaId: string | undefined) {
+  return useQuery<DemandaAnexo[]>({
+    queryKey: ["demanda-anexos", demandaId],
+    queryFn: async () => {
+      if (!demandaId) return [];
+      const { data, error } = await supabase
+        .from("demanda_anexos")
+        .select("*, autor:profiles(id, nome, avatar_url)")
+        .eq("demanda_id", demandaId)
+        .order("created_at", { ascending: true });
+      if (error) throw error;
+      return (data ?? []) as unknown as DemandaAnexo[];
+    },
+    enabled: !!demandaId,
+    staleTime: 30_000,
+  });
+}
+
+export function useUpdateDemanda() {
+  const qc = useQueryClient();
+  return useMutation<Demanda, unknown, { id: string; patch: UpdateDemandaPatch }>({
+    mutationFn: async ({ id, patch }) => {
+      const { data, error } = await supabase
+        .from("demandas")
+        .update(patch)
+        .eq("id", id)
+        .select()
+        .single();
+      if (error) throw error;
+      return data as Demanda;
+    },
+    onSuccess: (data) => {
+      if (data.codigo) {
+        qc.invalidateQueries({ queryKey: ["demanda", data.codigo] });
+      }
+      qc.invalidateQueries({ queryKey: ["demandas"] });
+    },
+    onError: (err) => {
+      toast.error(translateSupabaseError(err, "demanda"));
+    },
+  });
+}
+
+// Status workflow ---------------------------------------------------
+
+export const PROXIMOS_STATUS: Record<StatusDemanda, StatusDemanda[]> = {
+  triagem: ["analise", "cancelada"],
+  analise: ["desenvolvimento", "triagem", "cancelada"],
+  desenvolvimento: ["teste", "analise", "cancelada"],
+  teste: ["entregue", "desenvolvimento", "cancelada"],
+  entregue: [],
+  reaberta: ["desenvolvimento", "teste", "cancelada"],
+  encerrada: [],
+  cancelada: ["triagem"],
+};
+
+export const TRANSICAO_LABEL: Record<StatusDemanda, string> = {
+  triagem: "Voltar pra triagem",
+  analise: "Iniciar análise",
+  desenvolvimento: "Enviar pra desenvolvimento",
+  teste: "Enviar pra teste",
+  entregue: "Marcar como entregue",
+  reaberta: "Reabrir",
+  encerrada: "Encerrar",
+  cancelada: "Cancelar",
+};
