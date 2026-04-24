@@ -106,7 +106,7 @@ export function Sidebar() {
               <div className="mt-4 mb-2 px-3 text-xs uppercase tracking-wider text-muted-foreground">
                 Admin
               </div>
-              <NavItem icon={Package} label="Produtos" disabled />
+              <NavItem to="/admin/produtos" icon={Package} label="Produtos" />
               <NavItem icon={Layers} label="Módulos" disabled />
               <NavItem icon={Building2} label="Áreas" disabled />
               <NavItem icon={Users} label="Usuários" disabled />
