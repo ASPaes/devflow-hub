@@ -119,29 +119,31 @@ export function FiltrosPanel({
       </div>
 
       {/* Status (multi) */}
-      <MultiDropdown
-        label="Status"
-        count={value.status.length}
-        renderItems={() =>
-          STATUS_DEMANDA_VALUES.map((s) => (
-            <DropdownMenuCheckboxItem
-              key={s}
-              checked={value.status.includes(s)}
-              onCheckedChange={() =>
-                onChange({ status: toggleArray(value.status, s) })
-              }
-              onSelect={(e) => e.preventDefault()}
-            >
-              <span
-                className="mr-2 inline-block h-2 w-2 rounded-full"
-                style={{ backgroundColor: `var(--color-status-${s})` }}
-                aria-hidden
-              />
-              {STATUS_DEMANDA_LABEL[s]}
-            </DropdownMenuCheckboxItem>
-          ))
-        }
-      />
+      {!hideStatus && (
+        <MultiDropdown
+          label="Status"
+          count={value.status.length}
+          renderItems={() =>
+            STATUS_DEMANDA_VALUES.map((s) => (
+              <DropdownMenuCheckboxItem
+                key={s}
+                checked={value.status.includes(s)}
+                onCheckedChange={() =>
+                  onChange({ status: toggleArray(value.status, s) })
+                }
+                onSelect={(e) => e.preventDefault()}
+              >
+                <span
+                  className="mr-2 inline-block h-2 w-2 rounded-full"
+                  style={{ backgroundColor: `var(--color-status-${s})` }}
+                  aria-hidden
+                />
+                {STATUS_DEMANDA_LABEL[s]}
+              </DropdownMenuCheckboxItem>
+            ))
+          }
+        />
+      )}
 
       {/* Prioridade (multi) */}
       <MultiDropdown
