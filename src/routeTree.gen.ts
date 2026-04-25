@@ -23,6 +23,7 @@ import { Route as AuthenticatedDemandasNovaRouteImport } from './routes/_authent
 import { Route as AuthenticatedDemandasKanbanRouteImport } from './routes/_authenticated/demandas.kanban'
 import { Route as AuthenticatedDemandasCodigoRouteImport } from './routes/_authenticated/demandas.$codigo'
 import { Route as AuthenticatedAdminUsuariosRouteImport } from './routes/_authenticated/admin/usuarios'
+import { Route as AuthenticatedAdminTenantsRouteImport } from './routes/_authenticated/admin/tenants'
 import { Route as AuthenticatedAdminSubmodulosRouteImport } from './routes/_authenticated/admin/submodulos'
 import { Route as AuthenticatedAdminPerfisAcessoRouteImport } from './routes/_authenticated/admin/perfis-acesso'
 import { Route as AuthenticatedAdminModulosRouteImport } from './routes/_authenticated/admin/modulos'
@@ -102,6 +103,12 @@ const AuthenticatedAdminUsuariosRoute =
     path: '/usuarios',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminTenantsRoute =
+  AuthenticatedAdminTenantsRouteImport.update({
+    id: '/tenants',
+    path: '/tenants',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminSubmodulosRoute =
   AuthenticatedAdminSubmodulosRouteImport.update({
     id: '/submodulos',
@@ -139,6 +146,7 @@ export interface FileRoutesByFullPath {
   '/admin/modulos': typeof AuthenticatedAdminModulosRoute
   '/admin/perfis-acesso': typeof AuthenticatedAdminPerfisAcessoRoute
   '/admin/submodulos': typeof AuthenticatedAdminSubmodulosRoute
+  '/admin/tenants': typeof AuthenticatedAdminTenantsRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/demandas/$codigo': typeof AuthenticatedDemandasCodigoRoute
   '/demandas/kanban': typeof AuthenticatedDemandasKanbanRoute
@@ -158,6 +166,7 @@ export interface FileRoutesByTo {
   '/admin/modulos': typeof AuthenticatedAdminModulosRoute
   '/admin/perfis-acesso': typeof AuthenticatedAdminPerfisAcessoRoute
   '/admin/submodulos': typeof AuthenticatedAdminSubmodulosRoute
+  '/admin/tenants': typeof AuthenticatedAdminTenantsRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/demandas/$codigo': typeof AuthenticatedDemandasCodigoRoute
   '/demandas/kanban': typeof AuthenticatedDemandasKanbanRoute
@@ -179,6 +188,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/modulos': typeof AuthenticatedAdminModulosRoute
   '/_authenticated/admin/perfis-acesso': typeof AuthenticatedAdminPerfisAcessoRoute
   '/_authenticated/admin/submodulos': typeof AuthenticatedAdminSubmodulosRoute
+  '/_authenticated/admin/tenants': typeof AuthenticatedAdminTenantsRoute
   '/_authenticated/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/_authenticated/demandas/$codigo': typeof AuthenticatedDemandasCodigoRoute
   '/_authenticated/demandas/kanban': typeof AuthenticatedDemandasKanbanRoute
@@ -200,6 +210,7 @@ export interface FileRouteTypes {
     | '/admin/modulos'
     | '/admin/perfis-acesso'
     | '/admin/submodulos'
+    | '/admin/tenants'
     | '/admin/usuarios'
     | '/demandas/$codigo'
     | '/demandas/kanban'
@@ -219,6 +230,7 @@ export interface FileRouteTypes {
     | '/admin/modulos'
     | '/admin/perfis-acesso'
     | '/admin/submodulos'
+    | '/admin/tenants'
     | '/admin/usuarios'
     | '/demandas/$codigo'
     | '/demandas/kanban'
@@ -239,6 +251,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/modulos'
     | '/_authenticated/admin/perfis-acesso'
     | '/_authenticated/admin/submodulos'
+    | '/_authenticated/admin/tenants'
     | '/_authenticated/admin/usuarios'
     | '/_authenticated/demandas/$codigo'
     | '/_authenticated/demandas/kanban'
@@ -355,6 +368,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminUsuariosRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/tenants': {
+      id: '/_authenticated/admin/tenants'
+      path: '/tenants'
+      fullPath: '/admin/tenants'
+      preLoaderRoute: typeof AuthenticatedAdminTenantsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/submodulos': {
       id: '/_authenticated/admin/submodulos'
       path: '/submodulos'
@@ -391,6 +411,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminModulosRoute: typeof AuthenticatedAdminModulosRoute
   AuthenticatedAdminPerfisAcessoRoute: typeof AuthenticatedAdminPerfisAcessoRoute
   AuthenticatedAdminSubmodulosRoute: typeof AuthenticatedAdminSubmodulosRoute
+  AuthenticatedAdminTenantsRoute: typeof AuthenticatedAdminTenantsRoute
   AuthenticatedAdminUsuariosRoute: typeof AuthenticatedAdminUsuariosRoute
 }
 
@@ -399,6 +420,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminModulosRoute: AuthenticatedAdminModulosRoute,
   AuthenticatedAdminPerfisAcessoRoute: AuthenticatedAdminPerfisAcessoRoute,
   AuthenticatedAdminSubmodulosRoute: AuthenticatedAdminSubmodulosRoute,
+  AuthenticatedAdminTenantsRoute: AuthenticatedAdminTenantsRoute,
   AuthenticatedAdminUsuariosRoute: AuthenticatedAdminUsuariosRoute,
 }
 
