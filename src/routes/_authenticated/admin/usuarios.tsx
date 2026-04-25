@@ -61,6 +61,7 @@ import {
   type UsuarioAdmin,
 } from "@/hooks/useUsuarios";
 import { usePerfisAcesso } from "@/hooks/usePerfisAcesso";
+import { useTenants } from "@/hooks/useTenants";
 import type { AppPermissao } from "@/hooks/useProfile";
 import { isAdminPerfil, isLastAdmin } from "@/lib/permissions";
 import { formatRelativeSP } from "@/lib/format";
@@ -74,6 +75,7 @@ export const Route = createFileRoute("/_authenticated/admin/usuarios")({
 const editSchema = z.object({
   nome: z.string().trim().min(2, "Nome muito curto").max(80),
   perfil_acesso_id: z.string().uuid("Selecione um perfil de acesso"),
+  tenant_id: z.string().uuid("Selecione um tenant"),
   ativo: z.boolean(),
 });
 type EditValues = z.infer<typeof editSchema>;
@@ -82,6 +84,7 @@ const inviteSchema = z.object({
   email: z.string().email("Email inválido"),
   nome: z.string().trim().min(2).max(100),
   perfil_acesso_id: z.string().uuid("Selecione um perfil de acesso"),
+  tenant_id: z.string().uuid("Selecione um tenant"),
 });
 type InviteValues = z.infer<typeof inviteSchema>;
 
@@ -94,6 +97,7 @@ function UsuariosPage() {
   const meuId = user?.id ?? null;
   const { data: usuarios, isLoading } = useUsuarios();
   const { data: perfis } = usePerfisAcesso();
+  const { data: tenants } = useTenants();
   const updateMutation = useUpdateUsuario();
   const inviteMutation = useInviteUsuario();
   const resendMutation = useResendInvite();
@@ -111,14 +115,19 @@ function UsuariosPage() {
     () => (perfis ?? []).filter((p) => p.ativo),
     [perfis],
   );
+  const tenantsAtivos = React.useMemo(
+    () => (tenants ?? []).filter((t) => t.ativo),
+    [tenants],
+  );
 
   const editValues = React.useMemo<EditValues>(() => {
     if (!editTarget) {
-      return { nome: "", perfil_acesso_id: "", ativo: true };
+      return { nome: "", perfil_acesso_id: "", tenant_id: "", ativo: true };
     }
     return {
       nome: editTarget.nome,
       perfil_acesso_id: editTarget.perfil_acesso_id,
+      tenant_id: editTarget.tenant_id,
       ativo: editTarget.ativo,
     };
   }, [editTarget]);
@@ -130,6 +139,7 @@ function UsuariosPage() {
       patch: {
         nome: values.nome,
         perfil_acesso_id: values.perfil_acesso_id,
+        tenant_id: values.tenant_id,
         ativo: values.ativo,
       },
     });
