@@ -198,6 +198,15 @@ function UsuariosPage() {
         ),
     },
     {
+      key: "tenant",
+      header: "Tenant",
+      render: (row) => (
+        <span className="text-sm text-muted-foreground">
+          {row.tenant_nome ?? "—"}
+        </span>
+      ),
+    },
+    {
       key: "ativo",
       header: "Status",
       render: (row) => {
