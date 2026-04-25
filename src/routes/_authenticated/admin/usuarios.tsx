@@ -511,6 +511,7 @@ interface EditUserFieldsProps {
     nome: string;
     permissoes: AppPermissao[];
   }>;
+  tenantsAtivos: Array<{ id: string; nome: string }>;
 }
 
 function EditUserFields({
@@ -519,6 +520,7 @@ function EditUserFields({
   meuId,
   lista,
   perfisAtivos,
+  tenantsAtivos,
 }: EditUserFieldsProps) {
   const isSelf = target.id === meuId;
   const isLastAdmin = isLastActiveAdmin(lista, target);
@@ -600,6 +602,30 @@ function EditUserFields({
         }}
       />
 
+      <FormField
+        control={form.control}
+        name="tenant_id"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Tenant</FormLabel>
+            <Select value={field.value} onValueChange={field.onChange}>
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione um tenant" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {tenantsAtivos.map((t) => (
+                  <SelectItem key={t.id} value={t.id}>
+                    {t.nome}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
       <FormField
         control={form.control}
         name="ativo"
