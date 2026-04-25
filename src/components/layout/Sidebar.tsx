@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
+  Building,
   Building2,
   Columns3,
   Inbox,
@@ -98,6 +99,7 @@ export function Sidebar() {
     "gerenciar_areas",
     "gerenciar_usuarios",
     "gerenciar_perfis_acesso",
+    "gerenciar_tenants",
   );
 
   return (
@@ -143,6 +145,9 @@ export function Sidebar() {
                   icon={ShieldCheck}
                   label="Perfis de Acesso"
                 />
+              )}
+              {temPermissao("gerenciar_tenants") && (
+                <NavItem to="/admin/tenants" icon={Building} label="Tenants" />
               )}
               <NavItem to="/perfil" icon={UserCircle} label="Perfil" />
             </>

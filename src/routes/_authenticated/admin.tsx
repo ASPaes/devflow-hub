@@ -9,6 +9,7 @@ const PERMISSOES_ADMIN: AppPermissao[] = [
   "gerenciar_areas",
   "gerenciar_usuarios",
   "gerenciar_perfis_acesso",
+  "gerenciar_tenants",
 ];
 
 export const Route = createFileRoute("/_authenticated/admin")({
