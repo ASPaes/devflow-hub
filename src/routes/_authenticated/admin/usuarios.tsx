@@ -363,6 +363,7 @@ function UsuariosPage() {
                 meuId={meuId}
                 lista={lista}
                 perfisAtivos={perfisAtivos}
+                tenantsAtivos={tenantsAtivos}
               />
             )}
           </ModalForm>
@@ -374,7 +375,7 @@ function UsuariosPage() {
           title="Convidar usuário"
           description="O usuário receberá um e-mail com link pra definir a senha."
           schema={inviteSchema}
-          defaultValues={{ email: "", nome: "", perfil_acesso_id: "" }}
+          defaultValues={{ email: "", nome: "", perfil_acesso_id: "", tenant_id: "" }}
           onSubmit={handleInvite}
           submitLabel="Enviar convite"
         >
@@ -430,6 +431,33 @@ function UsuariosPage() {
                         {perfisAtivos.map((p) => (
                           <SelectItem key={p.id} value={p.id}>
                             {p.nome}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="tenant_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tenant</FormLabel>
+                    <Select
+                      value={field.value}
+                      onValueChange={field.onChange}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione um tenant" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {tenantsAtivos.map((t) => (
+                          <SelectItem key={t.id} value={t.id}>
+                            {t.nome}
                           </SelectItem>
                         ))}
                       </SelectContent>
