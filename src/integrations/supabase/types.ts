@@ -359,6 +359,7 @@ export type Database = {
           solicitante_id: string
           status: Database["public"]["Enums"]["status_demanda"]
           submodulo_id: string
+          tenant_id: string
           tipo: Database["public"]["Enums"]["tipo_demanda"]
           titulo: string
           updated_at: string
@@ -380,6 +381,7 @@ export type Database = {
           solicitante_id: string
           status?: Database["public"]["Enums"]["status_demanda"]
           submodulo_id: string
+          tenant_id: string
           tipo: Database["public"]["Enums"]["tipo_demanda"]
           titulo: string
           updated_at?: string
@@ -401,6 +403,7 @@ export type Database = {
           solicitante_id?: string
           status?: Database["public"]["Enums"]["status_demanda"]
           submodulo_id?: string
+          tenant_id?: string
           tipo?: Database["public"]["Enums"]["tipo_demanda"]
           titulo?: string
           updated_at?: string
@@ -439,6 +442,13 @@ export type Database = {
             columns: ["submodulo_id"]
             isOneToOne: false
             referencedRelation: "submodulos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demandas_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
@@ -517,6 +527,7 @@ export type Database = {
           id: string
           nome: string
           perfil_acesso_id: string
+          tenant_id: string
           updated_at: string
         }
         Insert: {
@@ -526,6 +537,7 @@ export type Database = {
           id: string
           nome: string
           perfil_acesso_id: string
+          tenant_id: string
           updated_at?: string
         }
         Update: {
@@ -535,6 +547,7 @@ export type Database = {
           id?: string
           nome?: string
           perfil_acesso_id?: string
+          tenant_id?: string
           updated_at?: string
         }
         Relationships: [
@@ -543,6 +556,13 @@ export type Database = {
             columns: ["perfil_acesso_id"]
             isOneToOne: false
             referencedRelation: "perfis_acesso"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
@@ -585,6 +605,36 @@ export type Database = {
           },
         ]
       }
+      tenants: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          descricao: string | null
+          doctorsaas_tenant_id: string | null
+          id: string
+          nome: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          descricao?: string | null
+          doctorsaas_tenant_id?: string | null
+          id?: string
+          nome: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          descricao?: string | null
+          doctorsaas_tenant_id?: string | null
+          id?: string
+          nome?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       cobranca_outbox_stats: {
@@ -623,6 +673,8 @@ export type Database = {
           status: Database["public"]["Enums"]["status_demanda"] | null
           submodulo_id: string | null
           submodulo_nome: string | null
+          tenant_id: string | null
+          tenant_nome: string | null
           tipo: Database["public"]["Enums"]["tipo_demanda"] | null
           titulo: string | null
           total_anexos: number | null
@@ -664,6 +716,13 @@ export type Database = {
             columns: ["submodulo_id"]
             isOneToOne: false
             referencedRelation: "submodulos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demandas_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
@@ -723,6 +782,8 @@ export type Database = {
           perfil_acesso_id: string
           perfil_acesso_nome: string
           permissoes: Database["public"]["Enums"]["app_permissao"][]
+          tenant_id: string
+          tenant_nome: string
           updated_at: string
         }[]
       }
@@ -757,6 +818,7 @@ export type Database = {
           solicitante_id: string
           status: Database["public"]["Enums"]["status_demanda"]
           submodulo_id: string
+          tenant_id: string
           tipo: Database["public"]["Enums"]["tipo_demanda"]
           titulo: string
           updated_at: string
@@ -789,6 +851,7 @@ export type Database = {
         | "gerenciar_usuarios"
         | "gerenciar_perfis_acesso"
         | "ver_dashboard_metricas"
+        | "gerenciar_tenants"
       status_demanda:
         | "triagem"
         | "analise"
@@ -943,6 +1006,7 @@ export const Constants = {
         "gerenciar_usuarios",
         "gerenciar_perfis_acesso",
         "ver_dashboard_metricas",
+        "gerenciar_tenants",
       ],
       status_demanda: [
         "triagem",
