@@ -1,3 +1,4 @@
+// sso-login v1 — SSO integration DoctorSaaS → DoctorDev
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.85.0';
 
 const corsHeaders = {
