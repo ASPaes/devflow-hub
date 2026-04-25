@@ -155,7 +155,7 @@ export function useCreateDemanda() {
           submodulo_id: input.submodulo_id,
           area_id: input.area_id,
           solicitante_id: userId,
-        })
+        } as never)
         .select()
         .single();
       if (error) throw error;
