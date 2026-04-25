@@ -76,6 +76,11 @@ const GROUPS: Group[] = [
         label: "Gerenciar perfis de acesso",
         description: "Criar e editar perfis de permissão",
       },
+      {
+        key: "gerenciar_tenants",
+        label: "Gerenciar tenants",
+        description: "CRUD de empresas/clientes do devflow-hub",
+      },
     ],
   },
   {
