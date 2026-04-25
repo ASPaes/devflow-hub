@@ -29,6 +29,7 @@ const PERMISSAO_VALUES = [
   "gerenciar_usuarios",
   "gerenciar_perfis_acesso",
   "ver_dashboard_metricas",
+  "gerenciar_tenants",
 ] as const;
 
 export const perfilAcessoSchema = z.object({
