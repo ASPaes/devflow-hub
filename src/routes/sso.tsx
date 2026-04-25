@@ -39,7 +39,7 @@ function SSOPage() {
         if (!magicLink) {
           throw new Error("Resposta sem magic_link");
         }
-        window.location.replace(magicLink);
+        window.location.href = magicLink;
       } catch (err) {
         console.error("[sso] erro:", err);
         setError("Acesso inválido ou expirado");
