@@ -13,7 +13,8 @@ export type EntityName =
   | "demanda"
   | "comentario"
   | "vinculo"
-  | "anexo";
+  | "anexo"
+  | "tenant";
 
 export function translateSupabaseError(
   err: unknown,
@@ -39,6 +40,13 @@ export function translateSupabaseError(
     if (entity === "perfil_acesso")
       return "Já existe um perfil com esse nome";
     if (entity === "vinculo") return "Este vínculo já existe";
+    if (entity === "tenant") {
+      const m = (rawMessage ?? "").toLowerCase();
+      if (m.includes("doctorsaas_tenant_id"))
+        return "Este DoctorSaas Tenant ID já está vinculado a outro tenant";
+      if (m.includes("nome")) return "Já existe um tenant com esse nome";
+      return "Já existe um tenant com esses dados";
+    }
     return "Registro duplicado";
   }
   if (code === "23514" && entity === "vinculo") {
@@ -49,6 +57,8 @@ export function translateSupabaseError(
       return "Este perfil está em uso por um ou mais usuários. Altere o perfil desses usuários antes de excluir.";
     if (entity === "demanda")
       return "Um dos campos referencia um item que não existe. Recarregue e tente novamente.";
+    if (entity === "tenant")
+      return "Este tenant tem usuários ou demandas vinculados. Mude eles para outro tenant antes de excluir.";
     return "Este registro está em uso e não pode ser removido. Considere desativá-lo.";
   }
   if (code === "23502") return "Campo obrigatório não preenchido";
