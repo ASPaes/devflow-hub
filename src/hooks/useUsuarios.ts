@@ -13,6 +13,8 @@ export type UsuarioAdmin = {
   perfil_acesso_id: string;
   perfil_acesso_nome: string;
   permissoes: AppPermissao[];
+  tenant_id: string;
+  tenant_nome: string | null;
   ativo: boolean;
   created_at: string;
   updated_at: string;
@@ -37,6 +39,7 @@ export type UsuarioPatch = Partial<{
   nome: string;
   ativo: boolean;
   perfil_acesso_id: string;
+  tenant_id: string;
 }>;
 
 export function useUpdateUsuario() {
@@ -106,6 +109,7 @@ export function useInviteUsuario() {
       email: string;
       nome: string;
       perfil_acesso_id: string;
+      tenant_id: string;
     }) => {
       const { data, error } = await supabase.functions.invoke("invite-user", {
         body: input,
