@@ -45,10 +45,11 @@ Deno.serve(async (req) => {
     const email = body?.email as string | undefined;
     const nome = body?.nome as string | undefined;
     const perfil_acesso_id = body?.perfil_acesso_id as string | undefined;
+    const tenant_id = body?.tenant_id as string | undefined;
 
-    if (!email || !nome || !perfil_acesso_id) {
+    if (!email || !nome || !perfil_acesso_id || !tenant_id) {
       return json(
-        { error: "email, nome e perfil_acesso_id são obrigatórios" },
+        { error: "email, nome, perfil_acesso_id e tenant_id são obrigatórios" },
         400,
       );
     }
@@ -57,7 +58,7 @@ Deno.serve(async (req) => {
 
     const { data: inviteData, error: inviteErr } =
       await adminClient.auth.admin.inviteUserByEmail(email, {
-        data: { nome },
+        data: { nome, tenant_id },
       });
     if (inviteErr) return json({ error: inviteErr.message }, 400);
 
@@ -66,11 +67,11 @@ Deno.serve(async (req) => {
       return json({ error: "Convite criado mas sem userId" }, 500);
     }
 
-    // O trigger handle_new_user já criou o profile como 'Solicitante'.
+    // O trigger handle_new_user já criou o profile com tenant_id do metadata.
     // Atualiza pra o perfil escolhido.
     const { error: updateErr } = await adminClient
       .from("profiles")
-      .update({ perfil_acesso_id, nome })
+      .update({ perfil_acesso_id, nome, tenant_id })
       .eq("id", userId);
     if (updateErr) return json({ error: updateErr.message }, 400);
 

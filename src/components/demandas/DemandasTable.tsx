@@ -58,6 +58,7 @@ export function DemandasTable({
             <th className="px-4 py-2.5 font-medium">Tipo</th>
             <th className="px-4 py-2.5 font-medium">Prior.</th>
             <th className="px-4 py-2.5 font-medium">Status</th>
+            <th className="px-4 py-2.5 font-medium">Tenant</th>
             <th className="px-4 py-2.5 font-medium">Responsável</th>
             <th className="px-4 py-2.5 font-medium">Atividade</th>
             <th className="px-4 py-2.5 font-medium">Criada</th>
@@ -149,6 +150,11 @@ function DemandaRow({ row, onClick }: DemandaRowProps) {
           )}
         >
           {STATUS_DEMANDA_LABEL[status]}
+        </span>
+      </td>
+      <td className="px-4 py-3 align-middle">
+        <span className="text-xs text-muted-foreground">
+          {row.tenant_nome ?? "—"}
         </span>
       </td>
       <td className="px-4 py-3 align-middle">

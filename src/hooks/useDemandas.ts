@@ -21,6 +21,7 @@ export type DemandaCompleta = Demanda & {
     "id" | "nome"
   > | null;
   area: Pick<Database["public"]["Tables"]["areas"]["Row"], "id" | "nome"> | null;
+  tenant: Pick<Database["public"]["Tables"]["tenants"]["Row"], "id" | "nome"> | null;
   solicitante: Pick<
     Database["public"]["Tables"]["profiles"]["Row"],
     "id" | "nome" | "avatar_url"
@@ -258,6 +259,7 @@ export function useDemanda(codigo: string) {
           modulo:modulos(id, nome, cor),
           submodulo:submodulos(id, nome),
           area:areas(id, nome),
+          tenant:tenants(id, nome),
           solicitante:profiles!demandas_solicitante_id_fkey(id, nome, avatar_url),
           responsavel:profiles!demandas_responsavel_id_fkey(id, nome, avatar_url)`,
         )

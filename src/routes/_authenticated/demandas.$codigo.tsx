@@ -141,7 +141,8 @@ function DemandaDetalhe() {
             />
 
             <p className="text-sm text-muted-foreground">
-              Aberto por <SolicitanteSummary solicitante={demanda.solicitante} />{" "}
+              Aberto por <SolicitanteSummary solicitante={demanda.solicitante} />
+              {demanda.tenant?.nome ? ` (${demanda.tenant.nome})` : ""}{" "}
               {formatRelativeSP(demanda.created_at)}
             </p>
           </div>
