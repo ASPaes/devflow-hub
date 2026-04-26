@@ -1,42 +1,29 @@
 import * as React from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
-import { Inbox, Plus, SearchX } from "lucide-react";
+import { Inbox, Plus, Search, SearchX, X } from "lucide-react";
 import { z } from "zod";
 
 import { PageHeader } from "@/components/common/PageHeader";
 import { EmptyState } from "@/components/common/EmptyState";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useProfile } from "@/hooks/useProfile";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import {
-  STATUS_DEMANDA_VALUES,
-  TIPO_DEMANDA_VALUES,
   useDemandasLista,
   type FiltrosDemanda,
+  type StatusDemanda,
+  type TipoDemanda,
 } from "@/hooks/useDemandas";
-import {
-  FiltrosPanel,
-  RESPONSAVEL_SEM,
-  type FiltrosState,
-} from "@/components/demandas/FiltrosPanel";
 import { DemandasTable } from "@/components/demandas/DemandasTable";
 import { ViewToggle } from "@/components/demandas/ViewToggle";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
+import { useDashboardFilters } from "@/contexts/DashboardFiltersContext";
+import { PeriodoPicker } from "@/components/dashboard/PeriodoPicker";
+import { DashboardFilterBar } from "@/components/dashboard/DashboardFilterBar";
 
 const demandasSearchSchema = z.object({
-  status: fallback(z.array(z.enum(STATUS_DEMANDA_VALUES)), []).default([]),
-  prioridade: fallback(
-    z.array(z.coerce.number().int().min(1).max(5)),
-    [],
-  ).default([]),
-  tipo: fallback(z.array(z.enum(TIPO_DEMANDA_VALUES)), []).default([]),
-  modulo_id: fallback(z.string().uuid().optional(), undefined),
-  area_id: fallback(z.string().uuid().optional(), undefined),
-  responsavel_id: fallback(
-    z.union([z.string().uuid(), z.literal(RESPONSAVEL_SEM)]).optional(),
-    undefined,
-  ),
   busca: fallback(z.string(), "").default(""),
 });
 
@@ -51,77 +38,90 @@ function DemandasListagem() {
   const { temPermissao } = useProfile();
   useDocumentTitle("Demandas");
 
-  const filtrosState: FiltrosState = React.useMemo(
-    () => ({
-      busca: search.busca,
-      status: search.status,
-      prioridade: search.prioridade,
-      tipo: search.tipo,
-      modulo_id: search.modulo_id,
-      area_id: search.area_id,
-      responsavel_id: search.responsavel_id,
-    }),
-    [search],
-  );
+  const {
+    periodo,
+    tipoData,
+    apenasSemData,
+    filtros: filtrosCompartilhados,
+    setPeriodo,
+    setTipoData,
+    setApenasSemData,
+    setFiltros: setFiltrosCompartilhados,
+  } = useDashboardFilters();
 
-  const buscaDebounced = useDebouncedValue(filtrosState.busca, 300);
+  const busca = search.busca;
+  const buscaDebounced = useDebouncedValue(busca, 300);
 
   const filtrosQuery: FiltrosDemanda = React.useMemo(() => {
     const f: FiltrosDemanda = {};
-    if (filtrosState.status.length) f.status = filtrosState.status;
-    if (filtrosState.prioridade.length) f.prioridade = filtrosState.prioridade;
-    if (filtrosState.tipo.length) f.tipo = filtrosState.tipo;
-    if (filtrosState.modulo_id) f.modulo_id = filtrosState.modulo_id;
-    if (filtrosState.area_id) f.area_id = filtrosState.area_id;
-    if (filtrosState.responsavel_id === RESPONSAVEL_SEM) {
-      f.responsavel_id = null;
-    } else if (filtrosState.responsavel_id) {
-      f.responsavel_id = filtrosState.responsavel_id;
+
+    if (filtrosCompartilhados.status.length > 0) {
+      f.status = filtrosCompartilhados.status as StatusDemanda[];
     }
+    if (filtrosCompartilhados.prioridade.length > 0) {
+      f.prioridade = filtrosCompartilhados.prioridade;
+    }
+    if (filtrosCompartilhados.tipo.length > 0) {
+      f.tipo = filtrosCompartilhados.tipo as TipoDemanda[];
+    }
+    if (filtrosCompartilhados.modulo_id.length > 0) {
+      f.modulo_ids = filtrosCompartilhados.modulo_id;
+    }
+    if (filtrosCompartilhados.area_id.length > 0) {
+      f.area_ids = filtrosCompartilhados.area_id;
+    }
+    if (filtrosCompartilhados.tenant_id.length > 0) {
+      f.tenant_ids = filtrosCompartilhados.tenant_id;
+    }
+    if (filtrosCompartilhados.responsavel_id.length > 0) {
+      f.responsavel_ids = filtrosCompartilhados.responsavel_id;
+    }
+
+    f.periodo = periodo;
+    f.tipoData = tipoData;
+    f.apenasSemData = apenasSemData;
+
     if (buscaDebounced.trim()) f.busca = buscaDebounced.trim();
     return f;
-  }, [filtrosState, buscaDebounced]);
+  }, [filtrosCompartilhados, periodo, tipoData, apenasSemData, buscaDebounced]);
 
   const { data: rows = [], isLoading } = useDemandasLista(filtrosQuery);
 
-  const setPatch = React.useCallback(
-    (patch: Partial<FiltrosState>) => {
+  const setBusca = React.useCallback(
+    (valor: string) => {
       navigate({
-        search: (old) => {
-          const next = { ...old, ...patch };
-          // Normaliza vazios para limpar a URL
-          if (next.busca === "") next.busca = "";
-          return next;
-        },
+        search: { busca: valor },
         replace: true,
       });
     },
     [navigate],
   );
 
-  const limpar = React.useCallback(() => {
-    navigate({
-      search: {
-        busca: "",
-        status: [],
-        prioridade: [],
-        tipo: [],
-        modulo_id: undefined,
-        area_id: undefined,
-        responsavel_id: undefined,
-      },
-      replace: true,
-    });
-  }, [navigate]);
+  const totalFiltrosAplicados =
+    filtrosCompartilhados.status.length +
+    filtrosCompartilhados.prioridade.length +
+    filtrosCompartilhados.tipo.length +
+    filtrosCompartilhados.modulo_id.length +
+    filtrosCompartilhados.area_id.length +
+    filtrosCompartilhados.tenant_id.length +
+    filtrosCompartilhados.responsavel_id.length;
 
   const hasFiltros =
-    !!filtrosState.busca?.trim() ||
-    filtrosState.status.length > 0 ||
-    filtrosState.prioridade.length > 0 ||
-    filtrosState.tipo.length > 0 ||
-    !!filtrosState.modulo_id ||
-    !!filtrosState.area_id ||
-    !!filtrosState.responsavel_id;
+    !!busca?.trim() || totalFiltrosAplicados > 0 || apenasSemData;
+
+  const limparTudo = React.useCallback(() => {
+    setBusca("");
+    setFiltrosCompartilhados({
+      status: [],
+      prioridade: [],
+      tipo: [],
+      modulo_id: [],
+      area_id: [],
+      tenant_id: [],
+      responsavel_id: [],
+    });
+    setApenasSemData(false);
+  }, [setBusca, setFiltrosCompartilhados, setApenasSemData]);
 
   const podeCriar = temPermissao("criar_demanda");
 
@@ -145,7 +145,45 @@ function DemandasListagem() {
         }
       />
 
-      <FiltrosPanel value={filtrosState} onChange={setPatch} onClear={limpar} />
+      {/* Linha 1: Período + tipo de data + busca */}
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <PeriodoPicker
+          value={periodo}
+          onChange={setPeriodo}
+          tipoData={tipoData}
+          onTipoDataChange={setTipoData}
+          apenasSemData={apenasSemData}
+          onApenasSemDataChange={setApenasSemData}
+        />
+
+        <div className="relative ml-auto min-w-[240px] flex-1 sm:max-w-sm">
+          <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+            placeholder="Buscar por código, título ou descrição..."
+            className="pl-8"
+          />
+          {busca && (
+            <button
+              type="button"
+              onClick={() => setBusca("")}
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-0.5 text-muted-foreground hover:bg-secondary hover:text-foreground"
+              aria-label="Limpar busca"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Linha 2: filtros multi-select */}
+      <div className="mb-4">
+        <DashboardFilterBar
+          filtros={filtrosCompartilhados}
+          onChange={setFiltrosCompartilhados}
+        />
+      </div>
 
       {!isLoading && rows.length === 0 ? (
         hasFiltros ? (
@@ -154,7 +192,7 @@ function DemandasListagem() {
             title="Nenhuma demanda encontrada"
             description="Tente ajustar os filtros pra encontrar o que procura."
             action={
-              <Button variant="outline" onClick={limpar}>
+              <Button variant="outline" onClick={limparTudo}>
                 Limpar filtros
               </Button>
             }
