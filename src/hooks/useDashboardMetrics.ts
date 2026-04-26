@@ -18,11 +18,11 @@ export function useDashboardMetrics(
   periodo: DateRange | null,
   enabled = true,
 ) {
-  const dataInicio = periodo?.from ? toIsoDate(periodo.from) : null;
-  const dataFim = periodo?.to ? toIsoDate(periodo.to) : null;
+  const dataInicio = periodo?.from ? toIsoDate(periodo.from) : undefined;
+  const dataFim = periodo?.to ? toIsoDate(periodo.to) : undefined;
 
   return useQuery<DashboardMetrics>({
-    queryKey: ["dashboard-metrics", dataInicio, dataFim],
+    queryKey: ["dashboard-metrics", dataInicio ?? null, dataFim ?? null],
     queryFn: async () => {
       const { data, error } = await supabase.rpc("dashboard_metrics", {
         p_data_inicio: dataInicio,
