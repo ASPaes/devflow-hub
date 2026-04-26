@@ -138,7 +138,13 @@ export function AnexosSecao({
             ))}
           </div>
         ) : anexos.length === 0 ? (
-          <EmptyAnexos onClick={triggerUpload} disabled={isUploading} />
+          podeAnexar ? (
+            <EmptyAnexos onClick={triggerUpload} disabled={isUploading} />
+          ) : (
+            <p className="py-6 text-center text-sm text-muted-foreground">
+              Nenhum anexo nesta demanda.
+            </p>
+          )
         ) : (
           <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
             {anexos.map((a) => (
