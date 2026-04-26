@@ -45,7 +45,7 @@ const emptyValues: TenantInput = {
 };
 
 function TenantsPage() {
-  useDocumentTitle("Tenants");
+  useDocumentTitle("Empresas");
   const { data: tenants, isLoading } = useTenants();
   const createMut = useCreateTenant();
   const updateMut = useUpdateTenant();
