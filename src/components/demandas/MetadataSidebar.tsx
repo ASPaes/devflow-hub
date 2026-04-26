@@ -130,20 +130,48 @@ export function MetadataSidebar({
         </div>
       </section>
 
-      {/* Deadline */}
+      {/* Data de Desenvolvimento */}
       <section className="rounded-lg border border-border bg-card p-4">
         <Label>
           <Calendar className="mr-1 inline h-3.5 w-3.5" />
-          Prazo
+          Data de Desenvolvimento
+        </Label>
+        <div className="mt-2">
+          <DeadlinePicker
+            value={demanda.dev_deadline}
+            disabled={!canEdit || saving}
+            onChange={(v) => onPatch({ dev_deadline: v })}
+          />
+        </div>
+      </section>
+
+      {/* Data de Entrega (campo deadline no banco) */}
+      <section className="rounded-lg border border-border bg-card p-4">
+        <Label>
+          <Calendar className="mr-1 inline h-3.5 w-3.5" />
+          Data de Entrega
         </Label>
         <div className="mt-2">
           <DeadlinePicker
             value={demanda.deadline}
             disabled={!canEdit || saving}
-            onChange={(v) => onPatch({ deadline: v })}
+            onChange={(novoDeadline) => {
+              // Auto-fill: se dev_deadline está vazio E definimos uma deadline,
+              // calcula dev_deadline = deadline - 2 dias úteis
+              if (novoDeadline && !demanda.dev_deadline) {
+                const target = parseLocalDate(novoDeadline);
+                const dev = subtractBusinessDays(target, 2);
+                return onPatch({
+                  deadline: novoDeadline,
+                  dev_deadline: formatLocalDate(dev),
+                });
+              }
+              return onPatch({ deadline: novoDeadline });
+            }}
           />
         </div>
       </section>
+
 
       {/* Estimativa */}
       <section className="rounded-lg border border-border bg-card p-4">
