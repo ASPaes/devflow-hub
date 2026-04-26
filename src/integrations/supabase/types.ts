@@ -852,6 +852,9 @@ export type Database = {
         | "gerenciar_perfis_acesso"
         | "ver_dashboard_metricas"
         | "gerenciar_tenants"
+        | "ver_demandas"
+        | "comentar_demanda"
+        | "pode_ser_responsavel"
       status_demanda:
         | "triagem"
         | "analise"
@@ -1007,6 +1010,9 @@ export const Constants = {
         "gerenciar_perfis_acesso",
         "ver_dashboard_metricas",
         "gerenciar_tenants",
+        "ver_demandas",
+        "comentar_demanda",
+        "pode_ser_responsavel",
       ],
       status_demanda: [
         "triagem",
