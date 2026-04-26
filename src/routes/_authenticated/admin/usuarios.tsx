@@ -75,7 +75,7 @@ export const Route = createFileRoute("/_authenticated/admin/usuarios")({
 const editSchema = z.object({
   nome: z.string().trim().min(2, "Nome muito curto").max(80),
   perfil_acesso_id: z.string().uuid("Selecione um perfil de acesso"),
-  tenant_id: z.string().uuid("Selecione um tenant"),
+  tenant_id: z.string().uuid("Selecione uma empresa"),
   ativo: z.boolean(),
 });
 type EditValues = z.infer<typeof editSchema>;
