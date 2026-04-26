@@ -49,6 +49,7 @@ export type UpdateDemandaPatch = Partial<
     | "prioridade"
     | "responsavel_id"
     | "deadline"
+    | "dev_deadline"
     | "estimativa_horas"
     | "modulo_id"
     | "submodulo_id"
