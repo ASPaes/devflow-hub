@@ -350,6 +350,7 @@ export type Database = {
           deadline: string | null
           delivered_at: string | null
           descricao: string
+          dev_deadline: string | null
           estimativa_horas: number | null
           id: string
           modulo_id: string
@@ -372,6 +373,7 @@ export type Database = {
           deadline?: string | null
           delivered_at?: string | null
           descricao: string
+          dev_deadline?: string | null
           estimativa_horas?: number | null
           id?: string
           modulo_id: string
@@ -394,6 +396,7 @@ export type Database = {
           deadline?: string | null
           delivered_at?: string | null
           descricao?: string
+          dev_deadline?: string | null
           estimativa_horas?: number | null
           id?: string
           modulo_id?: string
@@ -809,6 +812,7 @@ export type Database = {
           deadline: string | null
           delivered_at: string | null
           descricao: string
+          dev_deadline: string | null
           estimativa_horas: number | null
           id: string
           modulo_id: string
