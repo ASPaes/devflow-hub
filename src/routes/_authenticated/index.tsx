@@ -358,6 +358,10 @@ function Dashboard() {
     <div>
       {header}
 
+      <div className="mb-6">
+        <DashboardFilterBar filtros={filtros} onChange={setFiltros} />
+      </div>
+
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         <KpiCard
           label="Total de demandas"
@@ -422,6 +426,26 @@ function Dashboard() {
             <DistribuicaoStatus metrics={metrics} />
             <DistribuicaoPrioridade metrics={metrics} />
           </>
+        )}
+      </div>
+
+      <div className="mt-6">
+        {metricsLoading || !metrics ? (
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-5 w-56" />
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} className="h-8 w-full" />
+              ))}
+            </CardContent>
+          </Card>
+        ) : (
+          <DistribuicaoDesenvolvedorCard
+            data={metrics.por_responsavel ?? []}
+            isLoading={metricsLoading}
+          />
         )}
       </div>
 
