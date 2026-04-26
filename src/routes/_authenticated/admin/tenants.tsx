@@ -121,12 +121,12 @@ function TenantsPage() {
   return (
     <div className="p-8">
       <PageHeader
-        title="Tenants"
-        description="Empresas/clientes que utilizam o devflow-hub"
+        title="Empresas"
+        description="Empresas que utilizam o devflow-hub"
         action={
           <Button onClick={() => setCreateOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
-            Novo tenant
+            Nova empresa
           </Button>
         }
       />
