@@ -120,12 +120,23 @@ export function DashboardFilterBar({
     value: t.id,
     label: t.nome,
   }));
-  const responsavelOptions: FilterOption<string>[] = responsaveis.map((r) => ({
-    value: r.id,
-    label: r.nome,
+  const responsavelOptions: FilterOption<string>[] = responsaveis
+    .filter((r): r is { id: string; nome: string } => !!r.id && !!r.nome)
+    .map((r) => ({ value: r.id, label: r.nome }));
+  const solicitanteOptions: FilterOption<string>[] = solicitantes.map((s) => ({
+    value: s.id,
+    label: s.nome,
   }));
 
   const totalAplicados =
+    filtros.status.length +
+    filtros.prioridade.length +
+    filtros.tipo.length +
+    filtros.modulo_id.length +
+    filtros.area_id.length +
+    filtros.tenant_id.length +
+    filtros.responsavel_id.length +
+    filtros.solicitante_id.length;
     filtros.status.length +
     filtros.prioridade.length +
     filtros.tipo.length +
