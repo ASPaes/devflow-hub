@@ -162,10 +162,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "demanda_anexos_autor_id_fkey"
+            columns: ["autor_id"]
+            isOneToOne: false
+            referencedRelation: "vw_potenciais_responsaveis"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "demanda_anexos_demanda_id_fkey"
             columns: ["demanda_id"]
             isOneToOne: false
             referencedRelation: "demandas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demanda_anexos_demanda_id_fkey"
+            columns: ["demanda_id"]
+            isOneToOne: false
+            referencedRelation: "vw_demandas_excluidas"
             referencedColumns: ["id"]
           },
           {
@@ -211,10 +225,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "demanda_comentarios_autor_id_fkey"
+            columns: ["autor_id"]
+            isOneToOne: false
+            referencedRelation: "vw_potenciais_responsaveis"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "demanda_comentarios_demanda_id_fkey"
             columns: ["demanda_id"]
             isOneToOne: false
             referencedRelation: "demandas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demanda_comentarios_demanda_id_fkey"
+            columns: ["demanda_id"]
+            isOneToOne: false
+            referencedRelation: "vw_demandas_excluidas"
             referencedColumns: ["id"]
           },
           {
@@ -263,10 +291,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "demanda_historico_autor_id_fkey"
+            columns: ["autor_id"]
+            isOneToOne: false
+            referencedRelation: "vw_potenciais_responsaveis"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "demanda_historico_demanda_id_fkey"
             columns: ["demanda_id"]
             isOneToOne: false
             referencedRelation: "demandas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demanda_historico_demanda_id_fkey"
+            columns: ["demanda_id"]
+            isOneToOne: false
+            referencedRelation: "vw_demandas_excluidas"
             referencedColumns: ["id"]
           },
           {
@@ -315,6 +357,13 @@ export type Database = {
             foreignKeyName: "demanda_timer_log_demanda_id_fkey"
             columns: ["demanda_id"]
             isOneToOne: false
+            referencedRelation: "vw_demandas_excluidas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demanda_timer_log_demanda_id_fkey"
+            columns: ["demanda_id"]
+            isOneToOne: false
             referencedRelation: "vw_demandas_lista"
             referencedColumns: ["id"]
           },
@@ -354,10 +403,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "demanda_vinculos_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "vw_potenciais_responsaveis"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "demanda_vinculos_demanda_destino_id_fkey"
             columns: ["demanda_destino_id"]
             isOneToOne: false
             referencedRelation: "demandas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demanda_vinculos_demanda_destino_id_fkey"
+            columns: ["demanda_destino_id"]
+            isOneToOne: false
+            referencedRelation: "vw_demandas_excluidas"
             referencedColumns: ["id"]
           },
           {
@@ -372,6 +435,13 @@ export type Database = {
             columns: ["demanda_origem_id"]
             isOneToOne: false
             referencedRelation: "demandas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demanda_vinculos_demanda_origem_id_fkey"
+            columns: ["demanda_origem_id"]
+            isOneToOne: false
+            referencedRelation: "vw_demandas_excluidas"
             referencedColumns: ["id"]
           },
           {
@@ -390,6 +460,9 @@ export type Database = {
           codigo: string | null
           created_at: string
           deadline: string | null
+          delete_motivo: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           delivered_at: string | null
           descricao: string
           dev_deadline: string | null
@@ -416,6 +489,9 @@ export type Database = {
           codigo?: string | null
           created_at?: string
           deadline?: string | null
+          delete_motivo?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           delivered_at?: string | null
           descricao: string
           dev_deadline?: string | null
@@ -442,6 +518,9 @@ export type Database = {
           codigo?: string | null
           created_at?: string
           deadline?: string | null
+          delete_motivo?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           delivered_at?: string | null
           descricao?: string
           dev_deadline?: string | null
@@ -471,6 +550,20 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "demandas_deleted_by_fkey"
+            columns: ["deleted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demandas_deleted_by_fkey"
+            columns: ["deleted_by"]
+            isOneToOne: false
+            referencedRelation: "vw_potenciais_responsaveis"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "demandas_modulo_id_fkey"
             columns: ["modulo_id"]
             isOneToOne: false
@@ -485,10 +578,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "demandas_responsavel_id_fkey"
+            columns: ["responsavel_id"]
+            isOneToOne: false
+            referencedRelation: "vw_potenciais_responsaveis"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "demandas_solicitante_id_fkey"
             columns: ["solicitante_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demandas_solicitante_id_fkey"
+            columns: ["solicitante_id"]
+            isOneToOne: false
+            referencedRelation: "vw_potenciais_responsaveis"
             referencedColumns: ["id"]
           },
           {
@@ -701,6 +808,116 @@ export type Database = {
         }
         Relationships: []
       }
+      vw_demandas_excluidas: {
+        Row: {
+          area_id: string | null
+          area_nome: string | null
+          closed_at: string | null
+          codigo: string | null
+          created_at: string | null
+          deadline: string | null
+          delete_motivo: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          deleted_by_avatar: string | null
+          deleted_by_nome: string | null
+          delivered_at: string | null
+          descricao: string | null
+          dev_deadline: string | null
+          estimativa_horas: number | null
+          id: string | null
+          modulo_cor: string | null
+          modulo_id: string | null
+          modulo_nome: string | null
+          prioridade: number | null
+          responsavel_avatar: string | null
+          responsavel_id: string | null
+          responsavel_nome: string | null
+          solicitante_avatar: string | null
+          solicitante_id: string | null
+          solicitante_nome: string | null
+          status: Database["public"]["Enums"]["status_demanda"] | null
+          submodulo_id: string | null
+          submodulo_nome: string | null
+          tenant_id: string | null
+          tenant_nome: string | null
+          tipo: Database["public"]["Enums"]["tipo_demanda"] | null
+          titulo: string | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demandas_area_id_fkey"
+            columns: ["area_id"]
+            isOneToOne: false
+            referencedRelation: "areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demandas_deleted_by_fkey"
+            columns: ["deleted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demandas_deleted_by_fkey"
+            columns: ["deleted_by"]
+            isOneToOne: false
+            referencedRelation: "vw_potenciais_responsaveis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demandas_modulo_id_fkey"
+            columns: ["modulo_id"]
+            isOneToOne: false
+            referencedRelation: "modulos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demandas_responsavel_id_fkey"
+            columns: ["responsavel_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demandas_responsavel_id_fkey"
+            columns: ["responsavel_id"]
+            isOneToOne: false
+            referencedRelation: "vw_potenciais_responsaveis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demandas_solicitante_id_fkey"
+            columns: ["solicitante_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demandas_solicitante_id_fkey"
+            columns: ["solicitante_id"]
+            isOneToOne: false
+            referencedRelation: "vw_potenciais_responsaveis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demandas_submodulo_id_fkey"
+            columns: ["submodulo_id"]
+            isOneToOne: false
+            referencedRelation: "submodulos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demandas_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vw_demandas_lista: {
         Row: {
           area_id: string | null
@@ -760,10 +977,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "demandas_responsavel_id_fkey"
+            columns: ["responsavel_id"]
+            isOneToOne: false
+            referencedRelation: "vw_potenciais_responsaveis"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "demandas_solicitante_id_fkey"
             columns: ["solicitante_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demandas_solicitante_id_fkey"
+            columns: ["solicitante_id"]
+            isOneToOne: false
+            referencedRelation: "vw_potenciais_responsaveis"
             referencedColumns: ["id"]
           },
           {
@@ -775,6 +1006,23 @@ export type Database = {
           },
           {
             foreignKeyName: "demandas_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vw_potenciais_responsaveis: {
+        Row: {
+          avatar_url: string | null
+          id: string | null
+          nome: string | null
+          tenant_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -810,6 +1058,7 @@ export type Database = {
           p_modulo_id?: string[]
           p_prioridade?: number[]
           p_responsavel_id?: string[]
+          p_solicitante_id?: string[]
           p_status?: string[]
           p_tenant_id?: string[]
           p_tipo?: string[]
@@ -839,6 +1088,44 @@ export type Database = {
           status: string
         }[]
       }
+      excluir_demanda: {
+        Args: { p_demanda_id: string; p_motivo: string }
+        Returns: {
+          area_id: string
+          closed_at: string | null
+          codigo: string | null
+          created_at: string
+          deadline: string | null
+          delete_motivo: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          delivered_at: string | null
+          descricao: string
+          dev_deadline: string | null
+          estimativa_horas: number | null
+          id: string
+          modulo_id: string
+          prioridade: number
+          reopen_deadline: string | null
+          responsavel_id: string | null
+          solicitante_id: string
+          status: Database["public"]["Enums"]["status_demanda"]
+          submodulo_id: string
+          tempo_em_andamento_segundos: number
+          tempo_realizado_segundos: number
+          tenant_id: string
+          timer_iniciado_em: string | null
+          tipo: Database["public"]["Enums"]["tipo_demanda"]
+          titulo: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "demandas"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       iniciar_timer_demanda: {
         Args: { p_demanda_id: string }
         Returns: {
@@ -847,6 +1134,9 @@ export type Database = {
           codigo: string | null
           created_at: string
           deadline: string | null
+          delete_motivo: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           delivered_at: string | null
           descricao: string
           dev_deadline: string | null
@@ -912,6 +1202,9 @@ export type Database = {
           codigo: string | null
           created_at: string
           deadline: string | null
+          delete_motivo: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           delivered_at: string | null
           descricao: string
           dev_deadline: string | null
@@ -947,6 +1240,47 @@ export type Database = {
           codigo: string | null
           created_at: string
           deadline: string | null
+          delete_motivo: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          delivered_at: string | null
+          descricao: string
+          dev_deadline: string | null
+          estimativa_horas: number | null
+          id: string
+          modulo_id: string
+          prioridade: number
+          reopen_deadline: string | null
+          responsavel_id: string | null
+          solicitante_id: string
+          status: Database["public"]["Enums"]["status_demanda"]
+          submodulo_id: string
+          tempo_em_andamento_segundos: number
+          tempo_realizado_segundos: number
+          tenant_id: string
+          timer_iniciado_em: string | null
+          tipo: Database["public"]["Enums"]["tipo_demanda"]
+          titulo: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "demandas"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      restaurar_demanda: {
+        Args: { p_demanda_id: string }
+        Returns: {
+          area_id: string
+          closed_at: string | null
+          codigo: string | null
+          created_at: string
+          deadline: string | null
+          delete_motivo: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           delivered_at: string | null
           descricao: string
           dev_deadline: string | null
