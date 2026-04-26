@@ -253,13 +253,16 @@ function Dashboard() {
 
   useDocumentTitle("Dashboard");
 
-  const [periodo, setPeriodo] = React.useState<DateRange | null>(() => {
-    const r = presetToRange("este_mes");
-    return { from: r.from, to: r.to };
-  });
-  const [tipoData, setTipoData] = React.useState<TipoData>("criacao");
-  const [apenasSemData, setApenasSemData] = React.useState(false);
-  const [filtros, setFiltros] = React.useState<DashboardFiltros>(FILTROS_VAZIOS);
+  const {
+    periodo,
+    tipoData,
+    apenasSemData,
+    filtros,
+    setPeriodo,
+    setTipoData,
+    setApenasSemData,
+    setFiltros,
+  } = useDashboardFilters();
 
   const metricsQuery = useDashboardMetrics(
     periodo,
