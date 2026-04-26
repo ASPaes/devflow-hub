@@ -1,4 +1,8 @@
+import * as React from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import type { DateRange } from "react-day-picker";
+import { PeriodoPicker } from "@/components/dashboard/PeriodoPicker";
+import { presetToRange } from "@/lib/date-presets";
 import {
   ArrowRight,
   BarChart3,
@@ -247,7 +251,12 @@ function Dashboard() {
 
   useDocumentTitle("Dashboard");
 
-  const metricsQuery = useDashboardMetrics(podeVerMetricas);
+  const [periodo, setPeriodo] = React.useState<DateRange | null>(() => {
+    const r = presetToRange("este_mes");
+    return { from: r.from, to: r.to };
+  });
+
+  const metricsQuery = useDashboardMetrics(periodo, podeVerMetricas);
   const metrics = metricsQuery.data;
   const metricsLoading = metricsQuery.isLoading;
   const metricsRefetching = metricsQuery.isFetching && !metricsQuery.isLoading;
@@ -284,14 +293,19 @@ function Dashboard() {
           </Button>
         )}
       </div>
-      {podeCriar && (
-        <Button asChild size="lg">
-          <Link to="/demandas/nova">
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Abrir nova demanda
-          </Link>
-        </Button>
-      )}
+      <div className="flex items-center gap-2">
+        {podeVerMetricas && (
+          <PeriodoPicker value={periodo} onChange={setPeriodo} />
+        )}
+        {podeCriar && (
+          <Button asChild size="lg">
+            <Link to="/demandas/nova">
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Abrir nova demanda
+            </Link>
+          </Button>
+        )}
+      </div>
     </div>
   );
 
@@ -366,8 +380,8 @@ function Dashboard() {
           }
         />
         <KpiCard
-          label="Concluídas no mês"
-          value={metrics?.concluidas_mes}
+          label="Concluídas no período"
+          value={metrics?.concluidas_periodo}
           isLoading={metricsLoading}
           icon={CheckCircle2}
           iconClassName="h-5 w-5 text-status-entregue"
