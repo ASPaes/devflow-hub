@@ -207,6 +207,17 @@ export type FiltrosDemanda = {
   responsavel_id?: string | null;
   solicitante_id?: string;
   busca?: string;
+
+  // === NOVOS — compatíveis com filtros do Dashboard ===
+  modulo_ids?: string[];
+  area_ids?: string[];
+  tenant_ids?: string[];
+  responsavel_ids?: string[];
+
+  // === Período por tipo de data ===
+  periodo?: DateRange | null;
+  tipoData?: TipoData;
+  apenasSemData?: boolean;
 };
 
 export interface UseDemandasListaOptions {
