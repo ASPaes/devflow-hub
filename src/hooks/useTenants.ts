@@ -107,7 +107,7 @@ export function useDeleteTenant() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: tenantsKey });
-      toast.success("Tenant excluído");
+      toast.success("Empresa excluída");
     },
     onError: (err) => toast.error(translateSupabaseError(err, "tenant")),
   });
