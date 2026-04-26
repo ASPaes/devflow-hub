@@ -322,6 +322,7 @@ function Dashboard() {
     setApenasSemData,
     setFiltros,
   } = useDashboardFilters();
+  const { drillDown, goToDemandas } = useDrillDown();
 
   const metricsQuery = useDashboardMetrics(
     periodo,
