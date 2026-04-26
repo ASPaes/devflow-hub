@@ -36,7 +36,17 @@ import { DashboardFilterBar } from "@/components/dashboard/DashboardFilterBar";
 import { DistribuicaoDesenvolvedorCard } from "@/components/dashboard/DistribuicaoDesenvolvedorCard";
 import { formatRelativeSP } from "@/lib/format";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
+import { useDrillDown } from "@/hooks/useDrillDown";
 import { cn } from "@/lib/utils";
+
+const STATUS_ABERTAS: StatusDemanda[] = [
+  "triagem",
+  "analise",
+  "desenvolvimento",
+  "teste",
+  "reaberta",
+];
+const STATUS_CONCLUIDAS: StatusDemanda[] = ["entregue", "encerrada"];
 
 export const Route = createFileRoute("/_authenticated/")({
   component: Dashboard,
