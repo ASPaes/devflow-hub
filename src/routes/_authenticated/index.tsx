@@ -30,9 +30,13 @@ import {
   PRIORIDADE_BADGE_STYLES,
 } from "@/components/demandas/MetadataSidebar";
 import {
+  FILTROS_VAZIOS,
   useDashboardMetrics,
+  type DashboardFiltros,
   type DashboardMetrics,
 } from "@/hooks/useDashboardMetrics";
+import { DashboardFilterBar } from "@/components/dashboard/DashboardFilterBar";
+import { DistribuicaoDesenvolvedorCard } from "@/components/dashboard/DistribuicaoDesenvolvedorCard";
 import { formatRelativeSP } from "@/lib/format";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { cn } from "@/lib/utils";
@@ -255,8 +259,9 @@ function Dashboard() {
     const r = presetToRange("este_mes");
     return { from: r.from, to: r.to };
   });
+  const [filtros, setFiltros] = React.useState<DashboardFiltros>(FILTROS_VAZIOS);
 
-  const metricsQuery = useDashboardMetrics(periodo, podeVerMetricas);
+  const metricsQuery = useDashboardMetrics(periodo, podeVerMetricas, filtros);
   const metrics = metricsQuery.data;
   const metricsLoading = metricsQuery.isLoading;
   const metricsRefetching = metricsQuery.isFetching && !metricsQuery.isLoading;
@@ -353,6 +358,10 @@ function Dashboard() {
     <div>
       {header}
 
+      <div className="mb-6">
+        <DashboardFilterBar filtros={filtros} onChange={setFiltros} />
+      </div>
+
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         <KpiCard
           label="Total de demandas"
@@ -417,6 +426,26 @@ function Dashboard() {
             <DistribuicaoStatus metrics={metrics} />
             <DistribuicaoPrioridade metrics={metrics} />
           </>
+        )}
+      </div>
+
+      <div className="mt-6">
+        {metricsLoading || !metrics ? (
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-5 w-56" />
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} className="h-8 w-full" />
+              ))}
+            </CardContent>
+          </Card>
+        ) : (
+          <DistribuicaoDesenvolvedorCard
+            data={metrics.por_responsavel ?? []}
+            isLoading={metricsLoading}
+          />
         )}
       </div>
 

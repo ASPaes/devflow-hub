@@ -4,6 +4,13 @@ import type { DateRange } from "react-day-picker";
 import { supabase } from "@/lib/supabase";
 import { toIsoDate } from "@/lib/date-presets";
 
+export type ResponsavelStat = {
+  id: string | null;
+  nome: string;
+  avatar_url: string | null;
+  total: number;
+};
+
 export type DashboardMetrics = {
   total: number;
   abertas: number;
@@ -11,22 +18,57 @@ export type DashboardMetrics = {
   concluidas_periodo: number;
   por_status: Record<string, number>;
   por_prioridade: Record<string, number>;
+  por_responsavel: ResponsavelStat[];
   periodo: { data_inicio: string | null; data_fim: string | null };
+};
+
+export type DashboardFiltros = {
+  status: string[];
+  prioridade: number[];
+  tipo: string[];
+  modulo_id: string[];
+  area_id: string[];
+  tenant_id: string[];
+  responsavel_id: string[];
+};
+
+export const FILTROS_VAZIOS: DashboardFiltros = {
+  status: [],
+  prioridade: [],
+  tipo: [],
+  modulo_id: [],
+  area_id: [],
+  tenant_id: [],
+  responsavel_id: [],
 };
 
 export function useDashboardMetrics(
   periodo: DateRange | null,
   enabled = true,
+  filtros: DashboardFiltros = FILTROS_VAZIOS,
 ) {
   const dataInicio = periodo?.from ? toIsoDate(periodo.from) : undefined;
   const dataFim = periodo?.to ? toIsoDate(periodo.to) : undefined;
 
   return useQuery<DashboardMetrics>({
-    queryKey: ["dashboard-metrics", dataInicio ?? null, dataFim ?? null],
+    queryKey: ["dashboard-metrics", dataInicio ?? null, dataFim ?? null, filtros],
     queryFn: async () => {
       const { data, error } = await supabase.rpc("dashboard_metrics", {
         p_data_inicio: dataInicio,
         p_data_fim: dataFim,
+        p_status: filtros.status.length > 0 ? filtros.status : undefined,
+        p_prioridade:
+          filtros.prioridade.length > 0 ? filtros.prioridade : undefined,
+        p_tipo: filtros.tipo.length > 0 ? filtros.tipo : undefined,
+        p_modulo_id:
+          filtros.modulo_id.length > 0 ? filtros.modulo_id : undefined,
+        p_area_id: filtros.area_id.length > 0 ? filtros.area_id : undefined,
+        p_tenant_id:
+          filtros.tenant_id.length > 0 ? filtros.tenant_id : undefined,
+        p_responsavel_id:
+          filtros.responsavel_id.length > 0
+            ? filtros.responsavel_id
+            : undefined,
       });
       if (error) throw error;
       return data as unknown as DashboardMetrics;
