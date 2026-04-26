@@ -160,9 +160,8 @@ export function MetadataSidebar({
           <DeadlinePicker
             value={demanda.deadline}
             disabled={!canEdit || saving}
-            onChange={(novoDeadline) => {
-              // Auto-fill: se dev_deadline está vazio E definimos uma deadline,
-              // calcula dev_deadline = deadline - 2 dias úteis
+            onChange={async (novoDeadline) => {
+              // Caso 1: dev_deadline vazio → calcula auto (sem perguntar)
               if (novoDeadline && !demanda.dev_deadline) {
                 const target = parseLocalDate(novoDeadline);
                 const dev = subtractBusinessDays(target, 2);
@@ -171,6 +170,29 @@ export function MetadataSidebar({
                   dev_deadline: formatLocalDate(dev),
                 });
               }
+
+              // Caso 2: dev_deadline JÁ tem valor → atualiza só deadline
+              // e oferece via toast pra recalcular dev_deadline
+              if (novoDeadline && demanda.dev_deadline) {
+                await onPatch({ deadline: novoDeadline });
+                const target = parseLocalDate(novoDeadline);
+                const novaDev = formatLocalDate(subtractBusinessDays(target, 2));
+                if (novaDev !== demanda.dev_deadline) {
+                  toast("Atualizar Data de Desenvolvimento?", {
+                    description: `Sugestão: ${formatDateBR(novaDev)} (2 dias úteis antes)`,
+                    duration: 5000,
+                    action: {
+                      label: "Atualizar",
+                      onClick: () => {
+                        void onPatch({ dev_deadline: novaDev });
+                      },
+                    },
+                  });
+                }
+                return;
+              }
+
+              // Caso 3: limpou deadline → só persiste
               return onPatch({ deadline: novoDeadline });
             }}
           />
