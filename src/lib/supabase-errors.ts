@@ -58,7 +58,7 @@ export function translateSupabaseError(
     if (entity === "demanda")
       return "Um dos campos referencia um item que não existe. Recarregue e tente novamente.";
     if (entity === "tenant")
-      return "Este tenant tem usuários ou demandas vinculados. Mude eles para outro tenant antes de excluir.";
+      return "Esta empresa tem usuários ou demandas vinculados. Mude eles para outra empresa antes de excluir.";
     return "Este registro está em uso e não pode ser removido. Considere desativá-lo.";
   }
   if (code === "23502") return "Campo obrigatório não preenchido";
