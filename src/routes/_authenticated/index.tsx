@@ -2,7 +2,7 @@ import * as React from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import type { DateRange } from "react-day-picker";
 import { PeriodoPicker } from "@/components/dashboard/PeriodoPicker";
-import { presetToRange } from "@/lib/date-presets";
+import { presetToRange, type TipoData } from "@/lib/date-presets";
 import {
   ArrowRight,
   BarChart3,
