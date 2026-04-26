@@ -481,6 +481,16 @@ function Dashboard() {
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="lg:col-span-1">
+          <SemDataCard
+            semDevDeadline={metrics?.sem_dev_deadline ?? 0}
+            semDeadline={metrics?.sem_deadline ?? 0}
+            isLoading={metricsLoading}
+          />
+        </div>
+      </div>
+
+      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
         {metricsLoading || !metrics ? (
           <>
             <Card className="lg:col-span-2">
