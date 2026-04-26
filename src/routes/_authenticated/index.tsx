@@ -445,6 +445,7 @@ function Dashboard() {
           isLoading={metricsLoading}
           icon={Inbox}
           iconClassName="h-5 w-5 text-muted-foreground"
+          onClick={goToDemandas}
         />
         <KpiCard
           label="Abertas"
@@ -452,6 +453,7 @@ function Dashboard() {
           isLoading={metricsLoading}
           icon={Clock}
           iconClassName="h-5 w-5 text-accent"
+          onClick={() => drillDown({ status: STATUS_ABERTAS })}
         />
         <KpiCard
           label="Prioritárias"
@@ -463,6 +465,9 @@ function Dashboard() {
               ? "h-5 w-5 text-prioridade-5"
               : "h-5 w-5 text-muted-foreground"
           }
+          onClick={() =>
+            drillDown({ status: STATUS_ABERTAS, prioridade: [4, 5] })
+          }
         />
         <KpiCard
           label="Concluídas no período"
@@ -470,6 +475,7 @@ function Dashboard() {
           isLoading={metricsLoading}
           icon={CheckCircle2}
           iconClassName="h-5 w-5 text-status-entregue"
+          onClick={() => drillDown({ status: STATUS_CONCLUIDAS })}
         />
       </div>
 
