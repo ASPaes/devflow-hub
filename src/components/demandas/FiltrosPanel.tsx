@@ -74,11 +74,11 @@ export function FiltrosPanel({
     () => (areasQuery.data ?? []).filter((a) => a.ativo),
     [areasQuery.data],
   );
-  // Responsáveis: usuários ativos com permissão editar_qualquer_demanda
+  // Responsáveis: usuários ativos com permissão pode_ser_responsavel
   const responsaveis = React.useMemo(
     () =>
       (usuariosQuery.data ?? []).filter(
-        (u) => u.ativo && u.permissoes.includes("editar_qualquer_demanda"),
+        (u) => u.ativo && u.permissoes.includes("pode_ser_responsavel"),
       ),
     [usuariosQuery.data],
   );

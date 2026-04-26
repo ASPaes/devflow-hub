@@ -14,6 +14,7 @@ import {
   useUploadAnexos,
   type DemandaAnexo,
 } from "@/hooks/useDemandas";
+import { useProfile } from "@/hooks/useProfile";
 import { AnexoCard, AnexoCardSkeleton } from "@/components/demandas/AnexoCard";
 
 interface AnexosSecaoProps {
@@ -27,6 +28,8 @@ export function AnexosSecao({
   userId,
   podeRemoverDeOutros,
 }: AnexosSecaoProps) {
+  const { temPermissao } = useProfile();
+  const podeAnexar = temPermissao("comentar_demanda");
   const { data: anexos = [], isLoading } = useDemandaAnexos(demandaId);
   const uploadMut = useUploadAnexos();
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -68,21 +71,25 @@ export function AnexosSecao({
   const triggerUpload = () => inputRef.current?.click();
 
   const onDragEnter = (e: React.DragEvent) => {
+    if (!podeAnexar) return;
     if (!e.dataTransfer.types.includes("Files")) return;
     e.preventDefault();
     dragDepth.current += 1;
     setIsDragging(true);
   };
   const onDragOver = (e: React.DragEvent) => {
+    if (!podeAnexar) return;
     if (!e.dataTransfer.types.includes("Files")) return;
     e.preventDefault();
   };
   const onDragLeave = (e: React.DragEvent) => {
+    if (!podeAnexar) return;
     e.preventDefault();
     dragDepth.current = Math.max(0, dragDepth.current - 1);
     if (dragDepth.current === 0) setIsDragging(false);
   };
   const onDrop = (e: React.DragEvent) => {
+    if (!podeAnexar) return;
     e.preventDefault();
     dragDepth.current = 0;
     setIsDragging(false);
@@ -109,16 +116,18 @@ export function AnexosSecao({
         <CardTitle className="text-base">
           Anexos {anexos.length > 0 && `(${anexos.length})`}
         </CardTitle>
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          onClick={triggerUpload}
-          disabled={isUploading || !podeAdicionar}
-        >
-          <Plus className="mr-1 h-4 w-4" />
-          Adicionar
-        </Button>
+        {podeAnexar && (
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={triggerUpload}
+            disabled={isUploading || !podeAdicionar}
+          >
+            <Plus className="mr-1 h-4 w-4" />
+            Adicionar
+          </Button>
+        )}
       </CardHeader>
 
       <CardContent>
@@ -129,7 +138,13 @@ export function AnexosSecao({
             ))}
           </div>
         ) : anexos.length === 0 ? (
-          <EmptyAnexos onClick={triggerUpload} disabled={isUploading} />
+          podeAnexar ? (
+            <EmptyAnexos onClick={triggerUpload} disabled={isUploading} />
+          ) : (
+            <p className="py-6 text-center text-sm text-muted-foreground">
+              Nenhum anexo nesta demanda.
+            </p>
+          )
         ) : (
           <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
             {anexos.map((a) => (

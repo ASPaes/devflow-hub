@@ -288,7 +288,7 @@ function ResponsavelPicker({
 }: ResponsavelPickerProps) {
   const [open, setOpen] = React.useState(false);
   const { data: users = [], isLoading } = useUsuariosComPermissao(
-    "editar_qualquer_demanda",
+    "pode_ser_responsavel",
   );
 
   const trigger = (
@@ -348,7 +348,7 @@ function ResponsavelPicker({
           </div>
         ) : users.length === 0 ? (
           <p className="px-2 py-3 text-center text-xs text-muted-foreground">
-            Nenhum usuário com permissão de editar demandas.
+            Nenhum usuário disponível para ser responsável.
           </p>
         ) : (
           users.map((u) => (

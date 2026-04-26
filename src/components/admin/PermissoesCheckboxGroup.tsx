@@ -24,21 +24,36 @@ const GROUPS: Group[] = [
         description: "Abrir novas demandas",
       },
       {
+        key: "ver_demandas",
+        label: "Ver demandas",
+        description: "Ver demandas próprias",
+      },
+      {
         key: "ver_todas_demandas",
         label: "Ver todas as demandas",
-        description:
-          "Ver demandas de outros usuários (caso contrário, apenas as próprias)",
+        description: "Ver demandas de outros usuários",
+      },
+      {
+        key: "comentar_demanda",
+        label: "Comentar e anexar",
+        description: "Adicionar comentários e anexos a demandas",
       },
       {
         key: "editar_qualquer_demanda",
         label: "Editar qualquer demanda",
         description:
-          "Mudar status, responsável, prioridade de qualquer demanda",
+          "Mudar status, classificação, datas e demais campos de qualquer demanda",
       },
       {
         key: "deletar_demanda",
         label: "Excluir demandas",
         description: "Remover demandas do sistema (use com cuidado)",
+      },
+      {
+        key: "pode_ser_responsavel",
+        label: "Pode ser responsável",
+        description:
+          "Pode ser atribuído como responsável de uma demanda (devs e atribuíveis)",
       },
     ],
   },

@@ -20,9 +20,12 @@ export type PerfilAcesso = {
 
 const PERMISSAO_VALUES = [
   "criar_demanda",
+  "ver_demandas",
   "ver_todas_demandas",
+  "comentar_demanda",
   "editar_qualquer_demanda",
   "deletar_demanda",
+  "pode_ser_responsavel",
   "gerenciar_modulos",
   "gerenciar_submodulos",
   "gerenciar_areas",
