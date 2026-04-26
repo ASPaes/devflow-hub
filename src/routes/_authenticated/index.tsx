@@ -31,7 +31,6 @@ import {
 import {
   FILTROS_VAZIOS,
   useDashboardMetrics,
-  type DashboardFiltros,
   type DashboardMetrics,
 } from "@/hooks/useDashboardMetrics";
 import { DashboardFilterBar } from "@/components/dashboard/DashboardFilterBar";
