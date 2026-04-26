@@ -9,6 +9,8 @@ import type { ResponsavelStat } from "@/hooks/useDashboardMetrics";
 interface DistribuicaoDesenvolvedorCardProps {
   data: ResponsavelStat[];
   isLoading?: boolean;
+  /** Callback invocado ao clicar numa linha (não chamado para "Sem desenvolvedor"). */
+  onSelect?: (responsavelId: string) => void;
 }
 
 function inicial(nome: string): string {
