@@ -55,6 +55,11 @@ import { useAreas } from "@/hooks/useAreas";
 
 const PRIORIDADES = [1, 2, 3, 4, 5] as const;
 
+function formatDateBR(iso: string): string {
+  const [y, m, d] = iso.split("-");
+  return `${d}/${m}/${y}`;
+}
+
 interface MetadataSidebarProps {
   demanda: DemandaCompleta;
   canEdit: boolean;
