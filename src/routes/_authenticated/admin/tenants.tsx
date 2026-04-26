@@ -138,17 +138,17 @@ function TenantsPage() {
         onEdit={(row) => setEditing(row)}
         onDelete={(row) => setDeleting(row)}
         searchableFields={["nome", "descricao"]}
-        searchPlaceholder="Buscar tenants..."
+        searchPlaceholder="Buscar empresas..."
         getRowKey={(row) => row.id}
         emptyState={
           <EmptyState
             icon={Building}
-            title="Nenhum tenant cadastrado"
-            description="Cadastre o primeiro tenant para organizar usuários e demandas."
+            title="Nenhuma empresa cadastrada"
+            description="Cadastre a primeira empresa para organizar usuários e demandas."
             action={
               <Button onClick={() => setCreateOpen(true)}>
                 <Plus className="mr-2 h-4 w-4" />
-                Criar primeiro tenant
+                Criar primeira empresa
               </Button>
             }
           />
