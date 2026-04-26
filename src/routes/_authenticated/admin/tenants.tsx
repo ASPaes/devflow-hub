@@ -186,7 +186,7 @@ function TenantsPage() {
       <ConfirmDialog
         open={!!deleting}
         onOpenChange={(o) => !o && setDeleting(null)}
-        title="Excluir tenant"
+        title="Excluir empresa"
         description={
           deleting ? (
             <>
