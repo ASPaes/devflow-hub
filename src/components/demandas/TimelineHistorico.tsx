@@ -134,9 +134,17 @@ function formatEventoHistorico(
     case "titulo":
       return `alterou o título`;
     case "deadline":
-      if (!item.valor_anterior && item.valor_novo) return `definiu prazo`;
-      if (item.valor_anterior && !item.valor_novo) return `removeu o prazo`;
-      return `alterou o prazo`;
+      if (!item.valor_anterior && item.valor_novo)
+        return `definiu Data de Entrega`;
+      if (item.valor_anterior && !item.valor_novo)
+        return `removeu a Data de Entrega`;
+      return `alterou a Data de Entrega`;
+    case "dev_deadline":
+      if (!item.valor_anterior && item.valor_novo)
+        return `definiu Data de Desenvolvimento`;
+      if (item.valor_anterior && !item.valor_novo)
+        return `removeu a Data de Desenvolvimento`;
+      return `alterou a Data de Desenvolvimento`;
     case "estimativa_horas":
       if (!item.valor_anterior && item.valor_novo)
         return `definiu estimativa de ${item.valor_novo}h`;
