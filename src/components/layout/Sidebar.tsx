@@ -147,7 +147,7 @@ export function Sidebar() {
                 />
               )}
               {temPermissao("gerenciar_tenants") && (
-                <NavItem to="/admin/tenants" icon={Building} label="Tenants" />
+                <NavItem to="/admin/tenants" icon={Building} label="Empresas" />
               )}
               <NavItem to="/perfil" icon={UserCircle} label="Perfil" />
             </>
