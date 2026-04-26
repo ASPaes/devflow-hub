@@ -801,7 +801,17 @@ export type Database = {
       }
       close_expired_demands: { Args: never; Returns: number }
       dashboard_metrics: {
-        Args: { p_data_fim?: string; p_data_inicio?: string }
+        Args: {
+          p_area_id?: string[]
+          p_data_fim?: string
+          p_data_inicio?: string
+          p_modulo_id?: string[]
+          p_prioridade?: number[]
+          p_responsavel_id?: string[]
+          p_status?: string[]
+          p_tenant_id?: string[]
+          p_tipo?: string[]
+        }
         Returns: Json
       }
       demanda_visivel: { Args: { p_demanda_id: string }; Returns: boolean }
