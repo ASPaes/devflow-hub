@@ -199,7 +199,7 @@ function UsuariosPage() {
     },
     {
       key: "tenant",
-      header: "Tenant",
+      header: "Empresa",
       render: (row) => (
         <span className="text-sm text-muted-foreground">
           {row.tenant_nome ?? "—"}
