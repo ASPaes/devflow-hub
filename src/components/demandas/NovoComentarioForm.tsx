@@ -17,13 +17,15 @@ interface Props {
 
 export function NovoComentarioForm({ demandaId }: Props) {
   const { user } = useAuth();
-  const { profile } = useProfile();
+  const { profile, temPermissao } = useProfile();
   const createMutation = useCreateComentario();
   const [texto, setTexto] = React.useState("");
 
+  const podeComentar = temPermissao("comentar_demanda");
   const submitting = createMutation.isPending;
   const trimmed = texto.trim();
-  const canSubmit = trimmed.length > 0 && trimmed.length <= MAX_LEN && !!user;
+  const canSubmit =
+    podeComentar && trimmed.length > 0 && trimmed.length <= MAX_LEN && !!user;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,6 +51,14 @@ export function NovoComentarioForm({ demandaId }: Props) {
 
   const nome = profile?.nome ?? user?.email ?? "?";
   const avatarUrl = profile?.avatar_url ?? undefined;
+
+  if (!podeComentar) {
+    return (
+      <p className="text-xs text-muted-foreground">
+        Você não tem permissão para comentar nesta demanda.
+      </p>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} className="flex gap-3">
