@@ -94,7 +94,7 @@ Deno.serve(async (req) => {
       type: 'magiclink',
       email: payload.email,
       options: {
-        redirectTo: 'https://doctordev.lovable.app/',
+        redirectTo: 'https://doctordev.lovable.app/sso-callback',
       },
     });
 
