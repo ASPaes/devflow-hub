@@ -34,6 +34,7 @@ import {
 } from "@/hooks/useDashboardMetrics";
 import { DashboardFilterBar } from "@/components/dashboard/DashboardFilterBar";
 import { DistribuicaoDesenvolvedorCard } from "@/components/dashboard/DistribuicaoDesenvolvedorCard";
+import { SemDataCard } from "@/components/dashboard/SemDataCard";
 import { formatRelativeSP } from "@/lib/format";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useDrillDown } from "@/hooks/useDrillDown";
