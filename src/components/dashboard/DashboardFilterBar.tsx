@@ -85,6 +85,19 @@ export function DashboardFilterBar({
     queryKey: ["dashboard-filter-responsaveis"],
     queryFn: async () => {
       const { data, error } = await supabase
+        .from("vw_potenciais_responsaveis")
+        .select("id, nome")
+        .order("nome");
+      if (error) throw error;
+      return data ?? [];
+    },
+    staleTime: 5 * 60_000,
+  });
+
+  const { data: solicitantes = [], isLoading: loadingSolic } = useQuery({
+    queryKey: ["dashboard-filter-solicitantes"],
+    queryFn: async () => {
+      const { data, error } = await supabase
         .from("profiles")
         .select("id, nome")
         .eq("ativo", true)
@@ -107,12 +120,23 @@ export function DashboardFilterBar({
     value: t.id,
     label: t.nome,
   }));
-  const responsavelOptions: FilterOption<string>[] = responsaveis.map((r) => ({
-    value: r.id,
-    label: r.nome,
+  const responsavelOptions: FilterOption<string>[] = responsaveis
+    .filter((r): r is { id: string; nome: string } => !!r.id && !!r.nome)
+    .map((r) => ({ value: r.id, label: r.nome }));
+  const solicitanteOptions: FilterOption<string>[] = solicitantes.map((s) => ({
+    value: s.id,
+    label: s.nome,
   }));
 
   const totalAplicados =
+    filtros.status.length +
+    filtros.prioridade.length +
+    filtros.tipo.length +
+    filtros.modulo_id.length +
+    filtros.area_id.length +
+    filtros.tenant_id.length +
+    filtros.responsavel_id.length +
+    filtros.solicitante_id.length;
     filtros.status.length +
     filtros.prioridade.length +
     filtros.tipo.length +
@@ -168,6 +192,13 @@ export function DashboardFilterBar({
         selected={filtros.responsavel_id}
         onChange={(v) => onChange({ ...filtros, responsavel_id: v })}
         loading={loadingResp}
+      />
+      <MultiSelectFilter<string>
+        label="Aberto por"
+        options={solicitanteOptions}
+        selected={filtros.solicitante_id}
+        onChange={(v) => onChange({ ...filtros, solicitante_id: v })}
+        loading={loadingSolic}
       />
 
       {totalAplicados > 0 && (

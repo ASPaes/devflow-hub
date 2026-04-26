@@ -20,6 +20,7 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedDemandasIndexRouteImport } from './routes/_authenticated/demandas.index'
 import { Route as AuthenticatedDemandasNovaRouteImport } from './routes/_authenticated/demandas.nova'
 import { Route as AuthenticatedDemandasKanbanRouteImport } from './routes/_authenticated/demandas.kanban'
+import { Route as AuthenticatedDemandasExcluidasRouteImport } from './routes/_authenticated/demandas.excluidas'
 import { Route as AuthenticatedDemandasCodigoRouteImport } from './routes/_authenticated/demandas.$codigo'
 import { Route as AuthenticatedAdminUsuariosRouteImport } from './routes/_authenticated/admin/usuarios'
 import { Route as AuthenticatedAdminTenantsRouteImport } from './routes/_authenticated/admin/tenants'
@@ -85,6 +86,12 @@ const AuthenticatedDemandasKanbanRoute =
     path: '/demandas/kanban',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedDemandasExcluidasRoute =
+  AuthenticatedDemandasExcluidasRouteImport.update({
+    id: '/demandas/excluidas',
+    path: '/demandas/excluidas',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedDemandasCodigoRoute =
   AuthenticatedDemandasCodigoRouteImport.update({
     id: '/demandas/$codigo',
@@ -142,6 +149,7 @@ export interface FileRoutesByFullPath {
   '/admin/tenants': typeof AuthenticatedAdminTenantsRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/demandas/$codigo': typeof AuthenticatedDemandasCodigoRoute
+  '/demandas/excluidas': typeof AuthenticatedDemandasExcluidasRoute
   '/demandas/kanban': typeof AuthenticatedDemandasKanbanRoute
   '/demandas/nova': typeof AuthenticatedDemandasNovaRoute
   '/demandas/': typeof AuthenticatedDemandasIndexRoute
@@ -161,6 +169,7 @@ export interface FileRoutesByTo {
   '/admin/tenants': typeof AuthenticatedAdminTenantsRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/demandas/$codigo': typeof AuthenticatedDemandasCodigoRoute
+  '/demandas/excluidas': typeof AuthenticatedDemandasExcluidasRoute
   '/demandas/kanban': typeof AuthenticatedDemandasKanbanRoute
   '/demandas/nova': typeof AuthenticatedDemandasNovaRoute
   '/demandas': typeof AuthenticatedDemandasIndexRoute
@@ -182,6 +191,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/tenants': typeof AuthenticatedAdminTenantsRoute
   '/_authenticated/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/_authenticated/demandas/$codigo': typeof AuthenticatedDemandasCodigoRoute
+  '/_authenticated/demandas/excluidas': typeof AuthenticatedDemandasExcluidasRoute
   '/_authenticated/demandas/kanban': typeof AuthenticatedDemandasKanbanRoute
   '/_authenticated/demandas/nova': typeof AuthenticatedDemandasNovaRoute
   '/_authenticated/demandas/': typeof AuthenticatedDemandasIndexRoute
@@ -203,6 +213,7 @@ export interface FileRouteTypes {
     | '/admin/tenants'
     | '/admin/usuarios'
     | '/demandas/$codigo'
+    | '/demandas/excluidas'
     | '/demandas/kanban'
     | '/demandas/nova'
     | '/demandas/'
@@ -222,6 +233,7 @@ export interface FileRouteTypes {
     | '/admin/tenants'
     | '/admin/usuarios'
     | '/demandas/$codigo'
+    | '/demandas/excluidas'
     | '/demandas/kanban'
     | '/demandas/nova'
     | '/demandas'
@@ -242,6 +254,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/tenants'
     | '/_authenticated/admin/usuarios'
     | '/_authenticated/demandas/$codigo'
+    | '/_authenticated/demandas/excluidas'
     | '/_authenticated/demandas/kanban'
     | '/_authenticated/demandas/nova'
     | '/_authenticated/demandas/'
@@ -334,6 +347,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDemandasKanbanRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/demandas/excluidas': {
+      id: '/_authenticated/demandas/excluidas'
+      path: '/demandas/excluidas'
+      fullPath: '/demandas/excluidas'
+      preLoaderRoute: typeof AuthenticatedDemandasExcluidasRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/demandas/$codigo': {
       id: '/_authenticated/demandas/$codigo'
       path: '/demandas/$codigo'
@@ -412,6 +432,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedDemandasCodigoRoute: typeof AuthenticatedDemandasCodigoRoute
+  AuthenticatedDemandasExcluidasRoute: typeof AuthenticatedDemandasExcluidasRoute
   AuthenticatedDemandasKanbanRoute: typeof AuthenticatedDemandasKanbanRoute
   AuthenticatedDemandasNovaRoute: typeof AuthenticatedDemandasNovaRoute
   AuthenticatedDemandasIndexRoute: typeof AuthenticatedDemandasIndexRoute
@@ -422,6 +443,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedDemandasCodigoRoute: AuthenticatedDemandasCodigoRoute,
+  AuthenticatedDemandasExcluidasRoute: AuthenticatedDemandasExcluidasRoute,
   AuthenticatedDemandasKanbanRoute: AuthenticatedDemandasKanbanRoute,
   AuthenticatedDemandasNovaRoute: AuthenticatedDemandasNovaRoute,
   AuthenticatedDemandasIndexRoute: AuthenticatedDemandasIndexRoute,

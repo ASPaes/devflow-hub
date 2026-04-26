@@ -1,7 +1,7 @@
 import * as React from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
-import { Inbox, Plus, Search, SearchX, X } from "lucide-react";
+import { Inbox, Plus, Search, SearchX, Trash2, X } from "lucide-react";
 import { z } from "zod";
 
 import { PageHeader } from "@/components/common/PageHeader";
@@ -76,6 +76,9 @@ function DemandasListagem() {
     if (filtrosCompartilhados.responsavel_id.length > 0) {
       f.responsavel_ids = filtrosCompartilhados.responsavel_id;
     }
+    if (filtrosCompartilhados.solicitante_id.length > 0) {
+      f.solicitante_ids = filtrosCompartilhados.solicitante_id;
+    }
 
     f.periodo = periodo;
     f.tipoData = tipoData;
@@ -104,7 +107,8 @@ function DemandasListagem() {
     filtrosCompartilhados.modulo_id.length +
     filtrosCompartilhados.area_id.length +
     filtrosCompartilhados.tenant_id.length +
-    filtrosCompartilhados.responsavel_id.length;
+    filtrosCompartilhados.responsavel_id.length +
+    filtrosCompartilhados.solicitante_id.length;
 
   const hasFiltros =
     !!busca?.trim() || totalFiltrosAplicados > 0 || apenasSemData;
@@ -119,11 +123,13 @@ function DemandasListagem() {
       area_id: [],
       tenant_id: [],
       responsavel_id: [],
+      solicitante_id: [],
     });
     setApenasSemData(false);
   }, [setBusca, setFiltrosCompartilhados, setApenasSemData]);
 
   const podeCriar = temPermissao("criar_demanda");
+  const podeVerExcluidas = temPermissao("deletar_demanda");
 
   return (
     <div>
@@ -133,6 +139,14 @@ function DemandasListagem() {
         action={
           <div className="flex items-center gap-2">
             <ViewToggle />
+            {podeVerExcluidas && (
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/demandas/excluidas">
+                  <Trash2 className="mr-1.5 h-4 w-4" />
+                  Excluídas
+                </Link>
+              </Button>
+            )}
             {podeCriar && (
               <Button asChild>
                 <Link to="/demandas/nova">

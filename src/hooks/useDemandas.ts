@@ -213,6 +213,7 @@ export type FiltrosDemanda = {
   area_ids?: string[];
   tenant_ids?: string[];
   responsavel_ids?: string[];
+  solicitante_ids?: string[];
 
   // === Período por tipo de data ===
   periodo?: DateRange | null;
@@ -273,6 +274,10 @@ export function useDemandasLista(
 
       if (filtros.responsavel_ids?.length) {
         q = q.in("responsavel_id", filtros.responsavel_ids);
+      }
+
+      if (filtros.solicitante_ids?.length) {
+        q = q.in("solicitante_id", filtros.solicitante_ids);
       }
 
       // === PERÍODO POR TIPO DE DATA ===

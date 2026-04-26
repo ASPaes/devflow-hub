@@ -5,7 +5,7 @@ import {
   notFound,
   useNavigate,
 } from "@tanstack/react-router";
-import { ChevronLeft, FileQuestion, Link as LinkIcon, MoreHorizontal } from "lucide-react";
+import { ChevronLeft, FileQuestion, Link as LinkIcon, MoreHorizontal, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -48,6 +48,7 @@ import {
   StatusBadge,
   TipoBadge,
 } from "@/components/demandas/MetadataSidebar";
+import { ExcluirDemandaDialog } from "@/components/demandas/ExcluirDemandaDialog";
 
 export const Route = createFileRoute("/_authenticated/demandas/$codigo")({
   component: DemandaDetalhe,
@@ -60,6 +61,7 @@ function DemandaDetalhe() {
   const { temPermissao } = useProfile();
   const { data: demanda, isLoading, error } = useDemanda(codigo);
   const updateMutation = useUpdateDemanda();
+  const [excluirOpen, setExcluirOpen] = React.useState(false);
 
   useDocumentTitle(
     demanda ? `${demanda.codigo ?? codigo} · ${demanda.titulo}` : codigo,
@@ -83,6 +85,7 @@ function DemandaDetalhe() {
   const canEditTextual = canEditAny || canEditOwnTriagem;
   const canEditMetadata = canEditAny;
   const canChangeStatus = canEditAny;
+  const podeExcluir = temPermissao("deletar_demanda");
 
   const handlePatch = async (patch: UpdateDemandaPatch) => {
     await updateMutation.mutateAsync({ id: demanda.id, patch });
@@ -126,6 +129,15 @@ function DemandaDetalhe() {
                       <LinkIcon className="mr-2 h-3.5 w-3.5" />
                       Copiar link
                     </DropdownMenuItem>
+                    {podeExcluir && (
+                      <DropdownMenuItem
+                        onSelect={() => setExcluirOpen(true)}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <Trash2 className="mr-2 h-3.5 w-3.5" />
+                        Excluir demanda
+                      </DropdownMenuItem>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
@@ -194,6 +206,15 @@ function DemandaDetalhe() {
           saving={updateMutation.isPending}
         />
       </div>
+
+      {podeExcluir && (
+        <ExcluirDemandaDialog
+          demandaId={demanda.id}
+          demandaCodigo={demanda.codigo ?? codigo}
+          open={excluirOpen}
+          onOpenChange={setExcluirOpen}
+        />
+      )}
     </div>
   );
 }
