@@ -308,7 +308,14 @@ function Dashboard() {
       </div>
       <div className="flex items-center gap-2">
         {podeVerMetricas && (
-          <PeriodoPicker value={periodo} onChange={setPeriodo} />
+          <PeriodoPicker
+            value={periodo}
+            onChange={setPeriodo}
+            tipoData={tipoData}
+            onTipoDataChange={setTipoData}
+            apenasSemData={apenasSemData}
+            onApenasSemDataChange={setApenasSemData}
+          />
         )}
         {podeCriar && (
           <Button asChild size="lg">
