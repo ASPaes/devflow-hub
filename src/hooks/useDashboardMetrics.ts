@@ -37,6 +37,7 @@ export type DashboardFiltros = {
   area_id: string[];
   tenant_id: string[];
   responsavel_id: string[];
+  solicitante_id: string[];
 };
 
 export const FILTROS_VAZIOS: DashboardFiltros = {
@@ -47,6 +48,7 @@ export const FILTROS_VAZIOS: DashboardFiltros = {
   area_id: [],
   tenant_id: [],
   responsavel_id: [],
+  solicitante_id: [],
 };
 
 export function useDashboardMetrics(
@@ -84,6 +86,10 @@ export function useDashboardMetrics(
         p_responsavel_id:
           filtros.responsavel_id.length > 0
             ? filtros.responsavel_id
+            : undefined,
+        p_solicitante_id:
+          filtros.solicitante_id.length > 0
+            ? filtros.solicitante_id
             : undefined,
         p_tipo_data: tipoData,
         p_apenas_sem_data: apenasSemData,
