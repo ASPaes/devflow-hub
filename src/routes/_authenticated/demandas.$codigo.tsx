@@ -206,6 +206,15 @@ function DemandaDetalhe() {
           saving={updateMutation.isPending}
         />
       </div>
+
+      {podeExcluir && (
+        <ExcluirDemandaDialog
+          demandaId={demanda.id}
+          demandaCodigo={demanda.codigo ?? codigo}
+          open={excluirOpen}
+          onOpenChange={setExcluirOpen}
+        />
+      )}
     </div>
   );
 }

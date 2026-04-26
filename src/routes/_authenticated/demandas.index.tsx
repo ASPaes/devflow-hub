@@ -1,7 +1,7 @@
 import * as React from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
-import { Inbox, Plus, Search, SearchX, X } from "lucide-react";
+import { Inbox, Plus, Search, SearchX, Trash2, X } from "lucide-react";
 import { z } from "zod";
 
 import { PageHeader } from "@/components/common/PageHeader";
@@ -129,6 +129,7 @@ function DemandasListagem() {
   }, [setBusca, setFiltrosCompartilhados, setApenasSemData]);
 
   const podeCriar = temPermissao("criar_demanda");
+  const podeVerExcluidas = temPermissao("deletar_demanda");
 
   return (
     <div>
@@ -138,6 +139,14 @@ function DemandasListagem() {
         action={
           <div className="flex items-center gap-2">
             <ViewToggle />
+            {podeVerExcluidas && (
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/demandas/excluidas">
+                  <Trash2 className="mr-1.5 h-4 w-4" />
+                  Excluídas
+                </Link>
+              </Button>
+            )}
             {podeCriar && (
               <Button asChild>
                 <Link to="/demandas/nova">
