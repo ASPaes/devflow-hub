@@ -711,6 +711,7 @@ export type Database = {
           deadline: string | null
           delivered_at: string | null
           descricao: string | null
+          dev_deadline: string | null
           estimativa_horas: number | null
           id: string | null
           modulo_cor: string | null
