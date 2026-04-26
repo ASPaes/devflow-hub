@@ -505,8 +505,14 @@ function Dashboard() {
           </>
         ) : (
           <>
-            <DistribuicaoStatus metrics={metrics} />
-            <DistribuicaoPrioridade metrics={metrics} />
+            <DistribuicaoStatus
+              metrics={metrics}
+              onSelect={(status) => drillDown({ status: [status] })}
+            />
+            <DistribuicaoPrioridade
+              metrics={metrics}
+              onSelect={(p) => drillDown({ prioridade: [p] })}
+            />
           </>
         )}
       </div>
@@ -527,6 +533,7 @@ function Dashboard() {
           <DistribuicaoDesenvolvedorCard
             data={metrics.por_responsavel ?? []}
             isLoading={metricsLoading}
+            onSelect={(id) => drillDown({ responsavel_id: [id] })}
           />
         )}
       </div>
