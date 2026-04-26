@@ -172,7 +172,7 @@ function TenantsPage() {
       <ModalForm<TenantInput>
         open={!!editing}
         onOpenChange={(o) => !o && setEditing(null)}
-        title="Editar tenant"
+        title="Editar empresa"
         schema={tenantSchema}
         defaultValues={editValues}
         onSubmit={async (values) => {
