@@ -29,3 +29,24 @@ export function formatRelativeSP(iso: string | null | undefined): string {
   if (Math.abs(days) < 30) return rtf.format(-days, "day");
   return formatDateSP(iso);
 }
+
+/**
+ * Formata segundos em "HHh MMm" (ex: 9000 → "02h 30m").
+ */
+export function formatDuracao(segundos: number): string {
+  if (!segundos || segundos < 0) return "00h 00m";
+  const h = Math.floor(segundos / 3600);
+  const m = Math.floor((segundos % 3600) / 60);
+  return `${String(h).padStart(2, "0")}h ${String(m).padStart(2, "0")}m`;
+}
+
+/**
+ * Formata data ISO (yyyy-mm-dd) em "Seg 25/04/2026".
+ */
+export function formatDataLogPT(iso: string): string {
+  const [y, mo, d] = iso.split("-").map(Number);
+  const date = new Date(y, mo - 1, d);
+  const diasSemana = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+  const dia = diasSemana[date.getDay()];
+  return `${dia} ${String(d).padStart(2, "0")}/${String(mo).padStart(2, "0")}/${y}`;
+}
