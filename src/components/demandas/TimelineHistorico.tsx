@@ -124,11 +124,12 @@ function formatEventoHistorico(
       const antigoNome = item.valor_anterior
         ? (nomePorId.get(item.valor_anterior) ?? "outro usuário")
         : null;
-      if (!item.valor_anterior && novoNome) return `atribuiu responsável: ${novoNome}`;
-      if (item.valor_anterior && !item.valor_novo) return `removeu o responsável`;
+      if (!item.valor_anterior && novoNome)
+        return `atribuiu desenvolvedor: ${novoNome}`;
+      if (item.valor_anterior && !item.valor_novo) return `removeu o desenvolvedor`;
       if (antigoNome && novoNome)
-        return `trocou responsável de ${antigoNome} para ${novoNome}`;
-      return `trocou o responsável`;
+        return `trocou desenvolvedor de ${antigoNome} para ${novoNome}`;
+      return `trocou o desenvolvedor`;
     }
     case "titulo":
       return `alterou o título`;
