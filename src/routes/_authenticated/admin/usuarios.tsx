@@ -84,7 +84,7 @@ const inviteSchema = z.object({
   email: z.string().email("Email inválido"),
   nome: z.string().trim().min(2).max(100),
   perfil_acesso_id: z.string().uuid("Selecione um perfil de acesso"),
-  tenant_id: z.string().uuid("Selecione um tenant"),
+  tenant_id: z.string().uuid("Selecione uma empresa"),
 });
 type InviteValues = z.infer<typeof inviteSchema>;
 
