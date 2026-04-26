@@ -48,10 +48,12 @@ import {
   type StatusDemanda,
   type UpdateDemandaPatch,
 } from "@/hooks/useDemandas";
+import { useAuth } from "@/hooks/useAuth";
 import { useUsuariosComPermissao } from "@/hooks/useUsuarios";
 import { useModulos } from "@/hooks/useModulos";
 import { useSubmodulos } from "@/hooks/useSubmodulos";
 import { useAreas } from "@/hooks/useAreas";
+import { TimerCard } from "./TimerCard";
 
 const PRIORIDADES = [1, 2, 3, 4, 5] as const;
 
@@ -75,6 +77,8 @@ export function MetadataSidebar({
   onPatch,
   saving,
 }: MetadataSidebarProps) {
+  const { user } = useAuth();
+  const isResponsavel = !!user && demanda.responsavel_id === user.id;
   return (
     <aside className="space-y-4 lg:sticky lg:top-6 lg:self-start">
       {/* Status */}
@@ -219,6 +223,9 @@ export function MetadataSidebar({
           />
         </div>
       </section>
+
+      {/* Tempo (Realizado / Em Andamento) */}
+      <TimerCard demanda={demanda} isResponsavel={isResponsavel} />
 
       {/* Classificação */}
       <section className="space-y-3 rounded-lg border border-border bg-card p-4 text-sm">
