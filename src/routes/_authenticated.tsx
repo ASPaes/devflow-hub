@@ -1,6 +1,7 @@
 import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
 
 import { AppShell } from "@/components/layout/AppShell";
+import { DashboardFiltersProvider } from "@/contexts/DashboardFiltersContext";
 
 export const Route = createFileRoute("/_authenticated")({
   beforeLoad: ({ context, location }) => {
@@ -13,8 +14,10 @@ export const Route = createFileRoute("/_authenticated")({
 
 function AuthenticatedLayout() {
   return (
-    <AppShell>
-      <Outlet />
-    </AppShell>
+    <DashboardFiltersProvider>
+      <AppShell>
+        <Outlet />
+      </AppShell>
+    </DashboardFiltersProvider>
   );
 }
