@@ -50,6 +50,9 @@ export type UpdateDemandaPatch = Partial<
     | "responsavel_id"
     | "deadline"
     | "estimativa_horas"
+    | "modulo_id"
+    | "submodulo_id"
+    | "area_id"
   >
 >;
 
