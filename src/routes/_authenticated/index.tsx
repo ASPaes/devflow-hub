@@ -129,7 +129,13 @@ const PRIORIDADE_BAR_BG: Record<1 | 2 | 3 | 4 | 5, string> = {
   5: "bg-prioridade-5",
 };
 
-function DistribuicaoStatus({ metrics }: { metrics: DashboardMetrics }) {
+function DistribuicaoStatus({
+  metrics,
+  onSelect,
+}: {
+  metrics: DashboardMetrics;
+  onSelect?: (status: StatusDemanda) => void;
+}) {
   const valores = STATUS_DEMANDA_VALUES.map(
     (k) => metrics.por_status[k] ?? 0,
   );
@@ -146,7 +152,12 @@ function DistribuicaoStatus({ metrics }: { metrics: DashboardMetrics }) {
           const valor = metrics.por_status[status] ?? 0;
           const pct = (valor / max) * 100;
           return (
-            <div key={status} className="flex items-center gap-3">
+            <button
+              key={status}
+              type="button"
+              onClick={() => onSelect?.(status)}
+              className="flex w-full items-center gap-3 rounded-md px-1 py-1 text-left transition-colors hover:bg-secondary/40 cursor-pointer"
+            >
               <div className="w-32 shrink-0 text-xs text-muted-foreground">
                 {STATUS_DEMANDA_LABEL[status]}
               </div>
@@ -159,7 +170,7 @@ function DistribuicaoStatus({ metrics }: { metrics: DashboardMetrics }) {
               <div className="w-8 shrink-0 text-right font-mono text-xs text-foreground">
                 {valor}
               </div>
-            </div>
+            </button>
           );
         })}
       </CardContent>
