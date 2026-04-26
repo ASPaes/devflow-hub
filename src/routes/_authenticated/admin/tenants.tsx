@@ -257,7 +257,7 @@ function TenantFields({ form }: { form: UseFormReturn<TenantInput> }) {
               />
             </FormControl>
             <FormDescription>
-              ID do tenant correspondente no DoctorSaas, quando aplicável. Use
+              ID da empresa correspondente no DoctorSaas, quando aplicável. Use
               para mapear futura integração.
             </FormDescription>
             <FormMessage />
