@@ -85,6 +85,19 @@ export function DashboardFilterBar({
     queryKey: ["dashboard-filter-responsaveis"],
     queryFn: async () => {
       const { data, error } = await supabase
+        .from("vw_potenciais_responsaveis")
+        .select("id, nome")
+        .order("nome");
+      if (error) throw error;
+      return data ?? [];
+    },
+    staleTime: 5 * 60_000,
+  });
+
+  const { data: solicitantes = [], isLoading: loadingSolic } = useQuery({
+    queryKey: ["dashboard-filter-solicitantes"],
+    queryFn: async () => {
+      const { data, error } = await supabase
         .from("profiles")
         .select("id, nome")
         .eq("ativo", true)
