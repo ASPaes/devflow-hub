@@ -5,9 +5,12 @@ import { supabase } from "@/lib/supabase";
 
 export type AppPermissao =
   | "criar_demanda"
+  | "ver_demandas"
   | "ver_todas_demandas"
+  | "comentar_demanda"
   | "editar_qualquer_demanda"
   | "deletar_demanda"
+  | "pode_ser_responsavel"
   | "gerenciar_modulos"
   | "gerenciar_submodulos"
   | "gerenciar_areas"
