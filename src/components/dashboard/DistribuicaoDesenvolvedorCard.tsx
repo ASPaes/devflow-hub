@@ -9,6 +9,8 @@ import type { ResponsavelStat } from "@/hooks/useDashboardMetrics";
 interface DistribuicaoDesenvolvedorCardProps {
   data: ResponsavelStat[];
   isLoading?: boolean;
+  /** Callback invocado ao clicar numa linha (não chamado para "Sem desenvolvedor"). */
+  onSelect?: (responsavelId: string) => void;
 }
 
 function inicial(nome: string): string {
@@ -22,6 +24,7 @@ function inicial(nome: string): string {
 export function DistribuicaoDesenvolvedorCard({
   data,
   isLoading,
+  onSelect,
 }: DistribuicaoDesenvolvedorCardProps) {
   const max = data.reduce((m, r) => Math.max(m, r.total), 0);
 
@@ -53,11 +56,20 @@ export function DistribuicaoDesenvolvedorCard({
           data.map((row, idx) => {
             const pct = max > 0 ? (row.total / max) * 100 : 0;
             const isSemDev = row.id === null;
+            const clickable = !isSemDev && !!onSelect;
+            const Wrapper = clickable ? "button" : "div";
+            const wrapperProps = clickable
+              ? {
+                  type: "button" as const,
+                  onClick: () => onSelect?.(row.id as string),
+                  className:
+                    "flex w-full items-center gap-3 rounded-md px-1 py-1 text-left transition-colors hover:bg-secondary/40 cursor-pointer",
+                }
+              : {
+                  className: "flex items-center gap-3 px-1 py-1",
+                };
             return (
-              <div
-                key={row.id ?? `sem-dev-${idx}`}
-                className="flex items-center gap-3"
-              >
+              <Wrapper key={row.id ?? `sem-dev-${idx}`} {...wrapperProps}>
                 <Avatar className="h-7 w-7 shrink-0">
                   {row.avatar_url && (
                     <AvatarImage src={row.avatar_url} alt={row.nome} />
@@ -98,7 +110,7 @@ export function DistribuicaoDesenvolvedorCard({
                     />
                   </div>
                 </div>
-              </div>
+              </Wrapper>
             );
           })
         )}

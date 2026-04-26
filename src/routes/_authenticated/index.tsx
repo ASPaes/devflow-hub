@@ -36,7 +36,17 @@ import { DashboardFilterBar } from "@/components/dashboard/DashboardFilterBar";
 import { DistribuicaoDesenvolvedorCard } from "@/components/dashboard/DistribuicaoDesenvolvedorCard";
 import { formatRelativeSP } from "@/lib/format";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
+import { useDrillDown } from "@/hooks/useDrillDown";
 import { cn } from "@/lib/utils";
+
+const STATUS_ABERTAS: StatusDemanda[] = [
+  "triagem",
+  "analise",
+  "desenvolvimento",
+  "teste",
+  "reaberta",
+];
+const STATUS_CONCLUIDAS: StatusDemanda[] = ["entregue", "encerrada"];
 
 export const Route = createFileRoute("/_authenticated/")({
   component: Dashboard,
@@ -48,11 +58,20 @@ interface KpiProps {
   isLoading: boolean;
   icon: React.ComponentType<{ className?: string }>;
   iconClassName?: string;
+  onClick?: () => void;
 }
 
-function KpiCard({ label, value, isLoading, icon: Icon, iconClassName }: KpiProps) {
-  return (
-    <Card>
+function KpiCard({
+  label,
+  value,
+  isLoading,
+  icon: Icon,
+  iconClassName,
+  onClick,
+}: KpiProps) {
+  const interactive = !!onClick;
+  const content = (
+    <>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">
           {label}
@@ -66,8 +85,27 @@ function KpiCard({ label, value, isLoading, icon: Icon, iconClassName }: KpiProp
           <div className="text-3xl font-semibold text-foreground">{value}</div>
         )}
       </CardContent>
-    </Card>
+    </>
   );
+  if (interactive) {
+    return (
+      <Card
+        role="button"
+        tabIndex={0}
+        onClick={onClick}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onClick?.();
+          }
+        }}
+        className="cursor-pointer text-left transition-colors hover:bg-secondary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        {content}
+      </Card>
+    );
+  }
+  return <Card>{content}</Card>;
 }
 
 // Bar style maps — solid color for distribution charts.
@@ -91,7 +129,13 @@ const PRIORIDADE_BAR_BG: Record<1 | 2 | 3 | 4 | 5, string> = {
   5: "bg-prioridade-5",
 };
 
-function DistribuicaoStatus({ metrics }: { metrics: DashboardMetrics }) {
+function DistribuicaoStatus({
+  metrics,
+  onSelect,
+}: {
+  metrics: DashboardMetrics;
+  onSelect?: (status: StatusDemanda) => void;
+}) {
   const valores = STATUS_DEMANDA_VALUES.map(
     (k) => metrics.por_status[k] ?? 0,
   );
@@ -108,7 +152,12 @@ function DistribuicaoStatus({ metrics }: { metrics: DashboardMetrics }) {
           const valor = metrics.por_status[status] ?? 0;
           const pct = (valor / max) * 100;
           return (
-            <div key={status} className="flex items-center gap-3">
+            <button
+              key={status}
+              type="button"
+              onClick={() => onSelect?.(status)}
+              className="flex w-full items-center gap-3 rounded-md px-1 py-1 text-left transition-colors hover:bg-secondary/40 cursor-pointer"
+            >
               <div className="w-32 shrink-0 text-xs text-muted-foreground">
                 {STATUS_DEMANDA_LABEL[status]}
               </div>
@@ -121,7 +170,7 @@ function DistribuicaoStatus({ metrics }: { metrics: DashboardMetrics }) {
               <div className="w-8 shrink-0 text-right font-mono text-xs text-foreground">
                 {valor}
               </div>
-            </div>
+            </button>
           );
         })}
       </CardContent>
@@ -129,7 +178,13 @@ function DistribuicaoStatus({ metrics }: { metrics: DashboardMetrics }) {
   );
 }
 
-function DistribuicaoPrioridade({ metrics }: { metrics: DashboardMetrics }) {
+function DistribuicaoPrioridade({
+  metrics,
+  onSelect,
+}: {
+  metrics: DashboardMetrics;
+  onSelect?: (prioridade: number) => void;
+}) {
   const niveis: Array<1 | 2 | 3 | 4 | 5> = [5, 4, 3, 2, 1];
   const valores = niveis.map((n) => metrics.por_prioridade[String(n)] ?? 0);
   const max = Math.max(1, ...valores);
@@ -145,7 +200,12 @@ function DistribuicaoPrioridade({ metrics }: { metrics: DashboardMetrics }) {
           const valor = metrics.por_prioridade[String(n)] ?? 0;
           const pct = (valor / max) * 100;
           return (
-            <div key={n} className="flex items-center gap-3">
+            <button
+              key={n}
+              type="button"
+              onClick={() => onSelect?.(n)}
+              className="flex w-full items-center gap-3 rounded-md px-1 py-1 text-left transition-colors hover:bg-secondary/40 cursor-pointer"
+            >
               <div className="w-8 shrink-0 text-xs font-medium text-muted-foreground">
                 P{n}
               </div>
@@ -158,7 +218,7 @@ function DistribuicaoPrioridade({ metrics }: { metrics: DashboardMetrics }) {
               <div className="w-8 shrink-0 text-right font-mono text-xs text-foreground">
                 {valor}
               </div>
-            </div>
+            </button>
           );
         })}
         <div className="pt-2">
@@ -262,6 +322,7 @@ function Dashboard() {
     setApenasSemData,
     setFiltros,
   } = useDashboardFilters();
+  const { drillDown, goToDemandas } = useDrillDown();
 
   const metricsQuery = useDashboardMetrics(
     periodo,
@@ -384,6 +445,7 @@ function Dashboard() {
           isLoading={metricsLoading}
           icon={Inbox}
           iconClassName="h-5 w-5 text-muted-foreground"
+          onClick={goToDemandas}
         />
         <KpiCard
           label="Abertas"
@@ -391,6 +453,7 @@ function Dashboard() {
           isLoading={metricsLoading}
           icon={Clock}
           iconClassName="h-5 w-5 text-accent"
+          onClick={() => drillDown({ status: STATUS_ABERTAS })}
         />
         <KpiCard
           label="Prioritárias"
@@ -402,6 +465,9 @@ function Dashboard() {
               ? "h-5 w-5 text-prioridade-5"
               : "h-5 w-5 text-muted-foreground"
           }
+          onClick={() =>
+            drillDown({ status: STATUS_ABERTAS, prioridade: [4, 5] })
+          }
         />
         <KpiCard
           label="Concluídas no período"
@@ -409,6 +475,7 @@ function Dashboard() {
           isLoading={metricsLoading}
           icon={CheckCircle2}
           iconClassName="h-5 w-5 text-status-entregue"
+          onClick={() => drillDown({ status: STATUS_CONCLUIDAS })}
         />
       </div>
 
@@ -438,8 +505,14 @@ function Dashboard() {
           </>
         ) : (
           <>
-            <DistribuicaoStatus metrics={metrics} />
-            <DistribuicaoPrioridade metrics={metrics} />
+            <DistribuicaoStatus
+              metrics={metrics}
+              onSelect={(status) => drillDown({ status: [status] })}
+            />
+            <DistribuicaoPrioridade
+              metrics={metrics}
+              onSelect={(p) => drillDown({ prioridade: [p] })}
+            />
           </>
         )}
       </div>
@@ -460,6 +533,7 @@ function Dashboard() {
           <DistribuicaoDesenvolvedorCard
             data={metrics.por_responsavel ?? []}
             isLoading={metricsLoading}
+            onSelect={(id) => drillDown({ responsavel_id: [id] })}
           />
         )}
       </div>
