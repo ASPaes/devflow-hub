@@ -58,11 +58,23 @@ interface KpiProps {
   isLoading: boolean;
   icon: React.ComponentType<{ className?: string }>;
   iconClassName?: string;
+  onClick?: () => void;
 }
 
-function KpiCard({ label, value, isLoading, icon: Icon, iconClassName }: KpiProps) {
-  return (
-    <Card>
+function KpiCard({
+  label,
+  value,
+  isLoading,
+  icon: Icon,
+  iconClassName,
+  onClick,
+}: KpiProps) {
+  const interactive = !!onClick;
+  const cardClass = interactive
+    ? "cursor-pointer text-left transition-colors hover:bg-secondary/40"
+    : undefined;
+  const content = (
+    <>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">
           {label}
@@ -76,8 +88,18 @@ function KpiCard({ label, value, isLoading, icon: Icon, iconClassName }: KpiProp
           <div className="text-3xl font-semibold text-foreground">{value}</div>
         )}
       </CardContent>
-    </Card>
+    </>
   );
+  if (interactive) {
+    return (
+      <Card asChild className={cardClass}>
+        <button type="button" onClick={onClick}>
+          {content}
+        </button>
+      </Card>
+    );
+  }
+  return <Card>{content}</Card>;
 }
 
 // Bar style maps — solid color for distribution charts.
