@@ -43,9 +43,9 @@ export function translateSupabaseError(
     if (entity === "tenant") {
       const m = (rawMessage ?? "").toLowerCase();
       if (m.includes("doctorsaas_tenant_id"))
-        return "Este DoctorSaas Tenant ID já está vinculado a outro tenant";
-      if (m.includes("nome")) return "Já existe um tenant com esse nome";
-      return "Já existe um tenant com esses dados";
+        return "Este DoctorSaas Tenant ID já está vinculado a outra empresa";
+      if (m.includes("nome")) return "Já existe uma empresa com esse nome";
+      return "Já existe uma empresa com esses dados";
     }
     return "Registro duplicado";
   }
