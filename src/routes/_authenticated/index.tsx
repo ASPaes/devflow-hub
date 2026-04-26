@@ -178,7 +178,13 @@ function DistribuicaoStatus({
   );
 }
 
-function DistribuicaoPrioridade({ metrics }: { metrics: DashboardMetrics }) {
+function DistribuicaoPrioridade({
+  metrics,
+  onSelect,
+}: {
+  metrics: DashboardMetrics;
+  onSelect?: (prioridade: number) => void;
+}) {
   const niveis: Array<1 | 2 | 3 | 4 | 5> = [5, 4, 3, 2, 1];
   const valores = niveis.map((n) => metrics.por_prioridade[String(n)] ?? 0);
   const max = Math.max(1, ...valores);
@@ -194,7 +200,12 @@ function DistribuicaoPrioridade({ metrics }: { metrics: DashboardMetrics }) {
           const valor = metrics.por_prioridade[String(n)] ?? 0;
           const pct = (valor / max) * 100;
           return (
-            <div key={n} className="flex items-center gap-3">
+            <button
+              key={n}
+              type="button"
+              onClick={() => onSelect?.(n)}
+              className="flex w-full items-center gap-3 rounded-md px-1 py-1 text-left transition-colors hover:bg-secondary/40 cursor-pointer"
+            >
               <div className="w-8 shrink-0 text-xs font-medium text-muted-foreground">
                 P{n}
               </div>
@@ -207,7 +218,7 @@ function DistribuicaoPrioridade({ metrics }: { metrics: DashboardMetrics }) {
               <div className="w-8 shrink-0 text-right font-mono text-xs text-foreground">
                 {valor}
               </div>
-            </div>
+            </button>
           );
         })}
         <div className="pt-2">
