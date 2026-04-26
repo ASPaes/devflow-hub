@@ -34,6 +34,7 @@ import {
 } from "@/hooks/useDashboardMetrics";
 import { DashboardFilterBar } from "@/components/dashboard/DashboardFilterBar";
 import { DistribuicaoDesenvolvedorCard } from "@/components/dashboard/DistribuicaoDesenvolvedorCard";
+import { SemDataCard } from "@/components/dashboard/SemDataCard";
 import { formatRelativeSP } from "@/lib/format";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useDrillDown } from "@/hooks/useDrillDown";
@@ -477,6 +478,16 @@ function Dashboard() {
           iconClassName="h-5 w-5 text-status-entregue"
           onClick={() => drillDown({ status: STATUS_CONCLUIDAS })}
         />
+      </div>
+
+      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="lg:col-span-1">
+          <SemDataCard
+            semDevDeadline={metrics?.sem_dev_deadline ?? 0}
+            semDeadline={metrics?.sem_deadline ?? 0}
+            isLoading={metricsLoading}
+          />
+        </div>
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
