@@ -24,6 +24,7 @@ function inicial(nome: string): string {
 export function DistribuicaoDesenvolvedorCard({
   data,
   isLoading,
+  onSelect,
 }: DistribuicaoDesenvolvedorCardProps) {
   const max = data.reduce((m, r) => Math.max(m, r.total), 0);
 
