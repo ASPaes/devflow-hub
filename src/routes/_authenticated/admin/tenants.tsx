@@ -158,8 +158,8 @@ function TenantsPage() {
       <ModalForm<TenantInput>
         open={createOpen}
         onOpenChange={setCreateOpen}
-        title="Novo tenant"
-        description="Cadastre uma empresa/cliente do devflow-hub."
+        title="Nova empresa"
+        description="Cadastre uma empresa do devflow-hub."
         schema={tenantSchema}
         defaultValues={emptyValues}
         onSubmit={async (values) => {
