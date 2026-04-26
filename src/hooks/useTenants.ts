@@ -70,7 +70,7 @@ export function useCreateTenant() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: tenantsKey });
       qc.invalidateQueries({ queryKey: ["usuarios_admin"] });
-      toast.success("Tenant criado");
+      toast.success("Empresa criada");
     },
     onError: (err) => toast.error(translateSupabaseError(err, "tenant")),
   });
