@@ -254,6 +254,61 @@ export function useDemandasLista(
         );
       }
 
+      // === MULTI-SELECT (preferem sobre filtros únicos antigos) ===
+      if (filtros.modulo_ids?.length) {
+        q = q.in("modulo_id", filtros.modulo_ids);
+      } else if (filtros.modulo_id) {
+        q = q.eq("modulo_id", filtros.modulo_id);
+      }
+
+      if (filtros.area_ids?.length) {
+        q = q.in("area_id", filtros.area_ids);
+      } else if (filtros.area_id) {
+        q = q.eq("area_id", filtros.area_id);
+      }
+
+      if (filtros.tenant_ids?.length) {
+        q = q.in("tenant_id", filtros.tenant_ids);
+      }
+
+      if (filtros.responsavel_ids?.length) {
+        q = q.in("responsavel_id", filtros.responsavel_ids);
+      }
+
+      // === PERÍODO POR TIPO DE DATA ===
+      const tipoData: TipoData = filtros.tipoData ?? "criacao";
+      const apenasSemData = filtros.apenasSemData ?? false;
+
+      if (apenasSemData) {
+        if (tipoData === "desenvolvimento") {
+          q = q.is("dev_deadline", null);
+        } else if (tipoData === "entrega") {
+          q = q.is("deadline", null);
+        } else {
+          // criacao + apenasSemData → não faz sentido, retorna nada
+          q = q.eq("id", "00000000-0000-0000-0000-000000000000");
+        }
+      } else if (filtros.periodo?.from && filtros.periodo?.to) {
+        const inicio = toIsoDate(filtros.periodo.from);
+        const fim = toIsoDate(filtros.periodo.to);
+
+        if (tipoData === "criacao") {
+          q = q
+            .gte("created_at", `${inicio}T00:00:00`)
+            .lte("created_at", `${fim}T23:59:59`);
+        } else if (tipoData === "desenvolvimento") {
+          q = q
+            .not("dev_deadline", "is", null)
+            .gte("dev_deadline", inicio)
+            .lte("dev_deadline", fim);
+        } else if (tipoData === "entrega") {
+          q = q
+            .not("deadline", "is", null)
+            .gte("deadline", inicio)
+            .lte("deadline", fim);
+        }
+      }
+
       q = q.order("created_at", { ascending: false });
       if (limit) q = q.limit(limit);
 
