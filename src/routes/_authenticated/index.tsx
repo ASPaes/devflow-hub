@@ -1,4 +1,8 @@
+import * as React from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import type { DateRange } from "react-day-picker";
+import { PeriodoPicker } from "@/components/dashboard/PeriodoPicker";
+import { presetToRange } from "@/lib/date-presets";
 import {
   ArrowRight,
   BarChart3,
@@ -247,7 +251,12 @@ function Dashboard() {
 
   useDocumentTitle("Dashboard");
 
-  const metricsQuery = useDashboardMetrics(podeVerMetricas);
+  const [periodo, setPeriodo] = React.useState<DateRange | null>(() => {
+    const r = presetToRange("este_mes");
+    return { from: r.from, to: r.to };
+  });
+
+  const metricsQuery = useDashboardMetrics(periodo, podeVerMetricas);
   const metrics = metricsQuery.data;
   const metricsLoading = metricsQuery.isLoading;
   const metricsRefetching = metricsQuery.isFetching && !metricsQuery.isLoading;
