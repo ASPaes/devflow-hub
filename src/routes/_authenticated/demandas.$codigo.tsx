@@ -87,6 +87,7 @@ function DemandaDetalhe() {
   const handlePatch = async (patch: UpdateDemandaPatch) => {
     await updateMutation.mutateAsync({ id: demanda.id, patch });
     if ("status" in patch) toast.success("Status alterado");
+    else if ("responsavel_id" in patch) toast.success("Desenvolvedor atualizado");
     else toast.success("Atualizado");
   };
 
