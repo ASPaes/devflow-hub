@@ -293,14 +293,19 @@ function Dashboard() {
           </Button>
         )}
       </div>
-      {podeCriar && (
-        <Button asChild size="lg">
-          <Link to="/demandas/nova">
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Abrir nova demanda
-          </Link>
-        </Button>
-      )}
+      <div className="flex items-center gap-2">
+        {podeVerMetricas && (
+          <PeriodoPicker value={periodo} onChange={setPeriodo} />
+        )}
+        {podeCriar && (
+          <Button asChild size="lg">
+            <Link to="/demandas/nova">
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Abrir nova demanda
+            </Link>
+          </Button>
+        )}
+      </div>
     </div>
   );
 
@@ -375,8 +380,8 @@ function Dashboard() {
           }
         />
         <KpiCard
-          label="Concluídas no mês"
-          value={metrics?.concluidas_mes}
+          label="Concluídas no período"
+          value={metrics?.concluidas_periodo}
           isLoading={metricsLoading}
           icon={CheckCircle2}
           iconClassName="h-5 w-5 text-status-entregue"
