@@ -278,6 +278,48 @@ export type Database = {
           },
         ]
       }
+      demanda_timer_log: {
+        Row: {
+          created_at: string
+          data: string
+          demanda_id: string
+          id: string
+          segundos: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          data: string
+          demanda_id: string
+          id?: string
+          segundos?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          data?: string
+          demanda_id?: string
+          id?: string
+          segundos?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demanda_timer_log_demanda_id_fkey"
+            columns: ["demanda_id"]
+            isOneToOne: false
+            referencedRelation: "demandas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demanda_timer_log_demanda_id_fkey"
+            columns: ["demanda_id"]
+            isOneToOne: false
+            referencedRelation: "vw_demandas_lista"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       demanda_vinculos: {
         Row: {
           created_at: string
@@ -360,7 +402,10 @@ export type Database = {
           solicitante_id: string
           status: Database["public"]["Enums"]["status_demanda"]
           submodulo_id: string
+          tempo_em_andamento_segundos: number
+          tempo_realizado_segundos: number
           tenant_id: string
+          timer_iniciado_em: string | null
           tipo: Database["public"]["Enums"]["tipo_demanda"]
           titulo: string
           updated_at: string
@@ -383,7 +428,10 @@ export type Database = {
           solicitante_id: string
           status?: Database["public"]["Enums"]["status_demanda"]
           submodulo_id: string
+          tempo_em_andamento_segundos?: number
+          tempo_realizado_segundos?: number
           tenant_id: string
+          timer_iniciado_em?: string | null
           tipo: Database["public"]["Enums"]["tipo_demanda"]
           titulo: string
           updated_at?: string
@@ -406,7 +454,10 @@ export type Database = {
           solicitante_id?: string
           status?: Database["public"]["Enums"]["status_demanda"]
           submodulo_id?: string
+          tempo_em_andamento_segundos?: number
+          tempo_realizado_segundos?: number
           tenant_id?: string
+          timer_iniciado_em?: string | null
           tipo?: Database["public"]["Enums"]["tipo_demanda"]
           titulo?: string
           updated_at?: string
@@ -772,6 +823,41 @@ export type Database = {
           status: string
         }[]
       }
+      iniciar_timer_demanda: {
+        Args: { p_demanda_id: string }
+        Returns: {
+          area_id: string
+          closed_at: string | null
+          codigo: string | null
+          created_at: string
+          deadline: string | null
+          delivered_at: string | null
+          descricao: string
+          dev_deadline: string | null
+          estimativa_horas: number | null
+          id: string
+          modulo_id: string
+          prioridade: number
+          reopen_deadline: string | null
+          responsavel_id: string | null
+          solicitante_id: string
+          status: Database["public"]["Enums"]["status_demanda"]
+          submodulo_id: string
+          tempo_em_andamento_segundos: number
+          tempo_realizado_segundos: number
+          tenant_id: string
+          timer_iniciado_em: string | null
+          tipo: Database["public"]["Enums"]["tipo_demanda"]
+          titulo: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "demandas"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       list_usuarios_admin: {
         Args: never
         Returns: {
@@ -802,6 +888,41 @@ export type Database = {
         Args: { p_id: string; p_reason: string }
         Returns: undefined
       }
+      pausar_timer_demanda: {
+        Args: { p_demanda_id: string }
+        Returns: {
+          area_id: string
+          closed_at: string | null
+          codigo: string | null
+          created_at: string
+          deadline: string | null
+          delivered_at: string | null
+          descricao: string
+          dev_deadline: string | null
+          estimativa_horas: number | null
+          id: string
+          modulo_id: string
+          prioridade: number
+          reopen_deadline: string | null
+          responsavel_id: string | null
+          solicitante_id: string
+          status: Database["public"]["Enums"]["status_demanda"]
+          submodulo_id: string
+          tempo_em_andamento_segundos: number
+          tempo_realizado_segundos: number
+          tenant_id: string
+          timer_iniciado_em: string | null
+          tipo: Database["public"]["Enums"]["tipo_demanda"]
+          titulo: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "demandas"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       reabrir_demanda: {
         Args: { p_demanda_id: string; p_motivo: string }
         Returns: {
@@ -822,7 +943,10 @@ export type Database = {
           solicitante_id: string
           status: Database["public"]["Enums"]["status_demanda"]
           submodulo_id: string
+          tempo_em_andamento_segundos: number
+          tempo_realizado_segundos: number
           tenant_id: string
+          timer_iniciado_em: string | null
           tipo: Database["public"]["Enums"]["tipo_demanda"]
           titulo: string
           updated_at: string
