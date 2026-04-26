@@ -30,9 +30,13 @@ import {
   PRIORIDADE_BADGE_STYLES,
 } from "@/components/demandas/MetadataSidebar";
 import {
+  FILTROS_VAZIOS,
   useDashboardMetrics,
+  type DashboardFiltros,
   type DashboardMetrics,
 } from "@/hooks/useDashboardMetrics";
+import { DashboardFilterBar } from "@/components/dashboard/DashboardFilterBar";
+import { DistribuicaoDesenvolvedorCard } from "@/components/dashboard/DistribuicaoDesenvolvedorCard";
 import { formatRelativeSP } from "@/lib/format";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { cn } from "@/lib/utils";
@@ -255,8 +259,9 @@ function Dashboard() {
     const r = presetToRange("este_mes");
     return { from: r.from, to: r.to };
   });
+  const [filtros, setFiltros] = React.useState<DashboardFiltros>(FILTROS_VAZIOS);
 
-  const metricsQuery = useDashboardMetrics(periodo, podeVerMetricas);
+  const metricsQuery = useDashboardMetrics(periodo, podeVerMetricas, filtros);
   const metrics = metricsQuery.data;
   const metricsLoading = metricsQuery.isLoading;
   const metricsRefetching = metricsQuery.isFetching && !metricsQuery.isLoading;
