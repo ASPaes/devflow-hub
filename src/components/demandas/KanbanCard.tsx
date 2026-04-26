@@ -82,47 +82,82 @@ export function KanbanCard({ row, onClick }: KanbanCardProps) {
         </div>
       )}
 
-      {/* Linha 4: avatar + contadores */}
-      <div className="mt-3 flex items-center justify-between">
-        {row.responsavel_id ? (
-          <Avatar className="h-6 w-6" title={row.responsavel_nome ?? ""}>
-            {row.responsavel_avatar && (
-              <AvatarImage src={row.responsavel_avatar} alt="" />
-            )}
-            <AvatarFallback className="bg-primary/20 text-[10px] font-medium text-primary">
-              {initials(row.responsavel_nome ?? "")}
-            </AvatarFallback>
-          </Avatar>
-        ) : (
-          <Avatar className="h-6 w-6" title="Sem responsável">
-            <AvatarFallback className="bg-muted text-[10px] font-medium text-muted-foreground">
-              ?
-            </AvatarFallback>
-          </Avatar>
+      {/* Rodapé: solicitante, empresa, dev + contadores */}
+      <div className="mt-3 space-y-2 border-t border-border pt-2">
+        {/* Solicitante */}
+        {row.solicitante_id && (
+          <div className="flex items-center gap-1.5 text-xs">
+            <span className="shrink-0 text-muted-foreground">Aberto por:</span>
+            <Avatar className="h-4 w-4">
+              {row.solicitante_avatar && (
+                <AvatarImage src={row.solicitante_avatar} alt="" />
+              )}
+              <AvatarFallback className="bg-secondary text-[8px] font-medium text-muted-foreground">
+                {initials(row.solicitante_nome ?? "")}
+              </AvatarFallback>
+            </Avatar>
+            <span className="truncate text-foreground">
+              {row.solicitante_nome}
+            </span>
+          </div>
         )}
 
-        {(totalC > 0 || totalA > 0 || totalV > 0) && (
-          <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
-            {totalC > 0 && (
-              <span className="inline-flex items-center gap-0.5">
-                <MessageSquare className="h-3 w-3" />
-                {totalC}
-              </span>
-            )}
-            {totalA > 0 && (
-              <span className="inline-flex items-center gap-0.5">
-                <Paperclip className="h-3 w-3" />
-                {totalA}
-              </span>
-            )}
-            {totalV > 0 && (
-              <span className="inline-flex items-center gap-0.5">
-                <Link2 className="h-3 w-3" />
-                {totalV}
+        {/* Empresa */}
+        {row.tenant_nome && (
+          <div className="flex items-center gap-1.5 text-xs">
+            <span className="shrink-0 text-muted-foreground">Empresa:</span>
+            <span className="truncate text-foreground">{row.tenant_nome}</span>
+          </div>
+        )}
+
+        {/* Dev + contadores */}
+        <div className="flex items-center justify-between gap-2 text-xs">
+          <div className="flex min-w-0 items-center gap-1.5">
+            <span className="shrink-0 text-muted-foreground">Dev:</span>
+            {row.responsavel_id ? (
+              <>
+                <Avatar className="h-4 w-4">
+                  {row.responsavel_avatar && (
+                    <AvatarImage src={row.responsavel_avatar} alt="" />
+                  )}
+                  <AvatarFallback className="bg-primary/20 text-[8px] font-medium text-primary">
+                    {initials(row.responsavel_nome ?? "")}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="truncate text-foreground">
+                  {row.responsavel_nome}
+                </span>
+              </>
+            ) : (
+              <span className="italic text-muted-foreground">
+                Sem desenvolvedor
               </span>
             )}
           </div>
-        )}
+
+          {(totalC > 0 || totalA > 0 || totalV > 0) && (
+            <div className="flex shrink-0 items-center gap-2 text-muted-foreground">
+              {totalC > 0 && (
+                <span className="inline-flex items-center gap-0.5">
+                  <MessageSquare className="h-3 w-3" />
+                  {totalC}
+                </span>
+              )}
+              {totalA > 0 && (
+                <span className="inline-flex items-center gap-0.5">
+                  <Paperclip className="h-3 w-3" />
+                  {totalA}
+                </span>
+              )}
+              {totalV > 0 && (
+                <span className="inline-flex items-center gap-0.5">
+                  <Link2 className="h-3 w-3" />
+                  {totalV}
+                </span>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

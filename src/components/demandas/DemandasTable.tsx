@@ -59,7 +59,8 @@ export function DemandasTable({
             <th className="px-4 py-2.5 font-medium">Prior.</th>
             <th className="px-4 py-2.5 font-medium">Status</th>
             <th className="px-4 py-2.5 font-medium">Empresa</th>
-            <th className="px-4 py-2.5 font-medium">Responsável</th>
+            <th className="px-4 py-2.5 font-medium">Solicitante</th>
+            <th className="px-4 py-2.5 font-medium">Desenvolvedor</th>
             <th className="px-4 py-2.5 font-medium">Atividade</th>
             <th className="px-4 py-2.5 font-medium">Criada</th>
           </tr>
@@ -156,6 +157,25 @@ function DemandaRow({ row, onClick }: DemandaRowProps) {
         <span className="text-xs text-muted-foreground">
           {row.tenant_nome ?? "—"}
         </span>
+      </td>
+      <td className="px-4 py-3 align-middle">
+        {row.solicitante_id ? (
+          <div className="flex items-center gap-2">
+            <Avatar className="h-6 w-6">
+              {row.solicitante_avatar && (
+                <AvatarImage src={row.solicitante_avatar} alt="" />
+              )}
+              <AvatarFallback className="bg-secondary text-[10px] font-medium text-muted-foreground">
+                {initials(row.solicitante_nome ?? "")}
+              </AvatarFallback>
+            </Avatar>
+            <span className="truncate text-xs text-muted-foreground">
+              {row.solicitante_nome}
+            </span>
+          </div>
+        ) : (
+          <span className="text-xs text-muted-foreground">—</span>
+        )}
       </td>
       <td className="px-4 py-3 align-middle">
         {row.responsavel_id ? (

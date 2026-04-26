@@ -237,7 +237,7 @@ export function FiltrosPanel({
         </SelectContent>
       </Select>
 
-      {/* Responsável (single + sentinel) */}
+      {/* Desenvolvedor (single + sentinel) */}
       <Select
         value={value.responsavel_id ?? "__all__"}
         onValueChange={(v) =>
@@ -245,11 +245,11 @@ export function FiltrosPanel({
         }
       >
         <SelectTrigger className="h-9 w-auto min-w-[160px]">
-          <SelectValue placeholder="Responsável" />
+          <SelectValue placeholder="Desenvolvedor" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="__all__">Todos responsáveis</SelectItem>
-          <SelectItem value={RESPONSAVEL_SEM}>Sem responsável</SelectItem>
+          <SelectItem value="__all__">Todos desenvolvedores</SelectItem>
+          <SelectItem value={RESPONSAVEL_SEM}>Sem desenvolvedor</SelectItem>
           {responsaveis.length > 0 && <DropdownMenuSeparator />}
           {responsaveis.map((u) => (
             <SelectItem key={u.id} value={u.id}>

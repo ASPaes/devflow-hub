@@ -74,9 +74,9 @@ export function MetadataSidebar({
         </div>
       </section>
 
-      {/* Responsável */}
+      {/* Desenvolvedor */}
       <section className="rounded-lg border border-border bg-card p-4">
-        <Label>Responsável</Label>
+        <Label>Desenvolvedor</Label>
         <div className="mt-2">
           <ResponsavelPicker
             current={demanda.responsavel}
@@ -316,7 +316,7 @@ function ResponsavelPicker({
       ) : (
         <>
           <UserX className="h-4 w-4 text-muted-foreground" />
-          <span className="text-muted-foreground">Sem responsável</span>
+          <span className="text-muted-foreground">Sem desenvolvedor</span>
         </>
       )}
     </button>
