@@ -273,7 +273,7 @@ function TenantFields({ form }: { form: UseFormReturn<TenantInput> }) {
             <div className="space-y-0.5">
               <FormLabel className="text-base">Ativo</FormLabel>
               <FormDescription>
-                Tenants inativos não recebem novos usuários nem demandas.
+                Empresas inativas não recebem novos usuários nem demandas.
               </FormDescription>
             </div>
             <FormControl>
