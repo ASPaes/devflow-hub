@@ -70,9 +70,6 @@ function KpiCard({
   onClick,
 }: KpiProps) {
   const interactive = !!onClick;
-  const cardClass = interactive
-    ? "cursor-pointer text-left transition-colors hover:bg-secondary/40"
-    : undefined;
   const content = (
     <>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -92,10 +89,19 @@ function KpiCard({
   );
   if (interactive) {
     return (
-      <Card asChild className={cardClass}>
-        <button type="button" onClick={onClick}>
-          {content}
-        </button>
+      <Card
+        role="button"
+        tabIndex={0}
+        onClick={onClick}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onClick?.();
+          }
+        }}
+        className="cursor-pointer text-left transition-colors hover:bg-secondary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        {content}
       </Card>
     );
   }
