@@ -444,14 +444,14 @@ function UsuariosPage() {
                 name="tenant_id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Tenant</FormLabel>
+                    <FormLabel>Empresa</FormLabel>
                     <Select
                       value={field.value}
                       onValueChange={field.onChange}
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Selecione um tenant" />
+                          <SelectValue placeholder="Selecione uma empresa" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
