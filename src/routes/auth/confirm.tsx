@@ -48,20 +48,27 @@ function ConfirmPage() {
     if (ranRef.current) return;
     ranRef.current = true;
 
+    // CAPTURAR HASH ANTES de qualquer coisa — o supabase-js limpa hash
+    // automaticamente em alguns fluxos
+    const initialHash = window.location.hash.startsWith("#")
+      ? window.location.hash.substring(1)
+      : "";
+    const initialSearch = window.location.search;
+
+    const initialHashParams = new URLSearchParams(initialHash);
+    const initialSearchParams = new URLSearchParams(initialSearch);
+
+    // Detecta tipo no momento da carga, antes do supabase-js consumir
+    const detectedType = (initialHashParams.get("type") ||
+      initialSearchParams.get("type")) as TokenType;
+
+    // Detecta erro de OTP expirado / inválido vindo do redirect
+    const errorDescription =
+      initialHashParams.get("error_description") ||
+      initialSearchParams.get("error_description");
+
     (async () => {
       try {
-        const hash = window.location.hash.startsWith("#")
-          ? window.location.hash.substring(1)
-          : "";
-        const hashParams = new URLSearchParams(hash);
-        const searchParams = new URLSearchParams(window.location.search);
-
-        const type = (hashParams.get("type") ||
-          searchParams.get("type")) as TokenType;
-
-        const errorDescription =
-          hashParams.get("error_description") ||
-          searchParams.get("error_description");
         if (errorDescription) {
           setErrorMsg(errorDescription);
           setPhase("error");
@@ -69,7 +76,7 @@ function ConfirmPage() {
         }
 
         // PKCE-style: ?code=... — exchange first
-        const code = searchParams.get("code");
+        const code = initialSearchParams.get("code");
         if (code) {
           const { error } = await supabase.auth.exchangeCodeForSession(code);
           if (error) {
@@ -80,11 +87,15 @@ function ConfirmPage() {
         }
 
         // Legacy token_hash style: ?token_hash=...&type=...
-        const tokenHash = searchParams.get("token_hash");
-        if (tokenHash && type) {
+        const tokenHash = initialSearchParams.get("token_hash");
+        if (tokenHash && detectedType) {
           const { error } = await supabase.auth.verifyOtp({
             token_hash: tokenHash,
-            type: type as "invite" | "recovery" | "email_change" | "signup",
+            type: detectedType as
+              | "invite"
+              | "recovery"
+              | "email_change"
+              | "signup",
           });
           if (error) {
             setErrorMsg(error.message);
@@ -93,7 +104,7 @@ function ConfirmPage() {
           }
         }
 
-        // After exchange/verify — or with implicit hash flow handled by supabase-js
+        // Aguarda supabase-js processar o hash implicit (caso ainda não tenha)
         const { data } = await supabase.auth.getSession();
 
         if (!data.session) {
@@ -104,15 +115,23 @@ function ConfirmPage() {
           return;
         }
 
-        setTokenType(type);
+        setTokenType(detectedType);
 
-        if (type === "invite" || type === "recovery") {
+        // CRÍTICO: invite e recovery SEMPRE pedem form de senha,
+        // mesmo se o detectedType chegou null (hash já consumido).
+        if (detectedType === "invite" || detectedType === "recovery") {
           setPhase("form");
-        } else if (type === "email_change" || type === "signup") {
+        } else if (
+          detectedType === "email_change" ||
+          detectedType === "signup"
+        ) {
           setPhase("success");
         } else {
-          // No type — assume already logged in, send to dashboard
-          navigate({ to: "/" });
+          // FALLBACK: hash sumiu mas temos sessão
+          // Se chegou em /auth/confirm SEM type detectado mas COM sessão,
+          // por segurança trata como invite (pede senha).
+          setTokenType("invite");
+          setPhase("form");
         }
       } catch (e) {
         setErrorMsg(e instanceof Error ? e.message : String(e));
