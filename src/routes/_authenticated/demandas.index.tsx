@@ -76,6 +76,9 @@ function DemandasListagem() {
     if (filtrosCompartilhados.responsavel_id.length > 0) {
       f.responsavel_ids = filtrosCompartilhados.responsavel_id;
     }
+    if (filtrosCompartilhados.solicitante_id.length > 0) {
+      f.solicitante_ids = filtrosCompartilhados.solicitante_id;
+    }
 
     f.periodo = periodo;
     f.tipoData = tipoData;
@@ -104,7 +107,8 @@ function DemandasListagem() {
     filtrosCompartilhados.modulo_id.length +
     filtrosCompartilhados.area_id.length +
     filtrosCompartilhados.tenant_id.length +
-    filtrosCompartilhados.responsavel_id.length;
+    filtrosCompartilhados.responsavel_id.length +
+    filtrosCompartilhados.solicitante_id.length;
 
   const hasFiltros =
     !!busca?.trim() || totalFiltrosAplicados > 0 || apenasSemData;
@@ -119,6 +123,7 @@ function DemandasListagem() {
       area_id: [],
       tenant_id: [],
       responsavel_id: [],
+      solicitante_id: [],
     });
     setApenasSemData(false);
   }, [setBusca, setFiltrosCompartilhados, setApenasSemData]);

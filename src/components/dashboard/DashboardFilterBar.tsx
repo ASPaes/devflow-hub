@@ -193,6 +193,13 @@ export function DashboardFilterBar({
         onChange={(v) => onChange({ ...filtros, responsavel_id: v })}
         loading={loadingResp}
       />
+      <MultiSelectFilter<string>
+        label="Aberto por"
+        options={solicitanteOptions}
+        selected={filtros.solicitante_id}
+        onChange={(v) => onChange({ ...filtros, solicitante_id: v })}
+        loading={loadingSolic}
+      />
 
       {totalAplicados > 0 && (
         <Button
