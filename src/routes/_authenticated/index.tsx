@@ -259,9 +259,17 @@ function Dashboard() {
     const r = presetToRange("este_mes");
     return { from: r.from, to: r.to };
   });
+  const [tipoData, setTipoData] = React.useState<TipoData>("criacao");
+  const [apenasSemData, setApenasSemData] = React.useState(false);
   const [filtros, setFiltros] = React.useState<DashboardFiltros>(FILTROS_VAZIOS);
 
-  const metricsQuery = useDashboardMetrics(periodo, podeVerMetricas, filtros);
+  const metricsQuery = useDashboardMetrics(
+    periodo,
+    podeVerMetricas,
+    filtros,
+    tipoData,
+    apenasSemData,
+  );
   const metrics = metricsQuery.data;
   const metricsLoading = metricsQuery.isLoading;
   const metricsRefetching = metricsQuery.isFetching && !metricsQuery.isLoading;
