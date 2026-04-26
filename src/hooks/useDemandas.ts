@@ -1,10 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { z } from "zod";
+import type { DateRange } from "react-day-picker";
 
 import { supabase } from "@/lib/supabase";
 import { translateSupabaseError } from "@/lib/supabase-errors";
 import { ANEXO_BUCKET, uploadAnexo } from "@/lib/upload-anexos";
+import { toIsoDate, type TipoData } from "@/lib/date-presets";
 import type { Database } from "@/integrations/supabase/types";
 
 export type Demanda = Database["public"]["Tables"]["demandas"]["Row"];
