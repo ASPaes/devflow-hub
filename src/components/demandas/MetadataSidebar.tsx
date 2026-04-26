@@ -26,7 +26,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 import { cn, initials } from "@/lib/utils";
 import { formatDateTimeSP } from "@/lib/format";
 import {
@@ -39,6 +47,9 @@ import {
   type UpdateDemandaPatch,
 } from "@/hooks/useDemandas";
 import { useUsuariosComPermissao } from "@/hooks/useUsuarios";
+import { useModulos } from "@/hooks/useModulos";
+import { useSubmodulos } from "@/hooks/useSubmodulos";
+import { useAreas } from "@/hooks/useAreas";
 
 const PRIORIDADES = [1, 2, 3, 4, 5] as const;
 
@@ -152,24 +163,14 @@ export function MetadataSidebar({
         </div>
       </section>
 
-      {/* Classificação (read-only) */}
-      <section className="space-y-2 rounded-lg border border-border bg-card p-4 text-sm">
+      {/* Classificação */}
+      <section className="space-y-3 rounded-lg border border-border bg-card p-4 text-sm">
         <Label>Classificação</Label>
-        <ClassRow
-          icon={Folder}
-          label="Módulo"
-          value={demanda.modulo?.nome ?? "—"}
-          color={demanda.modulo?.cor}
-        />
-        <ClassRow
-          icon={Layers}
-          label="Submódulo"
-          value={demanda.submodulo?.nome ?? "—"}
-        />
-        <ClassRow
-          icon={MapPin}
-          label="Área"
-          value={demanda.area?.nome ?? "—"}
+        <ClassificacaoEditor
+          demanda={demanda}
+          canEdit={canEdit}
+          saving={saving}
+          onPatch={onPatch}
         />
       </section>
 
