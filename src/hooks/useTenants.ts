@@ -92,7 +92,7 @@ export function useUpdateTenant() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: tenantsKey });
       qc.invalidateQueries({ queryKey: ["usuarios_admin"] });
-      toast.success("Tenant atualizado");
+      toast.success("Empresa atualizada");
     },
     onError: (err) => toast.error(translateSupabaseError(err, "tenant")),
   });
