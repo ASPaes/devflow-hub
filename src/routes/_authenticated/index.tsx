@@ -29,7 +29,6 @@ import {
   PRIORIDADE_BADGE_STYLES,
 } from "@/components/demandas/MetadataSidebar";
 import {
-  FILTROS_VAZIOS,
   useDashboardMetrics,
   type DashboardMetrics,
 } from "@/hooks/useDashboardMetrics";
