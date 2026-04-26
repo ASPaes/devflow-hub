@@ -75,7 +75,7 @@ export const Route = createFileRoute("/_authenticated/admin/usuarios")({
 const editSchema = z.object({
   nome: z.string().trim().min(2, "Nome muito curto").max(80),
   perfil_acesso_id: z.string().uuid("Selecione um perfil de acesso"),
-  tenant_id: z.string().uuid("Selecione um tenant"),
+  tenant_id: z.string().uuid("Selecione uma empresa"),
   ativo: z.boolean(),
 });
 type EditValues = z.infer<typeof editSchema>;
@@ -84,7 +84,7 @@ const inviteSchema = z.object({
   email: z.string().email("Email inválido"),
   nome: z.string().trim().min(2).max(100),
   perfil_acesso_id: z.string().uuid("Selecione um perfil de acesso"),
-  tenant_id: z.string().uuid("Selecione um tenant"),
+  tenant_id: z.string().uuid("Selecione uma empresa"),
 });
 type InviteValues = z.infer<typeof inviteSchema>;
 
@@ -199,7 +199,7 @@ function UsuariosPage() {
     },
     {
       key: "tenant",
-      header: "Tenant",
+      header: "Empresa",
       render: (row) => (
         <span className="text-sm text-muted-foreground">
           {row.tenant_nome ?? "—"}
@@ -444,14 +444,14 @@ function UsuariosPage() {
                 name="tenant_id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Tenant</FormLabel>
+                    <FormLabel>Empresa</FormLabel>
                     <Select
                       value={field.value}
                       onValueChange={field.onChange}
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Selecione um tenant" />
+                          <SelectValue placeholder="Selecione uma empresa" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -607,11 +607,11 @@ function EditUserFields({
         name="tenant_id"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Tenant</FormLabel>
+            <FormLabel>Empresa</FormLabel>
             <Select value={field.value} onValueChange={field.onChange}>
               <FormControl>
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione um tenant" />
+                  <SelectValue placeholder="Selecione uma empresa" />
                 </SelectTrigger>
               </FormControl>
               <SelectContent>

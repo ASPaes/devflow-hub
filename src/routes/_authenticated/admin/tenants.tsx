@@ -45,7 +45,7 @@ const emptyValues: TenantInput = {
 };
 
 function TenantsPage() {
-  useDocumentTitle("Tenants");
+  useDocumentTitle("Empresas");
   const { data: tenants, isLoading } = useTenants();
   const createMut = useCreateTenant();
   const updateMut = useUpdateTenant();
@@ -121,12 +121,12 @@ function TenantsPage() {
   return (
     <div className="p-8">
       <PageHeader
-        title="Tenants"
-        description="Empresas/clientes que utilizam o devflow-hub"
+        title="Empresas"
+        description="Empresas que utilizam o devflow-hub"
         action={
           <Button onClick={() => setCreateOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
-            Novo tenant
+            Nova empresa
           </Button>
         }
       />
@@ -138,17 +138,17 @@ function TenantsPage() {
         onEdit={(row) => setEditing(row)}
         onDelete={(row) => setDeleting(row)}
         searchableFields={["nome", "descricao"]}
-        searchPlaceholder="Buscar tenants..."
+        searchPlaceholder="Buscar empresas..."
         getRowKey={(row) => row.id}
         emptyState={
           <EmptyState
             icon={Building}
-            title="Nenhum tenant cadastrado"
-            description="Cadastre o primeiro tenant para organizar usuários e demandas."
+            title="Nenhuma empresa cadastrada"
+            description="Cadastre a primeira empresa para organizar usuários e demandas."
             action={
               <Button onClick={() => setCreateOpen(true)}>
                 <Plus className="mr-2 h-4 w-4" />
-                Criar primeiro tenant
+                Criar primeira empresa
               </Button>
             }
           />
@@ -158,8 +158,8 @@ function TenantsPage() {
       <ModalForm<TenantInput>
         open={createOpen}
         onOpenChange={setCreateOpen}
-        title="Novo tenant"
-        description="Cadastre uma empresa/cliente do devflow-hub."
+        title="Nova empresa"
+        description="Cadastre uma empresa do devflow-hub."
         schema={tenantSchema}
         defaultValues={emptyValues}
         onSubmit={async (values) => {
@@ -172,7 +172,7 @@ function TenantsPage() {
       <ModalForm<TenantInput>
         open={!!editing}
         onOpenChange={(o) => !o && setEditing(null)}
-        title="Editar tenant"
+        title="Editar empresa"
         schema={tenantSchema}
         defaultValues={editValues}
         onSubmit={async (values) => {
@@ -186,7 +186,7 @@ function TenantsPage() {
       <ConfirmDialog
         open={!!deleting}
         onOpenChange={(o) => !o && setDeleting(null)}
-        title="Excluir tenant"
+        title="Excluir empresa"
         description={
           deleting ? (
             <>
@@ -257,7 +257,7 @@ function TenantFields({ form }: { form: UseFormReturn<TenantInput> }) {
               />
             </FormControl>
             <FormDescription>
-              ID do tenant correspondente no DoctorSaas, quando aplicável. Use
+              ID da empresa correspondente no DoctorSaas, quando aplicável. Use
               para mapear futura integração.
             </FormDescription>
             <FormMessage />
@@ -273,7 +273,7 @@ function TenantFields({ form }: { form: UseFormReturn<TenantInput> }) {
             <div className="space-y-0.5">
               <FormLabel className="text-base">Ativo</FormLabel>
               <FormDescription>
-                Tenants inativos não recebem novos usuários nem demandas.
+                Empresas inativas não recebem novos usuários nem demandas.
               </FormDescription>
             </div>
             <FormControl>

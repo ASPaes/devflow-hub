@@ -70,7 +70,7 @@ export function useCreateTenant() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: tenantsKey });
       qc.invalidateQueries({ queryKey: ["usuarios_admin"] });
-      toast.success("Tenant criado");
+      toast.success("Empresa criada");
     },
     onError: (err) => toast.error(translateSupabaseError(err, "tenant")),
   });
@@ -92,7 +92,7 @@ export function useUpdateTenant() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: tenantsKey });
       qc.invalidateQueries({ queryKey: ["usuarios_admin"] });
-      toast.success("Tenant atualizado");
+      toast.success("Empresa atualizada");
     },
     onError: (err) => toast.error(translateSupabaseError(err, "tenant")),
   });
@@ -107,7 +107,7 @@ export function useDeleteTenant() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: tenantsKey });
-      toast.success("Tenant excluído");
+      toast.success("Empresa excluída");
     },
     onError: (err) => toast.error(translateSupabaseError(err, "tenant")),
   });
