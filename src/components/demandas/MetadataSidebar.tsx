@@ -4,9 +4,6 @@ import {
   Calendar,
   ChevronDown,
   Clock,
-  Folder,
-  Layers,
-  MapPin,
   User,
   UserX,
 } from "lucide-react";
@@ -26,7 +23,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 import { cn, initials } from "@/lib/utils";
 import { formatDateTimeSP } from "@/lib/format";
 import {
@@ -39,6 +44,9 @@ import {
   type UpdateDemandaPatch,
 } from "@/hooks/useDemandas";
 import { useUsuariosComPermissao } from "@/hooks/useUsuarios";
+import { useModulos } from "@/hooks/useModulos";
+import { useSubmodulos } from "@/hooks/useSubmodulos";
+import { useAreas } from "@/hooks/useAreas";
 
 const PRIORIDADES = [1, 2, 3, 4, 5] as const;
 
@@ -152,24 +160,14 @@ export function MetadataSidebar({
         </div>
       </section>
 
-      {/* Classificação (read-only) */}
-      <section className="space-y-2 rounded-lg border border-border bg-card p-4 text-sm">
+      {/* Classificação */}
+      <section className="space-y-3 rounded-lg border border-border bg-card p-4 text-sm">
         <Label>Classificação</Label>
-        <ClassRow
-          icon={Folder}
-          label="Módulo"
-          value={demanda.modulo?.nome ?? "—"}
-          color={demanda.modulo?.cor}
-        />
-        <ClassRow
-          icon={Layers}
-          label="Submódulo"
-          value={demanda.submodulo?.nome ?? "—"}
-        />
-        <ClassRow
-          icon={MapPin}
-          label="Área"
-          value={demanda.area?.nome ?? "—"}
+        <ClassificacaoEditor
+          demanda={demanda}
+          canEdit={canEdit}
+          saving={saving}
+          onPatch={onPatch}
         />
       </section>
 
@@ -476,29 +474,126 @@ function EstimativaInput({ value, disabled, onChange }: EstimativaInputProps) {
   );
 }
 
-function ClassRow({
-  icon: Icon,
-  label,
-  value,
-  color,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  value: string;
-  color?: string | null;
-}) {
+interface ClassificacaoEditorProps {
+  demanda: DemandaCompleta;
+  canEdit: boolean;
+  saving: boolean;
+  onPatch: (patch: UpdateDemandaPatch) => Promise<void>;
+}
+
+function ClassificacaoEditor({
+  demanda,
+  canEdit,
+  saving,
+  onPatch,
+}: ClassificacaoEditorProps) {
+  const { data: modulos = [] } = useModulos();
+  const { data: submodulos = [] } = useSubmodulos();
+  const { data: areas = [] } = useAreas();
+
+  const disabled = !canEdit || saving;
+
+  const submodulosDoModulo = React.useMemo(
+    () =>
+      submodulos
+        .filter((s) => s.modulo_id === demanda.modulo_id && s.ativo)
+        .sort((a, b) => a.nome.localeCompare(b.nome)),
+    [submodulos, demanda.modulo_id],
+  );
+
+  const handleModuloChange = (novoModuloId: string) => {
+    if (novoModuloId === demanda.modulo_id) return;
+    const submodulosDoNovo = submodulos
+      .filter((s) => s.modulo_id === novoModuloId && s.ativo)
+      .sort((a, b) => a.nome.localeCompare(b.nome));
+    const novoSubmoduloId = submodulosDoNovo[0]?.id;
+    if (!novoSubmoduloId) {
+      toast.error("Módulo selecionado não tem submódulos ativos");
+      return;
+    }
+    void onPatch({ modulo_id: novoModuloId, submodulo_id: novoSubmoduloId });
+  };
+
   return (
-    <div className="flex items-center gap-2">
-      <Icon className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />
-      <span className="text-xs text-muted-foreground">{label}:</span>
-      {color && (
-        <span
-          className="inline-block h-2 w-2 rounded-full"
-          style={{ backgroundColor: color }}
-          aria-hidden
-        />
-      )}
-      <span className="ml-auto truncate text-foreground">{value}</span>
+    <div className="space-y-3">
+      <div className="space-y-1">
+        <label className="text-xs text-muted-foreground">Módulo</label>
+        <Select
+          value={demanda.modulo_id}
+          onValueChange={handleModuloChange}
+          disabled={disabled}
+        >
+          <SelectTrigger className="h-8 text-sm">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {modulos
+              .filter((m) => m.ativo)
+              .map((m) => (
+                <SelectItem key={m.id} value={m.id}>
+                  <span className="flex items-center gap-2">
+                    {m.cor && (
+                      <span
+                        className="h-2 w-2 rounded-full"
+                        style={{ backgroundColor: m.cor }}
+                        aria-hidden
+                      />
+                    )}
+                    {m.nome}
+                  </span>
+                </SelectItem>
+              ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-1">
+        <label className="text-xs text-muted-foreground">Submódulo</label>
+        <Select
+          value={demanda.submodulo_id}
+          onValueChange={(v) => {
+            if (v === demanda.submodulo_id) return;
+            void onPatch({ submodulo_id: v });
+          }}
+          disabled={disabled}
+        >
+          <SelectTrigger className="h-8 text-sm">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {submodulosDoModulo.map((s) => (
+              <SelectItem key={s.id} value={s.id}>
+                {s.nome}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-1">
+        <label className="text-xs text-muted-foreground">Área</label>
+        <Select
+          value={demanda.area_id}
+          onValueChange={(v) => {
+            if (v === demanda.area_id) return;
+            void onPatch({ area_id: v });
+          }}
+          disabled={disabled}
+        >
+          <SelectTrigger className="h-8 text-sm">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {areas
+              .filter((a) => a.ativo)
+              .map((a) => (
+                <SelectItem key={a.id} value={a.id}>
+                  {a.nome}
+                </SelectItem>
+              ))}
+          </SelectContent>
+        </Select>
+      </div>
     </div>
   );
 }

@@ -143,6 +143,12 @@ function formatEventoHistorico(
       if (item.valor_anterior && !item.valor_novo)
         return `removeu a estimativa`;
       return `alterou estimativa de ${item.valor_anterior}h para ${item.valor_novo}h`;
+    case "modulo_id":
+      return `alterou o módulo`;
+    case "submodulo_id":
+      return `alterou o submódulo`;
+    case "area_id":
+      return `alterou a área`;
     default:
       return `alterou ${item.campo}`;
   }
