@@ -2,7 +2,7 @@ import * as React from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import type { DateRange } from "react-day-picker";
 import { PeriodoPicker } from "@/components/dashboard/PeriodoPicker";
-import { presetToRange } from "@/lib/date-presets";
+import { presetToRange, type TipoData } from "@/lib/date-presets";
 import {
   ArrowRight,
   BarChart3,
@@ -259,9 +259,17 @@ function Dashboard() {
     const r = presetToRange("este_mes");
     return { from: r.from, to: r.to };
   });
+  const [tipoData, setTipoData] = React.useState<TipoData>("criacao");
+  const [apenasSemData, setApenasSemData] = React.useState(false);
   const [filtros, setFiltros] = React.useState<DashboardFiltros>(FILTROS_VAZIOS);
 
-  const metricsQuery = useDashboardMetrics(periodo, podeVerMetricas, filtros);
+  const metricsQuery = useDashboardMetrics(
+    periodo,
+    podeVerMetricas,
+    filtros,
+    tipoData,
+    apenasSemData,
+  );
   const metrics = metricsQuery.data;
   const metricsLoading = metricsQuery.isLoading;
   const metricsRefetching = metricsQuery.isFetching && !metricsQuery.isLoading;
@@ -300,7 +308,14 @@ function Dashboard() {
       </div>
       <div className="flex items-center gap-2">
         {podeVerMetricas && (
-          <PeriodoPicker value={periodo} onChange={setPeriodo} />
+          <PeriodoPicker
+            value={periodo}
+            onChange={setPeriodo}
+            tipoData={tipoData}
+            onTipoDataChange={setTipoData}
+            apenasSemData={apenasSemData}
+            onApenasSemDataChange={setApenasSemData}
+          />
         )}
         {podeCriar && (
           <Button asChild size="lg">

@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { DateRange } from "react-day-picker";
 
 import { supabase } from "@/lib/supabase";
-import { toIsoDate } from "@/lib/date-presets";
+import { toIsoDate, type TipoData } from "@/lib/date-presets";
 
 export type ResponsavelStat = {
   id: string | null;
@@ -16,10 +16,17 @@ export type DashboardMetrics = {
   abertas: number;
   prioritarias_abertas: number;
   concluidas_periodo: number;
+  sem_dev_deadline: number;
+  sem_deadline: number;
   por_status: Record<string, number>;
   por_prioridade: Record<string, number>;
   por_responsavel: ResponsavelStat[];
-  periodo: { data_inicio: string | null; data_fim: string | null };
+  periodo: {
+    data_inicio: string | null;
+    data_fim: string | null;
+    tipo_data: TipoData;
+    apenas_sem_data: boolean;
+  };
 };
 
 export type DashboardFiltros = {
@@ -46,12 +53,21 @@ export function useDashboardMetrics(
   periodo: DateRange | null,
   enabled = true,
   filtros: DashboardFiltros = FILTROS_VAZIOS,
+  tipoData: TipoData = "criacao",
+  apenasSemData: boolean = false,
 ) {
   const dataInicio = periodo?.from ? toIsoDate(periodo.from) : undefined;
   const dataFim = periodo?.to ? toIsoDate(periodo.to) : undefined;
 
   return useQuery<DashboardMetrics>({
-    queryKey: ["dashboard-metrics", dataInicio ?? null, dataFim ?? null, filtros],
+    queryKey: [
+      "dashboard-metrics",
+      dataInicio ?? null,
+      dataFim ?? null,
+      filtros,
+      tipoData,
+      apenasSemData,
+    ],
     queryFn: async () => {
       const { data, error } = await supabase.rpc("dashboard_metrics", {
         p_data_inicio: dataInicio,
@@ -69,6 +85,8 @@ export function useDashboardMetrics(
           filtros.responsavel_id.length > 0
             ? filtros.responsavel_id
             : undefined,
+        p_tipo_data: tipoData,
+        p_apenas_sem_data: apenasSemData,
       });
       if (error) throw error;
       return data as unknown as DashboardMetrics;

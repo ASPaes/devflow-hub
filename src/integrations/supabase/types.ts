@@ -802,6 +802,7 @@ export type Database = {
       close_expired_demands: { Args: never; Returns: number }
       dashboard_metrics: {
         Args: {
+          p_apenas_sem_data?: boolean
           p_area_id?: string[]
           p_data_fim?: string
           p_data_inicio?: string
@@ -811,6 +812,7 @@ export type Database = {
           p_status?: string[]
           p_tenant_id?: string[]
           p_tipo?: string[]
+          p_tipo_data?: string
         }
         Returns: Json
       }
