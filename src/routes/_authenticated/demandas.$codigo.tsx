@@ -61,6 +61,7 @@ function DemandaDetalhe() {
   const { temPermissao } = useProfile();
   const { data: demanda, isLoading, error } = useDemanda(codigo);
   const updateMutation = useUpdateDemanda();
+  const [excluirOpen, setExcluirOpen] = React.useState(false);
 
   useDocumentTitle(
     demanda ? `${demanda.codigo ?? codigo} · ${demanda.titulo}` : codigo,
@@ -85,7 +86,6 @@ function DemandaDetalhe() {
   const canEditMetadata = canEditAny;
   const canChangeStatus = canEditAny;
   const podeExcluir = temPermissao("deletar_demanda");
-  const [excluirOpen, setExcluirOpen] = React.useState(false);
 
   const handlePatch = async (patch: UpdateDemandaPatch) => {
     await updateMutation.mutateAsync({ id: demanda.id, patch });
