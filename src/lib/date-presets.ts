@@ -119,3 +119,57 @@ export function formatPillDate(d: Date): string {
   const y = String(d.getFullYear()).slice(2);
   return `${day}/${m}/${y}`;
 }
+
+// ============= Tipo de data =============
+export type TipoData = "criacao" | "desenvolvimento" | "entrega";
+
+export const TIPO_DATA_LABEL: Record<TipoData, string> = {
+  criacao: "Data de Criação",
+  desenvolvimento: "Data de Desenvolvimento",
+  entrega: "Data de Entrega",
+};
+
+// ============= Parser/formatador de input dd/MM/yyyy =============
+
+/**
+ * Parser tolerante de string para Date.
+ * Aceita: "01/04/2026", "1/4/2026", "01/04/26", "1/4/26"
+ * Retorna null se inválido.
+ */
+export function parseDDMMYYYY(input: string): Date | null {
+  if (!input) return null;
+  const trimmed = input.trim();
+  const match = trimmed.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/);
+  if (!match) return null;
+
+  const [, dStr, mStr, yStr] = match;
+  const day = Number(dStr);
+  const month = Number(mStr);
+  let year = Number(yStr);
+
+  if (yStr.length === 2) year = 2000 + year;
+
+  if (month < 1 || month > 12) return null;
+  if (day < 1 || day > 31) return null;
+  if (year < 1900 || year > 2200) return null;
+
+  const date = new Date(year, month - 1, day);
+  if (
+    date.getFullYear() !== year ||
+    date.getMonth() !== month - 1 ||
+    date.getDate() !== day
+  ) {
+    return null;
+  }
+  return date;
+}
+
+/**
+ * Formata Date como "01/04/2026" (4 dígitos no ano)
+ */
+export function formatInputDate(d: Date): string {
+  const day = String(d.getDate()).padStart(2, "0");
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const y = d.getFullYear();
+  return `${day}/${m}/${y}`;
+}
