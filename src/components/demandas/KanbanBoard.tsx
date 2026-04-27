@@ -26,6 +26,11 @@ const COLUNAS: { key: ColunaStatus; label: string; cor: string }[] = [
     cor: "var(--color-status-desenvolvimento)",
   },
   { key: "teste", label: "Teste", cor: "var(--color-status-teste)" },
+  {
+    key: "para_publicar",
+    label: "Para Publicar",
+    cor: "var(--color-status-para_publicar)",
+  },
   { key: "entregue", label: "Entregue", cor: "var(--color-status-entregue)" },
 ];
 
@@ -35,6 +40,7 @@ export const STATUS_NO_BOARD: StatusDemanda[] = [
   "analise",
   "desenvolvimento",
   "teste",
+  "para_publicar",
   "entregue",
 ];
 
