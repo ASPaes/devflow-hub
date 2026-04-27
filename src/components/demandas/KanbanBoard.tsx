@@ -15,6 +15,7 @@ export type ColunaStatus =
   | "analise"
   | "desenvolvimento"
   | "teste"
+  | "para_publicar"
   | "entregue";
 
 const COLUNAS: { key: ColunaStatus; label: string; cor: string }[] = [
