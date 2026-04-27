@@ -470,6 +470,7 @@ export type Database = {
           id: string
           modulo_id: string
           prioridade: number
+          produto_id: string | null
           reopen_deadline: string | null
           responsavel_id: string | null
           solicitante_id: string
@@ -499,6 +500,7 @@ export type Database = {
           id?: string
           modulo_id: string
           prioridade: number
+          produto_id?: string | null
           reopen_deadline?: string | null
           responsavel_id?: string | null
           solicitante_id: string
@@ -528,6 +530,7 @@ export type Database = {
           id?: string
           modulo_id?: string
           prioridade?: number
+          produto_id?: string | null
           reopen_deadline?: string | null
           responsavel_id?: string | null
           solicitante_id?: string
@@ -568,6 +571,13 @@ export type Database = {
             columns: ["modulo_id"]
             isOneToOne: false
             referencedRelation: "modulos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demandas_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
             referencedColumns: ["id"]
           },
           {
@@ -679,6 +689,51 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      produtos: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          created_by: string | null
+          descricao: string | null
+          id: string
+          nome: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          created_by?: string | null
+          descricao?: string | null
+          id?: string
+          nome: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          created_by?: string | null
+          descricao?: string | null
+          id?: string
+          nome?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "produtos_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "produtos_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "vw_potenciais_responsaveis"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -935,6 +990,8 @@ export type Database = {
           modulo_id: string | null
           modulo_nome: string | null
           prioridade: number | null
+          produto_id: string | null
+          produto_nome: string | null
           reopen_deadline: string | null
           responsavel_avatar: string | null
           responsavel_id: string | null
@@ -967,6 +1024,13 @@ export type Database = {
             columns: ["modulo_id"]
             isOneToOne: false
             referencedRelation: "modulos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demandas_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
             referencedColumns: ["id"]
           },
           {
@@ -1106,6 +1170,7 @@ export type Database = {
           id: string
           modulo_id: string
           prioridade: number
+          produto_id: string | null
           reopen_deadline: string | null
           responsavel_id: string | null
           solicitante_id: string
@@ -1144,6 +1209,7 @@ export type Database = {
           id: string
           modulo_id: string
           prioridade: number
+          produto_id: string | null
           reopen_deadline: string | null
           responsavel_id: string | null
           solicitante_id: string
@@ -1212,6 +1278,7 @@ export type Database = {
           id: string
           modulo_id: string
           prioridade: number
+          produto_id: string | null
           reopen_deadline: string | null
           responsavel_id: string | null
           solicitante_id: string
@@ -1250,6 +1317,7 @@ export type Database = {
           id: string
           modulo_id: string
           prioridade: number
+          produto_id: string | null
           reopen_deadline: string | null
           responsavel_id: string | null
           solicitante_id: string
@@ -1288,6 +1356,7 @@ export type Database = {
           id: string
           modulo_id: string
           prioridade: number
+          produto_id: string | null
           reopen_deadline: string | null
           responsavel_id: string | null
           solicitante_id: string
