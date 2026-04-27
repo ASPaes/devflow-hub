@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SsoRouteImport } from './routes/sso'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as CadastroRouteImport } from './routes/cadastro'
@@ -29,6 +30,11 @@ import { Route as AuthenticatedAdminPerfisAcessoRouteImport } from './routes/_au
 import { Route as AuthenticatedAdminModulosRouteImport } from './routes/_authenticated/admin/modulos'
 import { Route as AuthenticatedAdminAreasRouteImport } from './routes/_authenticated/admin/areas'
 
+const SsoRoute = SsoRouteImport.update({
+  id: '/sso',
+  path: '/sso',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
@@ -139,6 +145,7 @@ export interface FileRoutesByFullPath {
   '/cadastro': typeof CadastroRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/sso': typeof SsoRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/perfil': typeof AuthenticatedPerfilRoute
   '/auth/confirm': typeof AuthConfirmRoute
@@ -158,6 +165,7 @@ export interface FileRoutesByTo {
   '/cadastro': typeof CadastroRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/sso': typeof SsoRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/perfil': typeof AuthenticatedPerfilRoute
   '/auth/confirm': typeof AuthConfirmRoute
@@ -180,6 +188,7 @@ export interface FileRoutesById {
   '/cadastro': typeof CadastroRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/sso': typeof SsoRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/auth/confirm': typeof AuthConfirmRoute
@@ -203,6 +212,7 @@ export interface FileRouteTypes {
     | '/cadastro'
     | '/login'
     | '/reset-password'
+    | '/sso'
     | '/admin'
     | '/perfil'
     | '/auth/confirm'
@@ -222,6 +232,7 @@ export interface FileRouteTypes {
     | '/cadastro'
     | '/login'
     | '/reset-password'
+    | '/sso'
     | '/admin'
     | '/perfil'
     | '/auth/confirm'
@@ -243,6 +254,7 @@ export interface FileRouteTypes {
     | '/cadastro'
     | '/login'
     | '/reset-password'
+    | '/sso'
     | '/_authenticated/admin'
     | '/_authenticated/perfil'
     | '/auth/confirm'
@@ -265,11 +277,19 @@ export interface RootRouteChildren {
   CadastroRoute: typeof CadastroRoute
   LoginRoute: typeof LoginRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  SsoRoute: typeof SsoRoute
   AuthConfirmRoute: typeof AuthConfirmRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sso': {
+      id: '/sso'
+      path: '/sso'
+      fullPath: '/sso'
+      preLoaderRoute: typeof SsoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reset-password': {
       id: '/reset-password'
       path: '/reset-password'
@@ -458,6 +478,7 @@ const rootRouteChildren: RootRouteChildren = {
   CadastroRoute: CadastroRoute,
   LoginRoute: LoginRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  SsoRoute: SsoRoute,
   AuthConfirmRoute: AuthConfirmRoute,
 }
 export const routeTree = rootRouteImport
