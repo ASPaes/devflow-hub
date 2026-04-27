@@ -58,6 +58,7 @@ export function KanbanBoard({ rows, isLoading, onCardClick }: KanbanBoardProps) 
       analise: [],
       desenvolvimento: [],
       teste: [],
+      para_publicar: [],
       entregue: [],
     };
     for (const d of rows) {
@@ -70,6 +71,7 @@ export function KanbanBoard({ rows, isLoading, onCardClick }: KanbanBoardProps) 
               s === "analise" ||
               s === "desenvolvimento" ||
               s === "teste" ||
+              s === "para_publicar" ||
               s === "entregue"
             ? s
             : null;
