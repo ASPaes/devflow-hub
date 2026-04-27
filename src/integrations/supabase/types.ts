@@ -1407,6 +1407,7 @@ export type Database = {
         | "analise"
         | "desenvolvimento"
         | "teste"
+        | "para_publicar"
         | "entregue"
         | "reaberta"
         | "encerrada"
@@ -1566,6 +1567,7 @@ export const Constants = {
         "analise",
         "desenvolvimento",
         "teste",
+        "para_publicar",
         "entregue",
         "reaberta",
         "encerrada",
