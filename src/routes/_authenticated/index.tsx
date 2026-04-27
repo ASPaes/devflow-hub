@@ -45,6 +45,7 @@ const STATUS_ABERTAS: StatusDemanda[] = [
   "analise",
   "desenvolvimento",
   "teste",
+  "para_publicar",
   "reaberta",
 ];
 const STATUS_CONCLUIDAS: StatusDemanda[] = ["entregue", "encerrada"];
@@ -116,6 +117,7 @@ const STATUS_BAR_BG: Record<StatusDemanda, string> = {
   analise: "bg-status-analise",
   desenvolvimento: "bg-status-desenvolvimento",
   teste: "bg-status-teste",
+  para_publicar: "bg-status-para_publicar",
   entregue: "bg-status-entregue",
   reaberta: "bg-status-reaberta",
   encerrada: "bg-status-encerrada",
