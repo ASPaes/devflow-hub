@@ -13,7 +13,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { formatDataLogPT, formatDuracao } from "@/lib/format";
+import { formatDataLogPT } from "@/lib/format";
+import { formatHMFromSegundos } from "@/components/ui/HoraMinutoInput";
 import {
   useIniciarTimer,
   usePausarTimer,
