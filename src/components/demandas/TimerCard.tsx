@@ -13,7 +13,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { formatDataLogPT, formatDuracao } from "@/lib/format";
+import { formatDataLogPT } from "@/lib/format";
+import { formatHMFromSegundos } from "@/components/ui/HoraMinutoInput";
 import {
   useIniciarTimer,
   usePausarTimer,
@@ -102,7 +103,7 @@ export function TimerCard({ demanda, isResponsavel }: TimerCardProps) {
                       {formatDataLogPT(row.data)}
                     </span>
                     <span className="font-mono text-muted-foreground">
-                      {formatDuracao(row.segundos)}
+                      {formatHMFromSegundos(row.segundos)}
                     </span>
                   </li>
                 ))}
@@ -119,7 +120,7 @@ export function TimerCard({ demanda, isResponsavel }: TimerCardProps) {
             Realizado
           </div>
           <div className="mt-1 font-mono text-base font-semibold text-foreground">
-            {formatDuracao(realizado)}
+            {formatHMFromSegundos(realizado)}
           </div>
         </div>
         <div
@@ -137,7 +138,7 @@ export function TimerCard({ demanda, isResponsavel }: TimerCardProps) {
               rodando ? "text-primary" : "text-foreground"
             }`}
           >
-            {formatDuracao(segundosEmAndamento)}
+            {formatHMFromSegundos(segundosEmAndamento)}
           </div>
         </div>
       </div>

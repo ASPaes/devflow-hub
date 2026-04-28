@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { HoraMinutoInput } from "@/components/ui/HoraMinutoInput";
 import {
   Popover,
   PopoverContent,
@@ -216,7 +217,7 @@ export function MetadataSidebar({
           Estimativa
         </Label>
         <div className="mt-2">
-          <EstimativaInput
+          <HoraMinutoInput
             value={demanda.estimativa_horas}
             disabled={!canEdit || saving}
             onChange={(v) => onPatch({ estimativa_horas: v })}
@@ -494,51 +495,6 @@ function DeadlinePicker({ value, disabled, onChange }: DeadlinePickerProps) {
           Limpar
         </Button>
       )}
-    </div>
-  );
-}
-
-interface EstimativaInputProps {
-  value: number | null;
-  disabled: boolean;
-  onChange: (v: number | null) => void;
-}
-
-function EstimativaInput({ value, disabled, onChange }: EstimativaInputProps) {
-  const [draft, setDraft] = React.useState(value != null ? String(value) : "");
-  React.useEffect(
-    () => setDraft(value != null ? String(value) : ""),
-    [value],
-  );
-
-  const commit = () => {
-    const trimmed = draft.trim();
-    const next = trimmed === "" ? null : Number(trimmed);
-    if (next != null && (Number.isNaN(next) || next < 0)) return;
-    if (next === value) return;
-    onChange(next);
-  };
-
-  return (
-    <div className="flex items-center gap-1">
-      <Input
-        type="number"
-        step="0.5"
-        min="0"
-        value={draft}
-        disabled={disabled}
-        onChange={(e) => setDraft(e.target.value)}
-        onBlur={commit}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            e.preventDefault();
-            commit();
-          }
-        }}
-        className="h-8 text-sm"
-        placeholder="0"
-      />
-      <span className="text-sm text-muted-foreground">h</span>
     </div>
   );
 }
