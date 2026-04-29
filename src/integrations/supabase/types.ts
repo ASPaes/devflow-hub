@@ -169,6 +169,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "demanda_anexos_autor_id_fkey"
+            columns: ["autor_id"]
+            isOneToOne: false
+            referencedRelation: "vw_solicitantes_por_empresa"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "demanda_anexos_demanda_id_fkey"
             columns: ["demanda_id"]
             isOneToOne: false
@@ -229,6 +236,13 @@ export type Database = {
             columns: ["autor_id"]
             isOneToOne: false
             referencedRelation: "vw_potenciais_responsaveis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demanda_comentarios_autor_id_fkey"
+            columns: ["autor_id"]
+            isOneToOne: false
+            referencedRelation: "vw_solicitantes_por_empresa"
             referencedColumns: ["id"]
           },
           {
@@ -295,6 +309,13 @@ export type Database = {
             columns: ["autor_id"]
             isOneToOne: false
             referencedRelation: "vw_potenciais_responsaveis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demanda_historico_autor_id_fkey"
+            columns: ["autor_id"]
+            isOneToOne: false
+            referencedRelation: "vw_solicitantes_por_empresa"
             referencedColumns: ["id"]
           },
           {
@@ -407,6 +428,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "vw_potenciais_responsaveis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demanda_vinculos_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "vw_solicitantes_por_empresa"
             referencedColumns: ["id"]
           },
           {
@@ -567,6 +595,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "demandas_deleted_by_fkey"
+            columns: ["deleted_by"]
+            isOneToOne: false
+            referencedRelation: "vw_solicitantes_por_empresa"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "demandas_modulo_id_fkey"
             columns: ["modulo_id"]
             isOneToOne: false
@@ -595,6 +630,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "demandas_responsavel_id_fkey"
+            columns: ["responsavel_id"]
+            isOneToOne: false
+            referencedRelation: "vw_solicitantes_por_empresa"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "demandas_solicitante_id_fkey"
             columns: ["solicitante_id"]
             isOneToOne: false
@@ -609,6 +651,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "demandas_solicitante_id_fkey"
+            columns: ["solicitante_id"]
+            isOneToOne: false
+            referencedRelation: "vw_solicitantes_por_empresa"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "demandas_submodulo_id_fkey"
             columns: ["submodulo_id"]
             isOneToOne: false
@@ -620,6 +669,13 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demandas_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "vw_tenants_com_usuarios"
             referencedColumns: ["id"]
           },
         ]
@@ -733,6 +789,13 @@ export type Database = {
             referencedRelation: "vw_potenciais_responsaveis"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "produtos_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "vw_solicitantes_por_empresa"
+            referencedColumns: ["id"]
+          },
         ]
       }
       profiles: {
@@ -779,6 +842,13 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "vw_tenants_com_usuarios"
             referencedColumns: ["id"]
           },
         ]
@@ -923,6 +993,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "demandas_deleted_by_fkey"
+            columns: ["deleted_by"]
+            isOneToOne: false
+            referencedRelation: "vw_solicitantes_por_empresa"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "demandas_modulo_id_fkey"
             columns: ["modulo_id"]
             isOneToOne: false
@@ -944,6 +1021,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "demandas_responsavel_id_fkey"
+            columns: ["responsavel_id"]
+            isOneToOne: false
+            referencedRelation: "vw_solicitantes_por_empresa"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "demandas_solicitante_id_fkey"
             columns: ["solicitante_id"]
             isOneToOne: false
@@ -958,6 +1042,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "demandas_solicitante_id_fkey"
+            columns: ["solicitante_id"]
+            isOneToOne: false
+            referencedRelation: "vw_solicitantes_por_empresa"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "demandas_submodulo_id_fkey"
             columns: ["submodulo_id"]
             isOneToOne: false
@@ -969,6 +1060,13 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demandas_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "vw_tenants_com_usuarios"
             referencedColumns: ["id"]
           },
         ]
@@ -1048,6 +1146,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "demandas_responsavel_id_fkey"
+            columns: ["responsavel_id"]
+            isOneToOne: false
+            referencedRelation: "vw_solicitantes_por_empresa"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "demandas_solicitante_id_fkey"
             columns: ["solicitante_id"]
             isOneToOne: false
@@ -1062,6 +1167,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "demandas_solicitante_id_fkey"
+            columns: ["solicitante_id"]
+            isOneToOne: false
+            referencedRelation: "vw_solicitantes_por_empresa"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "demandas_submodulo_id_fkey"
             columns: ["submodulo_id"]
             isOneToOne: false
@@ -1073,6 +1185,13 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demandas_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "vw_tenants_com_usuarios"
             referencedColumns: ["id"]
           },
         ]
@@ -1092,7 +1211,57 @@ export type Database = {
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "profiles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "vw_tenants_com_usuarios"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      vw_solicitantes_por_empresa: {
+        Row: {
+          avatar_url: string | null
+          id: string | null
+          nome: string | null
+          tenant_id: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          id?: string | null
+          nome?: string | null
+          tenant_id?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          id?: string | null
+          nome?: string | null
+          tenant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "vw_tenants_com_usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vw_tenants_com_usuarios: {
+        Row: {
+          id: string | null
+          nome: string | null
+        }
+        Relationships: []
       }
     }
     Functions: {

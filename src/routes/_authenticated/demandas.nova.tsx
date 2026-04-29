@@ -31,10 +31,14 @@ import { cn } from "@/lib/utils";
 
 import { requirePermission } from "@/lib/auth-guards";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useAreas } from "@/hooks/useAreas";
 import { useModulos } from "@/hooks/useModulos";
 import { useSubmodulos } from "@/hooks/useSubmodulos";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
 import {
   novaDemandaSchema,
   PRIORIDADE_LABEL,
@@ -55,6 +59,8 @@ const PRIORIDADES = [1, 2, 3, 4, 5] as const;
 function NovaDemandaPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { profile, temPermissao } = useProfile();
+  const podeEscolher = temPermissao("pode_ser_responsavel");
   const [anexos, setAnexos] = React.useState<File[]>([]);
   const createDemanda = useCreateDemanda();
   useDocumentTitle("Nova demanda");
@@ -73,6 +79,8 @@ function NovaDemandaPage() {
       modulo_id: "",
       submodulo_id: "",
       area_id: "",
+      solicitante_id: undefined,
+      tenant_id: undefined,
     },
   });
 
@@ -107,11 +115,31 @@ function NovaDemandaPage() {
 
   const onSubmit = async (input: NovaDemandaInput) => {
     if (!user?.id) return;
+    if (podeEscolher) {
+      if (!input.tenant_id) {
+        toast.error("Selecione uma empresa");
+        return;
+      }
+      if (!input.solicitante_id) {
+        toast.error("Selecione quem está abrindo a demanda");
+        return;
+      }
+    }
     try {
       await createDemanda.mutateAsync({ input, anexos, userId: user.id });
       navigate({ to: "/" });
-    } catch {
-      // toast já tratado no hook
+    } catch (err) {
+      const msg = (err as { message?: string })?.message ?? "";
+      if (msg.includes("não pertence à empresa")) {
+        toast.error(
+          "O solicitante selecionado não pertence à empresa escolhida.",
+        );
+      } else if (msg.includes("Sem permissão")) {
+        toast.error(
+          "Você não tem permissão para alterar solicitante ou empresa.",
+        );
+      }
+      // demais erros já tratados no hook
     }
   };
 
@@ -197,6 +225,35 @@ function NovaDemandaPage() {
 
               {/* Coluna lateral */}
               <div className="space-y-6 lg:col-span-1">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base font-medium">
+                      Solicitante
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-5">
+                    <SolicitanteEmpresaFields
+                      podeEscolher={podeEscolher}
+                      profileNome={profile?.nome ?? ""}
+                      profileTenantId={profile?.tenant_id ?? null}
+                      profileTenantNome={profile?.tenant?.nome ?? ""}
+                      tenantId={form.watch("tenant_id") ?? null}
+                      solicitanteId={form.watch("solicitante_id") ?? null}
+                      onTenantChange={(v) =>
+                        form.setValue("tenant_id", v ?? undefined, {
+                          shouldValidate: false,
+                        })
+                      }
+                      onSolicitanteChange={(v) =>
+                        form.setValue("solicitante_id", v ?? undefined, {
+                          shouldValidate: false,
+                        })
+                      }
+                      disabled={isSubmitting}
+                    />
+                  </CardContent>
+                </Card>
+
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-base font-medium">
@@ -464,5 +521,154 @@ function PrioridadePicker({ value, onChange, disabled }: PrioridadePickerProps) 
         );
       })}
     </div>
+  );
+}
+
+interface SolicitanteEmpresaFieldsProps {
+  podeEscolher: boolean;
+  profileNome: string;
+  profileTenantId: string | null;
+  profileTenantNome: string;
+  tenantId: string | null;
+  solicitanteId: string | null;
+  onTenantChange: (id: string | null) => void;
+  onSolicitanteChange: (id: string | null) => void;
+  disabled?: boolean;
+}
+
+function SolicitanteEmpresaFields({
+  podeEscolher,
+  profileNome,
+  profileTenantNome,
+  tenantId,
+  solicitanteId,
+  onTenantChange,
+  onSolicitanteChange,
+  disabled,
+}: SolicitanteEmpresaFieldsProps) {
+  const empresasQuery = useQuery({
+    queryKey: ["empresas-com-usuarios"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("vw_tenants_com_usuarios")
+        .select("id, nome")
+        .order("nome");
+      if (error) throw error;
+      return (data ?? []) as { id: string; nome: string }[];
+    },
+    enabled: podeEscolher,
+    staleTime: 5 * 60_000,
+  });
+
+  const solicitantesQuery = useQuery({
+    queryKey: ["solicitantes-por-empresa", tenantId],
+    queryFn: async () => {
+      if (!tenantId) return [] as { id: string; nome: string }[];
+      const { data, error } = await supabase
+        .from("vw_solicitantes_por_empresa")
+        .select("id, nome")
+        .eq("tenant_id", tenantId)
+        .order("nome");
+      if (error) throw error;
+      return (data ?? []) as { id: string; nome: string }[];
+    },
+    enabled: podeEscolher && !!tenantId,
+    staleTime: 5 * 60_000,
+  });
+
+  const solicitantes = solicitantesQuery.data ?? [];
+
+  // Quando muda empresa, se o solicitante atual não pertence, limpa
+  React.useEffect(() => {
+    if (!podeEscolher) return;
+    if (!solicitanteId) return;
+    if (solicitantes.length === 0) return;
+    if (!solicitantes.find((s) => s.id === solicitanteId)) {
+      onSolicitanteChange(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tenantId, solicitantes]);
+
+  if (!podeEscolher) {
+    return (
+      <>
+        <div className="space-y-2">
+          <Label>Aberto por</Label>
+          <Input value={profileNome} disabled readOnly />
+        </div>
+        <div className="space-y-2">
+          <Label>Empresa</Label>
+          <Input
+            value={profileTenantNome || "—"}
+            disabled
+            readOnly
+          />
+        </div>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <div className="space-y-2">
+        <Label>Empresa *</Label>
+        <Select
+          value={tenantId ?? ""}
+          onValueChange={(v) => onTenantChange(v || null)}
+          disabled={disabled || empresasQuery.isLoading}
+        >
+          <SelectTrigger>
+            <SelectValue
+              placeholder={
+                empresasQuery.isLoading
+                  ? "Carregando..."
+                  : "Selecione a empresa"
+              }
+            />
+          </SelectTrigger>
+          <SelectContent>
+            {(empresasQuery.data ?? []).map((e) => (
+              <SelectItem key={e.id} value={e.id}>
+                {e.nome}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label>Aberto por *</Label>
+        <Select
+          value={solicitanteId ?? ""}
+          onValueChange={(v) => onSolicitanteChange(v || null)}
+          disabled={disabled || !tenantId || solicitantesQuery.isLoading}
+        >
+          <SelectTrigger>
+            <SelectValue
+              placeholder={
+                !tenantId
+                  ? "Selecione uma empresa primeiro"
+                  : solicitantesQuery.isLoading
+                    ? "Carregando..."
+                    : "Selecione o solicitante"
+              }
+            />
+          </SelectTrigger>
+          <SelectContent>
+            {solicitantes.length === 0 && tenantId ? (
+              <div className="px-2 py-1.5 text-xs text-muted-foreground">
+                Nenhum usuário ativo nesta empresa
+              </div>
+            ) : (
+              solicitantes.map((s) => (
+                <SelectItem key={s.id} value={s.id}>
+                  {s.nome}
+                </SelectItem>
+              ))
+            )}
+          </SelectContent>
+        </Select>
+      </div>
+    </>
   );
 }

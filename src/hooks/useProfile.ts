@@ -24,6 +24,8 @@ export type ProfileWithPerfil = {
   nome: string;
   avatar_url: string | null;
   ativo: boolean;
+  tenant_id: string | null;
+  tenant: { id: string; nome: string } | null;
   perfil_acesso: {
     id: string;
     nome: string;
@@ -40,7 +42,7 @@ export function useProfile() {
       const { data, error } = await supabase
         .from("profiles")
         .select(
-          "id, nome, avatar_url, ativo, perfil_acesso:perfis_acesso(id, nome, permissoes)",
+          "id, nome, avatar_url, ativo, tenant_id, tenant:tenants(id, nome), perfil_acesso:perfis_acesso(id, nome, permissoes)",
         )
         .eq("id", user.id)
         .single();
