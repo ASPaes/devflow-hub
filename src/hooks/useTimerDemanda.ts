@@ -4,9 +4,14 @@ import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 import type { Demanda } from "./useDemandas";
 
+export type TempoOrigem = "automatico" | "manual";
+
 export interface TimerLogRow {
+  id: string;
   data: string;
   segundos: number;
+  origem: TempoOrigem;
+  autor_manual_id: string | null;
 }
 
 export function useIniciarTimer() {
@@ -57,7 +62,7 @@ export function useTimerLog(demandaId: string | undefined) {
       if (!demandaId) return [];
       const { data, error } = await supabase
         .from("demanda_timer_log")
-        .select("data, segundos")
+        .select("id, data, segundos, origem, autor_manual_id")
         .eq("demanda_id", demandaId)
         .order("data", { ascending: false });
       if (error) throw error;

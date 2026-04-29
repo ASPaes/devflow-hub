@@ -1,7 +1,16 @@
 import * as React from "react";
-import { Clock, History, Pause, Play } from "lucide-react";
+import { Clock, Hand, History, Pause, Pencil, Play, Plus, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Popover,
   PopoverContent,
@@ -14,12 +23,22 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { formatDataLogPT } from "@/lib/format";
-import { formatHMFromSegundos } from "@/components/ui/HoraMinutoInput";
+import {
+  HoraMinutoInput,
+  formatHMFromSegundos,
+} from "@/components/ui/HoraMinutoInput";
 import {
   useIniciarTimer,
   usePausarTimer,
   useTimerLog,
+  type TimerLogRow,
 } from "@/hooks/useTimerDemanda";
+import {
+  useAtualizarTempoManual,
+  useExcluirTempoManual,
+  useInserirTempoManual,
+} from "@/hooks/useTempoManual";
+import { useProfile } from "@/hooks/useProfile";
 import type { DemandaCompleta } from "@/hooks/useDemandas";
 
 interface TimerCardProps {
@@ -33,6 +52,29 @@ export function TimerCard({ demanda, isResponsavel }: TimerCardProps) {
   const iniciarMutation = useIniciarTimer();
   const pausarMutation = usePausarTimer();
   const { data: log = [] } = useTimerLog(demanda.id);
+  const { temPermissao } = useProfile();
+  const podeInserirManual = temPermissao("inserir_tempo_manual");
+  const excluirManual = useExcluirTempoManual(demanda.id);
+
+  const [formOpen, setFormOpen] = React.useState(false);
+  const [logEditando, setLogEditando] = React.useState<TimerLogRow | null>(
+    null,
+  );
+
+  const abrirCriar = () => {
+    setLogEditando(null);
+    setFormOpen(true);
+  };
+  const abrirEditar = (row: TimerLogRow) => {
+    setLogEditando(row);
+    setFormOpen(true);
+  };
+  const confirmarExcluir = (row: TimerLogRow) => {
+    const txt = `${formatDataLogPT(row.data)} (${formatHMFromSegundos(row.segundos)})`;
+    if (window.confirm(`Excluir lançamento manual de ${txt}?`)) {
+      excluirManual.mutate(row.id);
+    }
+  };
 
   const rodando = !!demanda.timer_iniciado_em;
   const statusFinal = STATUS_FINAIS.has(demanda.status);
@@ -84,33 +126,105 @@ export function TimerCard({ demanda, isResponsavel }: TimerCardProps) {
               <History className="h-3.5 w-3.5" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent align="end" className="w-72 p-0">
-            <div className="border-b border-border px-3 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Histórico por dia
+          <PopoverContent align="end" className="w-80 p-0">
+            <div className="flex items-center justify-between border-b border-border px-3 py-2">
+              <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Histórico por dia
+              </span>
             </div>
+            {podeInserirManual && (
+              <div className="border-b border-border px-3 py-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="w-full"
+                  onClick={abrirCriar}
+                >
+                  <Plus className="mr-1.5 h-3.5 w-3.5" />
+                  Adicionar manualmente
+                </Button>
+              </div>
+            )}
             {log.length === 0 ? (
               <p className="px-3 py-4 text-center text-xs text-muted-foreground">
                 Nenhum registro ainda
               </p>
             ) : (
-              <ul className="max-h-64 overflow-y-auto py-1">
-                {log.map((row) => (
-                  <li
-                    key={row.data}
-                    className="flex items-center justify-between px-3 py-1.5 text-sm"
-                  >
-                    <span className="text-foreground">
-                      {formatDataLogPT(row.data)}
-                    </span>
-                    <span className="font-mono text-muted-foreground">
-                      {formatHMFromSegundos(row.segundos)}
-                    </span>
-                  </li>
-                ))}
+              <ul className="max-h-72 overflow-y-auto py-1">
+                {log.map((row) => {
+                  const isManual = row.origem === "manual";
+                  return (
+                    <li
+                      key={row.id}
+                      className="flex items-center gap-2 px-3 py-1.5 text-sm"
+                    >
+                      <TooltipProvider delayDuration={200}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="flex h-5 w-5 items-center justify-center">
+                              {isManual ? (
+                                <Hand className="h-3.5 w-3.5 text-amber-500" />
+                              ) : (
+                                <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                              )}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {isManual
+                              ? "Lançamento manual"
+                              : "Lançamento automático"}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+
+                      <span className="flex-1 text-foreground">
+                        {formatDataLogPT(row.data)}
+                      </span>
+
+                      <span className="font-mono text-muted-foreground">
+                        {formatHMFromSegundos(row.segundos)}
+                      </span>
+
+                      {isManual && podeInserirManual && (
+                        <span className="flex items-center gap-0.5">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 text-muted-foreground hover:text-foreground"
+                            title="Editar"
+                            onClick={() => abrirEditar(row)}
+                          >
+                            <Pencil className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                            title="Excluir"
+                            onClick={() => confirmarExcluir(row)}
+                            disabled={excluirManual.isPending}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </span>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </PopoverContent>
         </Popover>
+
+        <LancamentoManualForm
+          demandaId={demanda.id}
+          open={formOpen}
+          onOpenChange={setFormOpen}
+          logExistente={logEditando}
+        />
       </div>
 
       {/* Cards lado a lado */}
@@ -191,5 +305,119 @@ export function TimerCard({ demanda, isResponsavel }: TimerCardProps) {
         </TooltipProvider>
       </div>
     </section>
+  );
+}
+
+function LancamentoManualForm({
+  demandaId,
+  open,
+  onOpenChange,
+  logExistente,
+}: {
+  demandaId: string;
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  logExistente: TimerLogRow | null;
+}) {
+  const inserir = useInserirTempoManual();
+  const atualizar = useAtualizarTempoManual(demandaId);
+  const isPending = inserir.isPending || atualizar.isPending;
+  const modo: "criar" | "editar" = logExistente ? "editar" : "criar";
+
+  const hojeIso = () => new Date().toISOString().slice(0, 10);
+
+  const [data, setData] = React.useState<string>(hojeIso());
+  const [horasDecimal, setHorasDecimal] = React.useState<number>(0);
+
+  React.useEffect(() => {
+    if (open) {
+      if (logExistente) {
+        setData(logExistente.data);
+        setHorasDecimal(logExistente.segundos / 3600);
+      } else {
+        setData(hojeIso());
+        setHorasDecimal(0);
+      }
+    }
+  }, [open, logExistente]);
+
+  const segundos = Math.round(horasDecimal * 3600);
+  const valido = segundos > 0 && !!data;
+
+  const handleSubmit = async () => {
+    if (!valido) return;
+    try {
+      if (modo === "criar") {
+        await inserir.mutateAsync({ demandaId, data, segundos });
+      } else if (logExistente) {
+        await atualizar.mutateAsync({ logId: logExistente.id, segundos });
+      }
+      onOpenChange(false);
+    } catch {
+      // toast já tratado
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>
+            {modo === "criar"
+              ? "Adicionar tempo manual"
+              : "Editar lançamento"}
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4 py-2">
+          <div className="space-y-1.5">
+            <Label htmlFor="data-manual">Data</Label>
+            <Input
+              id="data-manual"
+              type="date"
+              value={data}
+              onChange={(e) => setData(e.target.value)}
+              max={new Date().toISOString().slice(0, 10)}
+              disabled={modo === "editar"}
+            />
+            {modo === "editar" && (
+              <p className="text-xs text-muted-foreground">
+                Para mudar a data, exclua e crie um novo lançamento.
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>Tempo gasto</Label>
+            <HoraMinutoInput
+              value={horasDecimal}
+              onChange={(v) => setHorasDecimal(v ?? 0)}
+            />
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={isPending}
+          >
+            Cancelar
+          </Button>
+          <Button
+            type="button"
+            onClick={handleSubmit}
+            disabled={!valido || isPending}
+          >
+            {isPending
+              ? "Salvando..."
+              : modo === "criar"
+                ? "Adicionar"
+                : "Salvar"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

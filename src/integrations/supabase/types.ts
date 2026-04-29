@@ -343,30 +343,57 @@ export type Database = {
       }
       demanda_timer_log: {
         Row: {
+          autor_manual_id: string | null
           created_at: string
           data: string
           demanda_id: string
           id: string
+          origem: Database["public"]["Enums"]["tempo_origem"]
           segundos: number
           updated_at: string
         }
         Insert: {
+          autor_manual_id?: string | null
           created_at?: string
           data: string
           demanda_id: string
           id?: string
+          origem?: Database["public"]["Enums"]["tempo_origem"]
           segundos?: number
           updated_at?: string
         }
         Update: {
+          autor_manual_id?: string | null
           created_at?: string
           data?: string
           demanda_id?: string
           id?: string
+          origem?: Database["public"]["Enums"]["tempo_origem"]
           segundos?: number
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "demanda_timer_log_autor_manual_id_fkey"
+            columns: ["autor_manual_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demanda_timer_log_autor_manual_id_fkey"
+            columns: ["autor_manual_id"]
+            isOneToOne: false
+            referencedRelation: "vw_potenciais_responsaveis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demanda_timer_log_autor_manual_id_fkey"
+            columns: ["autor_manual_id"]
+            isOneToOne: false
+            referencedRelation: "vw_solicitantes_por_empresa"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "demanda_timer_log_demanda_id_fkey"
             columns: ["demanda_id"]
@@ -1265,6 +1292,25 @@ export type Database = {
       }
     }
     Functions: {
+      atualizar_tempo_manual_log: {
+        Args: { p_log_id: string; p_segundos: number }
+        Returns: {
+          autor_manual_id: string | null
+          created_at: string
+          data: string
+          demanda_id: string
+          id: string
+          origem: Database["public"]["Enums"]["tempo_origem"]
+          segundos: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "demanda_timer_log"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       claim_next_cobranca_batch: {
         Args: { p_limit?: number; p_worker_id?: string }
         Returns: {
@@ -1360,6 +1406,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      excluir_tempo_manual_log: {
+        Args: { p_log_id: string }
+        Returns: undefined
+      }
       iniciar_timer_demanda: {
         Args: { p_demanda_id: string }
         Returns: {
@@ -1395,6 +1445,25 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "demandas"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      inserir_tempo_manual_log: {
+        Args: { p_data: string; p_demanda_id: string; p_segundos: number }
+        Returns: {
+          autor_manual_id: string | null
+          created_at: string
+          data: string
+          demanda_id: string
+          id: string
+          origem: Database["public"]["Enums"]["tempo_origem"]
+          segundos: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "demanda_timer_log"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -1572,6 +1641,7 @@ export type Database = {
         | "comentar_demanda"
         | "pode_ser_responsavel"
         | "alterar_produto_demanda"
+        | "inserir_tempo_manual"
       status_demanda:
         | "triagem"
         | "analise"
@@ -1582,6 +1652,7 @@ export type Database = {
         | "reaberta"
         | "encerrada"
         | "cancelada"
+      tempo_origem: "automatico" | "manual"
       tipo_demanda:
         | "erro"
         | "melhoria"
@@ -1732,6 +1803,7 @@ export const Constants = {
         "comentar_demanda",
         "pode_ser_responsavel",
         "alterar_produto_demanda",
+        "inserir_tempo_manual",
       ],
       status_demanda: [
         "triagem",
@@ -1744,6 +1816,7 @@ export const Constants = {
         "encerrada",
         "cancelada",
       ],
+      tempo_origem: ["automatico", "manual"],
       tipo_demanda: [
         "erro",
         "melhoria",
