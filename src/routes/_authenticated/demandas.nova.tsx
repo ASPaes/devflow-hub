@@ -523,3 +523,152 @@ function PrioridadePicker({ value, onChange, disabled }: PrioridadePickerProps) 
     </div>
   );
 }
+
+interface SolicitanteEmpresaFieldsProps {
+  podeEscolher: boolean;
+  profileNome: string;
+  profileTenantId: string | null;
+  profileTenantNome: string;
+  tenantId: string | null;
+  solicitanteId: string | null;
+  onTenantChange: (id: string | null) => void;
+  onSolicitanteChange: (id: string | null) => void;
+  disabled?: boolean;
+}
+
+function SolicitanteEmpresaFields({
+  podeEscolher,
+  profileNome,
+  profileTenantNome,
+  tenantId,
+  solicitanteId,
+  onTenantChange,
+  onSolicitanteChange,
+  disabled,
+}: SolicitanteEmpresaFieldsProps) {
+  const empresasQuery = useQuery({
+    queryKey: ["empresas-com-usuarios"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("vw_tenants_com_usuarios")
+        .select("id, nome")
+        .order("nome");
+      if (error) throw error;
+      return (data ?? []) as { id: string; nome: string }[];
+    },
+    enabled: podeEscolher,
+    staleTime: 5 * 60_000,
+  });
+
+  const solicitantesQuery = useQuery({
+    queryKey: ["solicitantes-por-empresa", tenantId],
+    queryFn: async () => {
+      if (!tenantId) return [] as { id: string; nome: string }[];
+      const { data, error } = await supabase
+        .from("vw_solicitantes_por_empresa")
+        .select("id, nome")
+        .eq("tenant_id", tenantId)
+        .order("nome");
+      if (error) throw error;
+      return (data ?? []) as { id: string; nome: string }[];
+    },
+    enabled: podeEscolher && !!tenantId,
+    staleTime: 5 * 60_000,
+  });
+
+  const solicitantes = solicitantesQuery.data ?? [];
+
+  // Quando muda empresa, se o solicitante atual não pertence, limpa
+  React.useEffect(() => {
+    if (!podeEscolher) return;
+    if (!solicitanteId) return;
+    if (solicitantes.length === 0) return;
+    if (!solicitantes.find((s) => s.id === solicitanteId)) {
+      onSolicitanteChange(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tenantId, solicitantes]);
+
+  if (!podeEscolher) {
+    return (
+      <>
+        <div className="space-y-2">
+          <Label>Aberto por</Label>
+          <Input value={profileNome} disabled readOnly />
+        </div>
+        <div className="space-y-2">
+          <Label>Empresa</Label>
+          <Input
+            value={profileTenantNome || "—"}
+            disabled
+            readOnly
+          />
+        </div>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <div className="space-y-2">
+        <Label>Empresa *</Label>
+        <Select
+          value={tenantId ?? ""}
+          onValueChange={(v) => onTenantChange(v || null)}
+          disabled={disabled || empresasQuery.isLoading}
+        >
+          <SelectTrigger>
+            <SelectValue
+              placeholder={
+                empresasQuery.isLoading
+                  ? "Carregando..."
+                  : "Selecione a empresa"
+              }
+            />
+          </SelectTrigger>
+          <SelectContent>
+            {(empresasQuery.data ?? []).map((e) => (
+              <SelectItem key={e.id} value={e.id}>
+                {e.nome}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label>Aberto por *</Label>
+        <Select
+          value={solicitanteId ?? ""}
+          onValueChange={(v) => onSolicitanteChange(v || null)}
+          disabled={disabled || !tenantId || solicitantesQuery.isLoading}
+        >
+          <SelectTrigger>
+            <SelectValue
+              placeholder={
+                !tenantId
+                  ? "Selecione uma empresa primeiro"
+                  : solicitantesQuery.isLoading
+                    ? "Carregando..."
+                    : "Selecione o solicitante"
+              }
+            />
+          </SelectTrigger>
+          <SelectContent>
+            {solicitantes.length === 0 && tenantId ? (
+              <div className="px-2 py-1.5 text-xs text-muted-foreground">
+                Nenhum usuário ativo nesta empresa
+              </div>
+            ) : (
+              solicitantes.map((s) => (
+                <SelectItem key={s.id} value={s.id}>
+                  {s.nome}
+                </SelectItem>
+              ))
+            )}
+          </SelectContent>
+        </Select>
+      </div>
+    </>
+  );
+}
