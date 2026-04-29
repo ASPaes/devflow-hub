@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   LogOut,
   Network,
+  Package2,
   PlusCircle,
   ShieldCheck,
   UserCircle,
