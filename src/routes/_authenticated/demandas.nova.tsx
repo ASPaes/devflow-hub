@@ -59,6 +59,8 @@ const PRIORIDADES = [1, 2, 3, 4, 5] as const;
 function NovaDemandaPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { profile, temPermissao } = useProfile();
+  const podeEscolher = temPermissao("pode_ser_responsavel");
   const [anexos, setAnexos] = React.useState<File[]>([]);
   const createDemanda = useCreateDemanda();
   useDocumentTitle("Nova demanda");
@@ -77,6 +79,8 @@ function NovaDemandaPage() {
       modulo_id: "",
       submodulo_id: "",
       area_id: "",
+      solicitante_id: undefined,
+      tenant_id: undefined,
     },
   });
 
