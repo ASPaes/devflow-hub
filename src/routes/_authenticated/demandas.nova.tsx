@@ -31,10 +31,14 @@ import { cn } from "@/lib/utils";
 
 import { requirePermission } from "@/lib/auth-guards";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useAreas } from "@/hooks/useAreas";
 import { useModulos } from "@/hooks/useModulos";
 import { useSubmodulos } from "@/hooks/useSubmodulos";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
 import {
   novaDemandaSchema,
   PRIORIDADE_LABEL,
