@@ -1,7 +1,16 @@
 import * as React from "react";
-import { Clock, History, Pause, Play } from "lucide-react";
+import { Clock, Hand, History, Pause, Pencil, Play, Plus, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Popover,
   PopoverContent,
@@ -14,12 +23,22 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { formatDataLogPT } from "@/lib/format";
-import { formatHMFromSegundos } from "@/components/ui/HoraMinutoInput";
+import {
+  HoraMinutoInput,
+  formatHMFromSegundos,
+} from "@/components/ui/HoraMinutoInput";
 import {
   useIniciarTimer,
   usePausarTimer,
   useTimerLog,
+  type TimerLogRow,
 } from "@/hooks/useTimerDemanda";
+import {
+  useAtualizarTempoManual,
+  useExcluirTempoManual,
+  useInserirTempoManual,
+} from "@/hooks/useTempoManual";
+import { useProfile } from "@/hooks/useProfile";
 import type { DemandaCompleta } from "@/hooks/useDemandas";
 
 interface TimerCardProps {
