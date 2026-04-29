@@ -52,6 +52,29 @@ export function TimerCard({ demanda, isResponsavel }: TimerCardProps) {
   const iniciarMutation = useIniciarTimer();
   const pausarMutation = usePausarTimer();
   const { data: log = [] } = useTimerLog(demanda.id);
+  const { temPermissao } = useProfile();
+  const podeInserirManual = temPermissao("inserir_tempo_manual");
+  const excluirManual = useExcluirTempoManual(demanda.id);
+
+  const [formOpen, setFormOpen] = React.useState(false);
+  const [logEditando, setLogEditando] = React.useState<TimerLogRow | null>(
+    null,
+  );
+
+  const abrirCriar = () => {
+    setLogEditando(null);
+    setFormOpen(true);
+  };
+  const abrirEditar = (row: TimerLogRow) => {
+    setLogEditando(row);
+    setFormOpen(true);
+  };
+  const confirmarExcluir = (row: TimerLogRow) => {
+    const txt = `${formatDataLogPT(row.data)} (${formatHMFromSegundos(row.segundos)})`;
+    if (window.confirm(`Excluir lançamento manual de ${txt}?`)) {
+      excluirManual.mutate(row.id);
+    }
+  };
 
   const rodando = !!demanda.timer_iniciado_em;
   const statusFinal = STATUS_FINAIS.has(demanda.status);
