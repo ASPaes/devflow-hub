@@ -62,7 +62,7 @@ export function useTimerLog(demandaId: string | undefined) {
       if (!demandaId) return [];
       const { data, error } = await supabase
         .from("demanda_timer_log")
-        .select("data, segundos")
+        .select("id, data, segundos, origem, autor_manual_id")
         .eq("demanda_id", demandaId)
         .order("data", { ascending: false });
       if (error) throw error;
