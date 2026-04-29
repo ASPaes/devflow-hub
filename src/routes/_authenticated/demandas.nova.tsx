@@ -115,11 +115,31 @@ function NovaDemandaPage() {
 
   const onSubmit = async (input: NovaDemandaInput) => {
     if (!user?.id) return;
+    if (podeEscolher) {
+      if (!input.tenant_id) {
+        toast.error("Selecione uma empresa");
+        return;
+      }
+      if (!input.solicitante_id) {
+        toast.error("Selecione quem está abrindo a demanda");
+        return;
+      }
+    }
     try {
       await createDemanda.mutateAsync({ input, anexos, userId: user.id });
       navigate({ to: "/" });
-    } catch {
-      // toast já tratado no hook
+    } catch (err) {
+      const msg = (err as { message?: string })?.message ?? "";
+      if (msg.includes("não pertence à empresa")) {
+        toast.error(
+          "O solicitante selecionado não pertence à empresa escolhida.",
+        );
+      } else if (msg.includes("Sem permissão")) {
+        toast.error(
+          "Você não tem permissão para alterar solicitante ou empresa.",
+        );
+      }
+      // demais erros já tratados no hook
     }
   };
 
