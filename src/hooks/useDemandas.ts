@@ -132,6 +132,7 @@ export const novaDemandaSchema = z.object({
     .min(10, "Descreva com mais detalhes (mínimo 10 caracteres)"),
   tipo: z.enum(TIPO_DEMANDA_VALUES),
   prioridade: z.coerce.number().int().min(1).max(5),
+  produto_id: z.string().uuid("Selecione um produto"),
   modulo_id: z.string().uuid("Selecione um módulo"),
   submodulo_id: z.string().uuid("Selecione um submódulo"),
   area_id: z.string().uuid("Selecione uma área"),
