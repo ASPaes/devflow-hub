@@ -126,33 +126,105 @@ export function TimerCard({ demanda, isResponsavel }: TimerCardProps) {
               <History className="h-3.5 w-3.5" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent align="end" className="w-72 p-0">
-            <div className="border-b border-border px-3 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Histórico por dia
+          <PopoverContent align="end" className="w-80 p-0">
+            <div className="flex items-center justify-between border-b border-border px-3 py-2">
+              <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Histórico por dia
+              </span>
             </div>
+            {podeInserirManual && (
+              <div className="border-b border-border px-3 py-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="w-full"
+                  onClick={abrirCriar}
+                >
+                  <Plus className="mr-1.5 h-3.5 w-3.5" />
+                  Adicionar manualmente
+                </Button>
+              </div>
+            )}
             {log.length === 0 ? (
               <p className="px-3 py-4 text-center text-xs text-muted-foreground">
                 Nenhum registro ainda
               </p>
             ) : (
-              <ul className="max-h-64 overflow-y-auto py-1">
-                {log.map((row) => (
-                  <li
-                    key={row.data}
-                    className="flex items-center justify-between px-3 py-1.5 text-sm"
-                  >
-                    <span className="text-foreground">
-                      {formatDataLogPT(row.data)}
-                    </span>
-                    <span className="font-mono text-muted-foreground">
-                      {formatHMFromSegundos(row.segundos)}
-                    </span>
-                  </li>
-                ))}
+              <ul className="max-h-72 overflow-y-auto py-1">
+                {log.map((row) => {
+                  const isManual = row.origem === "manual";
+                  return (
+                    <li
+                      key={row.id}
+                      className="flex items-center gap-2 px-3 py-1.5 text-sm"
+                    >
+                      <TooltipProvider delayDuration={200}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="flex h-5 w-5 items-center justify-center">
+                              {isManual ? (
+                                <Hand className="h-3.5 w-3.5 text-amber-500" />
+                              ) : (
+                                <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                              )}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {isManual
+                              ? "Lançamento manual"
+                              : "Lançamento automático"}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+
+                      <span className="flex-1 text-foreground">
+                        {formatDataLogPT(row.data)}
+                      </span>
+
+                      <span className="font-mono text-muted-foreground">
+                        {formatHMFromSegundos(row.segundos)}
+                      </span>
+
+                      {isManual && podeInserirManual && (
+                        <span className="flex items-center gap-0.5">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 text-muted-foreground hover:text-foreground"
+                            title="Editar"
+                            onClick={() => abrirEditar(row)}
+                          >
+                            <Pencil className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                            title="Excluir"
+                            onClick={() => confirmarExcluir(row)}
+                            disabled={excluirManual.isPending}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </span>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </PopoverContent>
         </Popover>
+
+        <LancamentoManualForm
+          demandaId={demanda.id}
+          open={formOpen}
+          onOpenChange={setFormOpen}
+          logExistente={logEditando}
+        />
       </div>
 
       {/* Cards lado a lado */}
