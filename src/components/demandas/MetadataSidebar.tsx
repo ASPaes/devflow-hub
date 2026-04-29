@@ -517,8 +517,12 @@ function ClassificacaoEditor({
   const { data: modulos = [] } = useModulos();
   const { data: submodulos = [] } = useSubmodulos();
   const { data: areas = [] } = useAreas();
+  const { data: produtos = [] } = useProdutosAtivos();
+  const { temPermissao } = useProfile();
+  const podeAlterarProduto = temPermissao("alterar_produto_demanda");
 
   const disabled = !canEdit || saving;
+  const produtoDisabled = saving || !podeAlterarProduto;
 
   const submodulosDoModulo = React.useMemo(
     () =>
