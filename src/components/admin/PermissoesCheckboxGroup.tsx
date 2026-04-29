@@ -61,6 +61,12 @@ const GROUPS: Group[] = [
         description:
           "Pode trocar o produto-alvo (DoctorSaaS, DoctorDev etc.) de uma demanda existente",
       },
+      {
+        key: "inserir_tempo_manual",
+        label: "Inserir tempo manualmente",
+        description:
+          "Pode adicionar, editar e excluir lançamentos manuais de tempo no histórico do timer",
+      },
     ],
   },
   {
