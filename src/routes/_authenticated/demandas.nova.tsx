@@ -34,6 +34,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useAreas } from "@/hooks/useAreas";
+import { useProdutosAtivos } from "@/hooks/useProdutos";
 import { useModulos } from "@/hooks/useModulos";
 import { useSubmodulos } from "@/hooks/useSubmodulos";
 import { useQuery } from "@tanstack/react-query";
@@ -68,6 +69,7 @@ function NovaDemandaPage() {
   const modulosQuery = useModulos();
   const submodulosQuery = useSubmodulos();
   const areasQuery = useAreas();
+  const produtosQuery = useProdutosAtivos();
 
   const form = useForm<NovaDemandaInput>({
     resolver: zodResolver(novaDemandaSchema),
@@ -76,6 +78,7 @@ function NovaDemandaPage() {
       descricao: "",
       tipo: "tarefa",
       prioridade: 3,
+      produto_id: "",
       modulo_id: "",
       submodulo_id: "",
       area_id: "",
@@ -261,6 +264,44 @@ function NovaDemandaPage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-5">
+                    <FormField
+                      control={form.control}
+                      name="produto_id"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Produto</FormLabel>
+                          <Select
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            disabled={isSubmitting || produtosQuery.isLoading}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue
+                                  placeholder={
+                                    produtosQuery.isLoading
+                                      ? "Carregando..."
+                                      : "Selecione o produto"
+                                  }
+                                />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {(produtosQuery.data ?? []).map((p) => (
+                                <SelectItem key={p.id} value={p.id}>
+                                  {p.nome}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormDescription>
+                            Produto-alvo da demanda (obrigatório).
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
                     <FormField
                       control={form.control}
                       name="tipo"

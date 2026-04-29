@@ -50,10 +50,12 @@ import {
   type UpdateDemandaPatch,
 } from "@/hooks/useDemandas";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 import { useUsuariosComPermissao } from "@/hooks/useUsuarios";
 import { useModulos } from "@/hooks/useModulos";
 import { useSubmodulos } from "@/hooks/useSubmodulos";
 import { useAreas } from "@/hooks/useAreas";
+import { useProdutosAtivos } from "@/hooks/useProdutos";
 import { TimerCard } from "./TimerCard";
 
 const PRIORIDADES = [1, 2, 3, 4, 5] as const;
@@ -515,8 +517,12 @@ function ClassificacaoEditor({
   const { data: modulos = [] } = useModulos();
   const { data: submodulos = [] } = useSubmodulos();
   const { data: areas = [] } = useAreas();
+  const { data: produtos = [] } = useProdutosAtivos();
+  const { temPermissao } = useProfile();
+  const podeAlterarProduto = temPermissao("alterar_produto_demanda");
 
   const disabled = !canEdit || saving;
+  const produtoDisabled = saving || !podeAlterarProduto;
 
   const submodulosDoModulo = React.useMemo(
     () =>
@@ -541,6 +547,37 @@ function ClassificacaoEditor({
 
   return (
     <div className="space-y-3">
+      <div className="space-y-1">
+        <label className="text-xs text-muted-foreground">Produto</label>
+        {podeAlterarProduto ? (
+          <Select
+            value={demanda.produto_id ?? ""}
+            onValueChange={(v) => {
+              if (v === demanda.produto_id) return;
+              void onPatch({ produto_id: v });
+            }}
+            disabled={produtoDisabled}
+          >
+            <SelectTrigger className="h-8 text-sm">
+              <SelectValue placeholder="Sem produto" />
+            </SelectTrigger>
+            <SelectContent>
+              {produtos.map((p) => (
+                <SelectItem key={p.id} value={p.id}>
+                  {p.nome}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        ) : demanda.produto ? (
+          <Badge variant="secondary" className="font-normal">
+            {demanda.produto.nome}
+          </Badge>
+        ) : (
+          <span className="text-sm text-muted-foreground">Sem produto</span>
+        )}
+      </div>
+
       <div className="space-y-1">
         <label className="text-xs text-muted-foreground">Módulo</label>
         <Select

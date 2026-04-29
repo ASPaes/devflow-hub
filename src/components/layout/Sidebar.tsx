@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   LogOut,
   Network,
+  Package2,
   PlusCircle,
   ShieldCheck,
   UserCircle,
@@ -100,6 +101,7 @@ export function Sidebar() {
     "gerenciar_usuarios",
     "gerenciar_perfis_acesso",
     "gerenciar_tenants",
+    "deletar_demanda",
   );
 
   const mostraDemandas = temAlgumaPermissao(
@@ -145,6 +147,9 @@ export function Sidebar() {
               )}
               {temPermissao("gerenciar_areas") && (
                 <NavItem to="/admin/areas" icon={Building2} label="Áreas" />
+              )}
+              {temPermissao("deletar_demanda") && (
+                <NavItem to="/admin/produtos" icon={Package2} label="Produtos" />
               )}
               {temPermissao("gerenciar_usuarios") && (
                 <NavItem to="/admin/usuarios" icon={Users} label="Usuários" />

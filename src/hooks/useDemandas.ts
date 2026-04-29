@@ -24,6 +24,10 @@ export type DemandaCompleta = Demanda & {
   > | null;
   area: Pick<Database["public"]["Tables"]["areas"]["Row"], "id" | "nome"> | null;
   tenant: Pick<Database["public"]["Tables"]["tenants"]["Row"], "id" | "nome"> | null;
+  produto: Pick<
+    Database["public"]["Tables"]["produtos"]["Row"],
+    "id" | "nome"
+  > | null;
   solicitante: Pick<
     Database["public"]["Tables"]["profiles"]["Row"],
     "id" | "nome" | "avatar_url"
@@ -56,6 +60,7 @@ export type UpdateDemandaPatch = Partial<
     | "modulo_id"
     | "submodulo_id"
     | "area_id"
+    | "produto_id"
   >
 >;
 
@@ -131,6 +136,7 @@ export const novaDemandaSchema = z.object({
     .min(10, "Descreva com mais detalhes (mínimo 10 caracteres)"),
   tipo: z.enum(TIPO_DEMANDA_VALUES),
   prioridade: z.coerce.number().int().min(1).max(5),
+  produto_id: z.string().uuid("Selecione um produto"),
   modulo_id: z.string().uuid("Selecione um módulo"),
   submodulo_id: z.string().uuid("Selecione um submódulo"),
   area_id: z.string().uuid("Selecione uma área"),
@@ -162,6 +168,7 @@ export function useCreateDemanda() {
           descricao: input.descricao.trim(),
           tipo: input.tipo,
           prioridade: input.prioridade,
+          produto_id: input.produto_id,
           modulo_id: input.modulo_id,
           submodulo_id: input.submodulo_id,
           area_id: input.area_id,
@@ -342,6 +349,7 @@ export function useDemanda(codigo: string) {
           submodulo:submodulos(id, nome),
           area:areas(id, nome),
           tenant:tenants(id, nome),
+          produto:produtos(id, nome),
           solicitante:profiles!demandas_solicitante_id_fkey(id, nome, avatar_url),
           responsavel:profiles!demandas_responsavel_id_fkey(id, nome, avatar_url)`,
         )

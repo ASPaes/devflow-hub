@@ -55,6 +55,12 @@ const GROUPS: Group[] = [
         description:
           "Pode ser atribuído como responsável de uma demanda (devs e atribuíveis)",
       },
+      {
+        key: "alterar_produto_demanda",
+        label: "Alterar produto da demanda",
+        description:
+          "Pode trocar o produto-alvo (DoctorSaaS, DoctorDev etc.) de uma demanda existente",
+      },
     ],
   },
   {
