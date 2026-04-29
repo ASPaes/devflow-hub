@@ -228,6 +228,35 @@ function NovaDemandaPage() {
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-base font-medium">
+                      Solicitante
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-5">
+                    <SolicitanteEmpresaFields
+                      podeEscolher={podeEscolher}
+                      profileNome={profile?.nome ?? ""}
+                      profileTenantId={profile?.tenant_id ?? null}
+                      profileTenantNome={profile?.tenant?.nome ?? ""}
+                      tenantId={form.watch("tenant_id") ?? null}
+                      solicitanteId={form.watch("solicitante_id") ?? null}
+                      onTenantChange={(v) =>
+                        form.setValue("tenant_id", v ?? undefined, {
+                          shouldValidate: false,
+                        })
+                      }
+                      onSolicitanteChange={(v) =>
+                        form.setValue("solicitante_id", v ?? undefined, {
+                          shouldValidate: false,
+                        })
+                      }
+                      disabled={isSubmitting}
+                    />
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base font-medium">
                       Classificação
                     </CardTitle>
                   </CardHeader>
