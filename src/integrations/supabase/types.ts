@@ -1571,6 +1571,7 @@ export type Database = {
         | "ver_demandas"
         | "comentar_demanda"
         | "pode_ser_responsavel"
+        | "alterar_produto_demanda"
       status_demanda:
         | "triagem"
         | "analise"
@@ -1730,6 +1731,7 @@ export const Constants = {
         "ver_demandas",
         "comentar_demanda",
         "pode_ser_responsavel",
+        "alterar_produto_demanda",
       ],
       status_demanda: [
         "triagem",
