@@ -3,6 +3,7 @@ import { Users } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { formatHMFromSegundos } from "@/components/ui/HoraMinutoInput";
 import { cn } from "@/lib/utils";
 import type { ResponsavelStat } from "@/hooks/useDashboardMetrics";
 
@@ -96,8 +97,14 @@ export function DistribuicaoDesenvolvedorCard({
                     >
                       {row.nome}
                     </span>
-                    <span className="font-mono text-xs text-foreground">
-                      {row.total}
+                    <span className="flex items-center gap-2 shrink-0">
+                      <span className="font-mono text-xs text-muted-foreground">
+                        {formatHMFromSegundos(row.total_segundos)}
+                      </span>
+                      <span className="text-muted-foreground/40">|</span>
+                      <span className="font-mono text-xs font-semibold text-foreground">
+                        {row.total}
+                      </span>
                     </span>
                   </div>
                   <div className="relative mt-1 h-2 overflow-hidden rounded-md bg-secondary/40">

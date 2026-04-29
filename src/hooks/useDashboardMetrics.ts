@@ -9,6 +9,7 @@ export type ResponsavelStat = {
   nome: string;
   avatar_url: string | null;
   total: number;
+  total_segundos: number;
 };
 
 export type DashboardMetrics = {
