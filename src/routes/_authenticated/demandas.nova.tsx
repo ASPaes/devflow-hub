@@ -69,6 +69,7 @@ function NovaDemandaPage() {
   const modulosQuery = useModulos();
   const submodulosQuery = useSubmodulos();
   const areasQuery = useAreas();
+  const produtosQuery = useProdutosAtivos();
 
   const form = useForm<NovaDemandaInput>({
     resolver: zodResolver(novaDemandaSchema),
