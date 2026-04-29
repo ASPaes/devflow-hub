@@ -548,6 +548,37 @@ function ClassificacaoEditor({
   return (
     <div className="space-y-3">
       <div className="space-y-1">
+        <label className="text-xs text-muted-foreground">Produto</label>
+        {podeAlterarProduto ? (
+          <Select
+            value={demanda.produto_id ?? ""}
+            onValueChange={(v) => {
+              if (v === demanda.produto_id) return;
+              void onPatch({ produto_id: v });
+            }}
+            disabled={produtoDisabled}
+          >
+            <SelectTrigger className="h-8 text-sm">
+              <SelectValue placeholder="Sem produto" />
+            </SelectTrigger>
+            <SelectContent>
+              {produtos.map((p) => (
+                <SelectItem key={p.id} value={p.id}>
+                  {p.nome}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        ) : demanda.produto ? (
+          <Badge variant="secondary" className="font-normal">
+            {demanda.produto.nome}
+          </Badge>
+        ) : (
+          <span className="text-sm text-muted-foreground">Sem produto</span>
+        )}
+      </div>
+
+      <div className="space-y-1">
         <label className="text-xs text-muted-foreground">Módulo</label>
         <Select
           value={demanda.modulo_id}
