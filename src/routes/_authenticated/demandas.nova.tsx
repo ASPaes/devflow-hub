@@ -77,6 +77,7 @@ function NovaDemandaPage() {
       descricao: "",
       tipo: "tarefa",
       prioridade: 3,
+      produto_id: "",
       modulo_id: "",
       submodulo_id: "",
       area_id: "",
