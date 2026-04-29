@@ -34,6 +34,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useAreas } from "@/hooks/useAreas";
+import { useProdutosAtivos } from "@/hooks/useProdutos";
 import { useModulos } from "@/hooks/useModulos";
 import { useSubmodulos } from "@/hooks/useSubmodulos";
 import { useQuery } from "@tanstack/react-query";
