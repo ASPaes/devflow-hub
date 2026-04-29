@@ -164,6 +164,7 @@ export function useCreateDemanda() {
           descricao: input.descricao.trim(),
           tipo: input.tipo,
           prioridade: input.prioridade,
+          produto_id: input.produto_id,
           modulo_id: input.modulo_id,
           submodulo_id: input.submodulo_id,
           area_id: input.area_id,
