@@ -3,6 +3,7 @@ import { Users } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { formatHMFromSegundos } from "@/components/ui/HoraMinutoInput";
 import { cn } from "@/lib/utils";
 import type { ResponsavelStat } from "@/hooks/useDashboardMetrics";
 
