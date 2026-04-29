@@ -349,6 +349,7 @@ export function useDemanda(codigo: string) {
           submodulo:submodulos(id, nome),
           area:areas(id, nome),
           tenant:tenants(id, nome),
+          produto:produtos(id, nome),
           solicitante:profiles!demandas_solicitante_id_fkey(id, nome, avatar_url),
           responsavel:profiles!demandas_responsavel_id_fkey(id, nome, avatar_url)`,
         )
