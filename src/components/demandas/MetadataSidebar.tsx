@@ -50,10 +50,12 @@ import {
   type UpdateDemandaPatch,
 } from "@/hooks/useDemandas";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 import { useUsuariosComPermissao } from "@/hooks/useUsuarios";
 import { useModulos } from "@/hooks/useModulos";
 import { useSubmodulos } from "@/hooks/useSubmodulos";
 import { useAreas } from "@/hooks/useAreas";
+import { useProdutosAtivos } from "@/hooks/useProdutos";
 import { TimerCard } from "./TimerCard";
 
 const PRIORIDADES = [1, 2, 3, 4, 5] as const;
