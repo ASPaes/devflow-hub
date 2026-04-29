@@ -24,6 +24,10 @@ export type DemandaCompleta = Demanda & {
   > | null;
   area: Pick<Database["public"]["Tables"]["areas"]["Row"], "id" | "nome"> | null;
   tenant: Pick<Database["public"]["Tables"]["tenants"]["Row"], "id" | "nome"> | null;
+  produto: Pick<
+    Database["public"]["Tables"]["produtos"]["Row"],
+    "id" | "nome"
+  > | null;
   solicitante: Pick<
     Database["public"]["Tables"]["profiles"]["Row"],
     "id" | "nome" | "avatar_url"
