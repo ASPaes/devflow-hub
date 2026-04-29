@@ -2,14 +2,15 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 
-export interface Produto {
+export type Produto = {
   id: string;
   nome: string;
   descricao: string | null;
   ativo: boolean;
   created_at: string;
   updated_at: string;
-}
+  [key: string]: unknown;
+};
 
 const produtosKey = ["produtos"] as const;
 
