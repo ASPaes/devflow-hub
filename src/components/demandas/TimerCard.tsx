@@ -307,3 +307,117 @@ export function TimerCard({ demanda, isResponsavel }: TimerCardProps) {
     </section>
   );
 }
+
+function LancamentoManualForm({
+  demandaId,
+  open,
+  onOpenChange,
+  logExistente,
+}: {
+  demandaId: string;
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  logExistente: TimerLogRow | null;
+}) {
+  const inserir = useInserirTempoManual();
+  const atualizar = useAtualizarTempoManual(demandaId);
+  const isPending = inserir.isPending || atualizar.isPending;
+  const modo: "criar" | "editar" = logExistente ? "editar" : "criar";
+
+  const hojeIso = () => new Date().toISOString().slice(0, 10);
+
+  const [data, setData] = React.useState<string>(hojeIso());
+  const [horasDecimal, setHorasDecimal] = React.useState<number>(0);
+
+  React.useEffect(() => {
+    if (open) {
+      if (logExistente) {
+        setData(logExistente.data);
+        setHorasDecimal(logExistente.segundos / 3600);
+      } else {
+        setData(hojeIso());
+        setHorasDecimal(0);
+      }
+    }
+  }, [open, logExistente]);
+
+  const segundos = Math.round(horasDecimal * 3600);
+  const valido = segundos > 0 && !!data;
+
+  const handleSubmit = async () => {
+    if (!valido) return;
+    try {
+      if (modo === "criar") {
+        await inserir.mutateAsync({ demandaId, data, segundos });
+      } else if (logExistente) {
+        await atualizar.mutateAsync({ logId: logExistente.id, segundos });
+      }
+      onOpenChange(false);
+    } catch {
+      // toast já tratado
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>
+            {modo === "criar"
+              ? "Adicionar tempo manual"
+              : "Editar lançamento"}
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4 py-2">
+          <div className="space-y-1.5">
+            <Label htmlFor="data-manual">Data</Label>
+            <Input
+              id="data-manual"
+              type="date"
+              value={data}
+              onChange={(e) => setData(e.target.value)}
+              max={new Date().toISOString().slice(0, 10)}
+              disabled={modo === "editar"}
+            />
+            {modo === "editar" && (
+              <p className="text-xs text-muted-foreground">
+                Para mudar a data, exclua e crie um novo lançamento.
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>Tempo gasto</Label>
+            <HoraMinutoInput
+              value={horasDecimal}
+              onChange={(v) => setHorasDecimal(v ?? 0)}
+            />
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={isPending}
+          >
+            Cancelar
+          </Button>
+          <Button
+            type="button"
+            onClick={handleSubmit}
+            disabled={!valido || isPending}
+          >
+            {isPending
+              ? "Salvando..."
+              : modo === "criar"
+                ? "Adicionar"
+                : "Salvar"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
