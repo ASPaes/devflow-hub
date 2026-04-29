@@ -101,6 +101,7 @@ export function Sidebar() {
     "gerenciar_usuarios",
     "gerenciar_perfis_acesso",
     "gerenciar_tenants",
+    "deletar_demanda",
   );
 
   const mostraDemandas = temAlgumaPermissao(
