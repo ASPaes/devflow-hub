@@ -134,6 +134,8 @@ export const novaDemandaSchema = z.object({
   modulo_id: z.string().uuid("Selecione um módulo"),
   submodulo_id: z.string().uuid("Selecione um submódulo"),
   area_id: z.string().uuid("Selecione uma área"),
+  solicitante_id: z.string().uuid().optional(),
+  tenant_id: z.string().uuid().optional(),
 });
 
 export type NovaDemandaInput = z.infer<typeof novaDemandaSchema>;
@@ -163,7 +165,8 @@ export function useCreateDemanda() {
           modulo_id: input.modulo_id,
           submodulo_id: input.submodulo_id,
           area_id: input.area_id,
-          solicitante_id: userId,
+          solicitante_id: input.solicitante_id ?? userId,
+          ...(input.tenant_id ? { tenant_id: input.tenant_id } : {}),
         } as never)
         .select()
         .single();
