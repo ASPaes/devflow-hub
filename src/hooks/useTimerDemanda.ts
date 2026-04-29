@@ -4,9 +4,14 @@ import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 import type { Demanda } from "./useDemandas";
 
+export type TempoOrigem = "automatico" | "manual";
+
 export interface TimerLogRow {
+  id: string;
   data: string;
   segundos: number;
+  origem: TempoOrigem;
+  autor_manual_id: string | null;
 }
 
 export function useIniciarTimer() {
