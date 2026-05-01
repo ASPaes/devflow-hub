@@ -81,7 +81,7 @@ function NovaDemandaPage() {
       produto_id: "",
       modulo_id: "",
       submodulo_id: "",
-      area_id: "",
+      
       solicitante_id: undefined,
       tenant_id: undefined,
     },
@@ -436,40 +436,6 @@ function NovaDemandaPage() {
                       )}
                     />
 
-                    <FormField
-                      control={form.control}
-                      name="area_id"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Área</FormLabel>
-                          <Select
-                            value={field.value}
-                            onValueChange={field.onChange}
-                            disabled={isSubmitting || areasQuery.isLoading}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue
-                                  placeholder={
-                                    areasQuery.isLoading
-                                      ? "Carregando..."
-                                      : "Selecione uma área"
-                                  }
-                                />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {areasAtivas.map((a) => (
-                                <SelectItem key={a.id} value={a.id}>
-                                  {a.nome}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
 
                     {isLoadingDeps && (
                       <div className="space-y-2">
