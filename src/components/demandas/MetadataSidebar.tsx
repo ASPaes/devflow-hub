@@ -54,7 +54,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { useUsuariosComPermissao } from "@/hooks/useUsuarios";
 import { useModulos } from "@/hooks/useModulos";
 import { useSubmodulos } from "@/hooks/useSubmodulos";
-import { useAreas } from "@/hooks/useAreas";
+
 import { useProdutosAtivos } from "@/hooks/useProdutos";
 import { TimerCard } from "./TimerCard";
 
@@ -516,7 +516,7 @@ function ClassificacaoEditor({
 }: ClassificacaoEditorProps) {
   const { data: modulos = [] } = useModulos();
   const { data: submodulos = [] } = useSubmodulos();
-  const { data: areas = [] } = useAreas();
+  
   const { data: produtos = [] } = useProdutosAtivos();
   const { temPermissao } = useProfile();
   const podeAlterarProduto = temPermissao("alterar_produto_demanda");

@@ -33,7 +33,7 @@ import { requirePermission } from "@/lib/auth-guards";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
-import { useAreas } from "@/hooks/useAreas";
+
 import { useProdutosAtivos } from "@/hooks/useProdutos";
 import { useModulos } from "@/hooks/useModulos";
 import { useSubmodulos } from "@/hooks/useSubmodulos";
@@ -68,7 +68,7 @@ function NovaDemandaPage() {
 
   const modulosQuery = useModulos();
   const submodulosQuery = useSubmodulos();
-  const areasQuery = useAreas();
+  
   const produtosQuery = useProdutosAtivos();
 
   const form = useForm<NovaDemandaInput>({
@@ -92,10 +92,6 @@ function NovaDemandaPage() {
   const modulosAtivos = React.useMemo(
     () => (modulosQuery.data ?? []).filter((m) => m.ativo),
     [modulosQuery.data],
-  );
-  const areasAtivas = React.useMemo(
-    () => (areasQuery.data ?? []).filter((a) => a.ativo),
-    [areasQuery.data],
   );
   const submodulosFiltrados = React.useMemo(
     () =>
@@ -147,7 +143,7 @@ function NovaDemandaPage() {
   };
 
   const isLoadingDeps =
-    modulosQuery.isLoading || submodulosQuery.isLoading || areasQuery.isLoading;
+    modulosQuery.isLoading || submodulosQuery.isLoading;
 
   return (
     <div>
