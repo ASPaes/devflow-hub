@@ -24,12 +24,16 @@ interface DemandasTableProps {
   rows: DemandaListaRow[];
   isLoading?: boolean;
   onRowClick?: (row: DemandaListaRow) => void;
+  sort?: SortConfig;
+  onSortChange?: (next: SortConfig | undefined) => void;
 }
 
 export function DemandasTable({
   rows,
   isLoading,
   onRowClick,
+  sort,
+  onSortChange,
 }: DemandasTableProps) {
   if (isLoading) {
     return (
