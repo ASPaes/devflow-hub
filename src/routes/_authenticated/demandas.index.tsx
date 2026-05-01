@@ -53,6 +53,8 @@ function DemandasListagem() {
   const busca = search.busca;
   const buscaDebounced = useDebouncedValue(busca, 300);
 
+  const [sort, setSort] = React.useState<SortConfig | undefined>(undefined);
+
   const filtrosQuery: FiltrosDemanda = React.useMemo(() => {
     const f: FiltrosDemanda = {};
 
