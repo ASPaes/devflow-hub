@@ -351,7 +351,17 @@ export function useDemandasLista(
         }
       }
 
-      q = q.order("created_at", { ascending: false });
+      if (filtros.sort) {
+        const coluna = COLUNAS_ORDENAVEIS[filtros.sort.campo];
+        if (coluna) {
+          q = q.order(coluna, {
+            ascending: filtros.sort.direcao === "asc",
+            nullsFirst: false,
+          });
+        }
+      } else {
+        q = q.order("created_at", { ascending: false });
+      }
       if (limit) q = q.limit(limit);
 
       const { data, error } = await q;
