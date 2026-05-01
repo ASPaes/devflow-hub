@@ -5,13 +5,15 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn, initials } from "@/lib/utils";
-import { formatRelativeSP } from "@/lib/format";
+import { formatDateSP } from "@/lib/format";
 import { ScrollableTable } from "@/components/ui/ScrollableTable";
+import { SortableHeader } from "@/components/ui/SortableHeader";
 import {
   PRIORIDADE_LABEL_CURTA,
   STATUS_DEMANDA_LABEL,
   TIPO_DEMANDA_LABEL,
   type DemandaListaRow,
+  type SortConfig,
 } from "@/hooks/useDemandas";
 import {
   PRIORIDADE_BADGE_STYLES,
@@ -22,12 +24,16 @@ interface DemandasTableProps {
   rows: DemandaListaRow[];
   isLoading?: boolean;
   onRowClick?: (row: DemandaListaRow) => void;
+  sort?: SortConfig;
+  onSortChange?: (next: SortConfig | undefined) => void;
 }
 
 export function DemandasTable({
   rows,
   isLoading,
   onRowClick,
+  sort,
+  onSortChange,
 }: DemandasTableProps) {
   if (isLoading) {
     return (
@@ -54,16 +60,18 @@ export function DemandasTable({
       <table className="w-full text-sm">
         <thead className="bg-secondary/30">
           <tr className="text-left text-xs uppercase tracking-wider text-muted-foreground">
-            <th className="px-4 py-2.5 font-medium">Código</th>
-            <th className="px-4 py-2.5 font-medium">Título</th>
-            <th className="px-4 py-2.5 font-medium">Tipo</th>
-            <th className="px-4 py-2.5 font-medium">Prior.</th>
-            <th className="px-4 py-2.5 font-medium">Status</th>
-            <th className="px-4 py-2.5 font-medium">Empresa</th>
-            <th className="px-4 py-2.5 font-medium">Solicitante</th>
-            <th className="px-4 py-2.5 font-medium">Desenvolvedor</th>
-            <th className="px-4 py-2.5 font-medium">Atividade</th>
-            <th className="px-4 py-2.5 font-medium">Criada</th>
+            <SortableHeader label="Código" campo="codigo" sort={sort} onSortChange={onSortChange ?? (() => {})} />
+            <SortableHeader label="Título" campo="titulo" sort={sort} onSortChange={onSortChange ?? (() => {})} />
+            <SortableHeader label="Tipo" campo="tipo" sort={sort} onSortChange={onSortChange ?? (() => {})} />
+            <SortableHeader label="Data Criação" campo="data_criacao" sort={sort} onSortChange={onSortChange ?? (() => {})} />
+            <SortableHeader label="Data Desenv." campo="data_desenvolvimento" sort={sort} onSortChange={onSortChange ?? (() => {})} />
+            <SortableHeader label="Data Entrega" campo="data_entrega" sort={sort} onSortChange={onSortChange ?? (() => {})} />
+            <SortableHeader label="Prior." campo="prioridade" sort={sort} onSortChange={onSortChange ?? (() => {})} />
+            <SortableHeader label="Status" campo="status" sort={sort} onSortChange={onSortChange ?? (() => {})} />
+            <SortableHeader label="Empresa" campo="empresa" sort={sort} onSortChange={onSortChange ?? (() => {})} />
+            <SortableHeader label="Solicitante" campo="solicitante" sort={sort} onSortChange={onSortChange ?? (() => {})} />
+            <SortableHeader label="Desenvolvedor" campo="desenvolvedor" sort={sort} onSortChange={onSortChange ?? (() => {})} />
+            <SortableHeader label="Atividade" campo="total_atividade" sort={sort} onSortChange={onSortChange ?? (() => {})} />
           </tr>
         </thead>
         <tbody className="divide-y divide-border">
@@ -132,6 +140,15 @@ function DemandaRow({ row, onClick }: DemandaRowProps) {
         <Badge variant="outline" className="font-normal">
           {TIPO_DEMANDA_LABEL[tipo]}
         </Badge>
+      </td>
+      <td className="whitespace-nowrap px-4 py-3 align-middle text-xs text-muted-foreground">
+        {formatDateSP(row.created_at)}
+      </td>
+      <td className="whitespace-nowrap px-4 py-3 align-middle text-xs text-muted-foreground">
+        {formatDateSP(row.dev_deadline)}
+      </td>
+      <td className="whitespace-nowrap px-4 py-3 align-middle text-xs text-muted-foreground">
+        {formatDateSP(row.deadline)}
       </td>
       <td className="px-4 py-3 align-middle">
         <span
@@ -203,9 +220,6 @@ function DemandaRow({ row, onClick }: DemandaRowProps) {
           <ActivityCount icon={Paperclip} count={row.total_anexos} />
           <ActivityCount icon={Link2} count={row.total_vinculos} />
         </div>
-      </td>
-      <td className="whitespace-nowrap px-4 py-3 align-middle text-xs text-muted-foreground">
-        {formatRelativeSP(row.created_at)}
       </td>
     </tr>
   );

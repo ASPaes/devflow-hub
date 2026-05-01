@@ -13,6 +13,7 @@ import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import {
   useDemandasLista,
   type FiltrosDemanda,
+  type SortConfig,
   type StatusDemanda,
   type TipoDemanda,
 } from "@/hooks/useDemandas";
@@ -52,6 +53,8 @@ function DemandasListagem() {
   const busca = search.busca;
   const buscaDebounced = useDebouncedValue(busca, 300);
 
+  const [sort, setSort] = React.useState<SortConfig | undefined>(undefined);
+
   const filtrosQuery: FiltrosDemanda = React.useMemo(() => {
     const f: FiltrosDemanda = {};
 
@@ -85,8 +88,9 @@ function DemandasListagem() {
     f.apenasSemData = apenasSemData;
 
     if (buscaDebounced.trim()) f.busca = buscaDebounced.trim();
+    if (sort) f.sort = sort;
     return f;
-  }, [filtrosCompartilhados, periodo, tipoData, apenasSemData, buscaDebounced]);
+  }, [filtrosCompartilhados, periodo, tipoData, apenasSemData, buscaDebounced, sort]);
 
   const { data: rows = [], isLoading } = useDemandasLista(filtrosQuery);
 
@@ -233,6 +237,8 @@ function DemandasListagem() {
           <DemandasTable
             rows={rows}
             isLoading={isLoading}
+            sort={sort}
+            onSortChange={setSort}
             onRowClick={(row) => {
               if (row.codigo) {
                 navigate({

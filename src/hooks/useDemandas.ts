@@ -209,7 +209,32 @@ export function useCreateDemanda() {
   });
 }
 
+export type SortDirection = "asc" | "desc";
+
+export interface SortConfig {
+  campo: ColunaOrdenavel;
+  direcao: SortDirection;
+}
+
+export const COLUNAS_ORDENAVEIS = {
+  codigo: "codigo",
+  titulo: "titulo",
+  tipo: "tipo",
+  data_criacao: "created_at",
+  data_desenvolvimento: "dev_deadline",
+  data_entrega: "deadline",
+  prioridade: "prioridade",
+  status: "status",
+  empresa: "tenant_nome",
+  solicitante: "solicitante_nome",
+  desenvolvedor: "responsavel_nome",
+  total_atividade: "total_comentarios",
+} as const;
+
+export type ColunaOrdenavel = keyof typeof COLUNAS_ORDENAVEIS;
+
 export type FiltrosDemanda = {
+  sort?: SortConfig;
   status?: StatusDemanda[];
   prioridade?: number[];
   tipo?: TipoDemanda[];
@@ -326,7 +351,17 @@ export function useDemandasLista(
         }
       }
 
-      q = q.order("created_at", { ascending: false });
+      if (filtros.sort) {
+        const coluna = COLUNAS_ORDENAVEIS[filtros.sort.campo];
+        if (coluna) {
+          q = q.order(coluna, {
+            ascending: filtros.sort.direcao === "asc",
+            nullsFirst: false,
+          });
+        }
+      } else {
+        q = q.order("created_at", { ascending: false });
+      }
       if (limit) q = q.limit(limit);
 
       const { data, error } = await q;
