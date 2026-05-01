@@ -38,6 +38,7 @@ import { ComentariosSecao } from "@/components/demandas/ComentariosSecao";
 import { TimelineHistorico } from "@/components/demandas/TimelineHistorico";
 import { VinculosSecao } from "@/components/demandas/VinculosSecao";
 import { ReaberturaBanner } from "@/components/demandas/ReaberturaBanner";
+import { RetornosTab } from "@/components/demandas/RetornosTab";
 import { useComentarios } from "@/hooks/useComentarios";
 import { useVinculos } from "@/hooks/useVinculos";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
@@ -299,6 +300,7 @@ function DetalheTabs({
             </span>
           )}
         </TabsTrigger>
+        <TabsTrigger value="retornos">Retornos</TabsTrigger>
         <TabsTrigger value="historico">Histórico</TabsTrigger>
         <TabsTrigger value="vinculos">
           Vínculos
@@ -311,6 +313,9 @@ function DetalheTabs({
       </TabsList>
       <TabsContent value="comentarios" className="mt-4">
         <ComentariosSecao demandaId={demandaId} />
+      </TabsContent>
+      <TabsContent value="retornos" className="mt-4">
+        <RetornosTab demandaId={demandaId} />
       </TabsContent>
       <TabsContent value="historico" className="mt-4 rounded-lg border border-border bg-card p-6">
         <TimelineHistorico demandaId={demandaId} />

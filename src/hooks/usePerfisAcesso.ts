@@ -35,6 +35,7 @@ const PERMISSAO_VALUES = [
   "gerenciar_tenants",
   "alterar_produto_demanda",
   "inserir_tempo_manual",
+  "criar_retorno_demanda",
 ] as const;
 
 export const perfilAcessoSchema = z.object({
