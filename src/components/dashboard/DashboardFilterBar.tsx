@@ -53,20 +53,6 @@ export function DashboardFilterBar({
     staleTime: 5 * 60_000,
   });
 
-  const { data: areas = [], isLoading: loadingAreas } = useQuery({
-    queryKey: ["dashboard-filter-areas"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("areas")
-        .select("id, nome")
-        .eq("ativo", true)
-        .order("nome");
-      if (error) throw error;
-      return data ?? [];
-    },
-    staleTime: 5 * 60_000,
-  });
-
   const { data: tenants = [], isLoading: loadingTenants } = useQuery({
     queryKey: ["dashboard-filter-tenants"],
     queryFn: async () => {
@@ -112,10 +98,6 @@ export function DashboardFilterBar({
     value: m.id,
     label: m.nome,
   }));
-  const areaOptions: FilterOption<string>[] = areas.map((a) => ({
-    value: a.id,
-    label: a.nome,
-  }));
   const tenantOptions: FilterOption<string>[] = tenants.map((t) => ({
     value: t.id,
     label: t.nome,
@@ -133,17 +115,9 @@ export function DashboardFilterBar({
     filtros.prioridade.length +
     filtros.tipo.length +
     filtros.modulo_id.length +
-    filtros.area_id.length +
     filtros.tenant_id.length +
     filtros.responsavel_id.length +
     filtros.solicitante_id.length;
-    filtros.status.length +
-    filtros.prioridade.length +
-    filtros.tipo.length +
-    filtros.modulo_id.length +
-    filtros.area_id.length +
-    filtros.tenant_id.length +
-    filtros.responsavel_id.length;
 
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -171,13 +145,6 @@ export function DashboardFilterBar({
         selected={filtros.modulo_id}
         onChange={(v) => onChange({ ...filtros, modulo_id: v })}
         loading={loadingModulos}
-      />
-      <MultiSelectFilter<string>
-        label="Área"
-        options={areaOptions}
-        selected={filtros.area_id}
-        onChange={(v) => onChange({ ...filtros, area_id: v })}
-        loading={loadingAreas}
       />
       <MultiSelectFilter<string>
         label="Empresa"

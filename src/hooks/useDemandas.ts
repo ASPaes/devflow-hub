@@ -139,7 +139,7 @@ export const novaDemandaSchema = z.object({
   produto_id: z.string().uuid("Selecione um produto"),
   modulo_id: z.string().uuid("Selecione um módulo"),
   submodulo_id: z.string().uuid("Selecione um submódulo"),
-  area_id: z.string().uuid("Selecione uma área"),
+  area_id: z.string().uuid().optional(),
   solicitante_id: z.string().uuid().optional(),
   tenant_id: z.string().uuid().optional(),
 });
@@ -171,7 +171,7 @@ export function useCreateDemanda() {
           produto_id: input.produto_id,
           modulo_id: input.modulo_id,
           submodulo_id: input.submodulo_id,
-          area_id: input.area_id,
+          ...(input.area_id ? { area_id: input.area_id } : {}),
           solicitante_id: input.solicitante_id ?? userId,
           ...(input.tenant_id ? { tenant_id: input.tenant_id } : {}),
         } as never)

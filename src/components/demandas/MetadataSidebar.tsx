@@ -54,7 +54,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { useUsuariosComPermissao } from "@/hooks/useUsuarios";
 import { useModulos } from "@/hooks/useModulos";
 import { useSubmodulos } from "@/hooks/useSubmodulos";
-import { useAreas } from "@/hooks/useAreas";
+
 import { useProdutosAtivos } from "@/hooks/useProdutos";
 import { TimerCard } from "./TimerCard";
 
@@ -516,7 +516,7 @@ function ClassificacaoEditor({
 }: ClassificacaoEditorProps) {
   const { data: modulos = [] } = useModulos();
   const { data: submodulos = [] } = useSubmodulos();
-  const { data: areas = [] } = useAreas();
+  
   const { data: produtos = [] } = useProdutosAtivos();
   const { temPermissao } = useProfile();
   const podeAlterarProduto = temPermissao("alterar_produto_demanda");
@@ -632,30 +632,6 @@ function ClassificacaoEditor({
         </Select>
       </div>
 
-      <div className="space-y-1">
-        <label className="text-xs text-muted-foreground">Área</label>
-        <Select
-          value={demanda.area_id}
-          onValueChange={(v) => {
-            if (v === demanda.area_id) return;
-            void onPatch({ area_id: v });
-          }}
-          disabled={disabled}
-        >
-          <SelectTrigger className="h-8 text-sm">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {areas
-              .filter((a) => a.ativo)
-              .map((a) => (
-                <SelectItem key={a.id} value={a.id}>
-                  {a.nome}
-                </SelectItem>
-              ))}
-          </SelectContent>
-        </Select>
-      </div>
     </div>
   );
 }

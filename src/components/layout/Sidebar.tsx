@@ -2,7 +2,7 @@ import * as React from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
   Building,
-  Building2,
+  
   Columns3,
   Inbox,
   Layers,
@@ -144,9 +144,6 @@ export function Sidebar() {
               )}
               {temPermissao("gerenciar_submodulos") && (
                 <NavItem to="/admin/submodulos" icon={Network} label="Submódulos" />
-              )}
-              {temPermissao("gerenciar_areas") && (
-                <NavItem to="/admin/areas" icon={Building2} label="Áreas" />
               )}
               {temPermissao("deletar_demanda") && (
                 <NavItem to="/admin/produtos" icon={Package2} label="Produtos" />

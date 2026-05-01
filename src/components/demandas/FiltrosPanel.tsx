@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { useAreas } from "@/hooks/useAreas";
+
 import { useModulos } from "@/hooks/useModulos";
 import { useUsuarios } from "@/hooks/useUsuarios";
 import {
@@ -63,16 +63,12 @@ export function FiltrosPanel({
   hideStatus,
 }: FiltrosPanelProps) {
   const modulosQuery = useModulos();
-  const areasQuery = useAreas();
+  
   const usuariosQuery = useUsuarios();
 
   const modulos = React.useMemo(
     () => (modulosQuery.data ?? []).filter((m) => m.ativo),
     [modulosQuery.data],
-  );
-  const areas = React.useMemo(
-    () => (areasQuery.data ?? []).filter((a) => a.ativo),
-    [areasQuery.data],
   );
   // Responsáveis: usuários ativos com permissão pode_ser_responsavel
   const responsaveis = React.useMemo(
@@ -212,26 +208,6 @@ export function FiltrosPanel({
                 />
                 {m.nome}
               </div>
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-
-      {/* Área (single) */}
-      <Select
-        value={value.area_id ?? "__all__"}
-        onValueChange={(v) =>
-          onChange({ area_id: v === "__all__" ? undefined : v })
-        }
-      >
-        <SelectTrigger className="h-9 w-auto min-w-[140px]">
-          <SelectValue placeholder="Área" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="__all__">Todas as áreas</SelectItem>
-          {areas.map((a) => (
-            <SelectItem key={a.id} value={a.id}>
-              {a.nome}
             </SelectItem>
           ))}
         </SelectContent>
