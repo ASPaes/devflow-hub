@@ -306,7 +306,14 @@ export function KanbanBoard({ rows, isLoading, onCardClick }: KanbanBoardProps) 
       onDragEnd={handleDragEnd}
       onDragCancel={handleDragCancel}
     >
-      <div className="flex gap-4 overflow-x-auto pb-4">
+      <div
+        ref={boardRef}
+        className="flex cursor-grab gap-4 overflow-x-auto pb-4"
+        onMouseDown={handleBoardMouseDown}
+        onMouseMove={handleBoardMouseMove}
+        onMouseUp={endBoardDrag}
+        onMouseLeave={endBoardDrag}
+      >
         {COLUNAS.map((col) => (
           <ColunaDroppable
             key={col.key}
