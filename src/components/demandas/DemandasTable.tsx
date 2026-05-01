@@ -60,16 +60,18 @@ export function DemandasTable({
       <table className="w-full text-sm">
         <thead className="bg-secondary/30">
           <tr className="text-left text-xs uppercase tracking-wider text-muted-foreground">
-            <th className="px-4 py-2.5 font-medium">Código</th>
-            <th className="px-4 py-2.5 font-medium">Título</th>
-            <th className="px-4 py-2.5 font-medium">Tipo</th>
-            <th className="px-4 py-2.5 font-medium">Prior.</th>
-            <th className="px-4 py-2.5 font-medium">Status</th>
-            <th className="px-4 py-2.5 font-medium">Empresa</th>
-            <th className="px-4 py-2.5 font-medium">Solicitante</th>
-            <th className="px-4 py-2.5 font-medium">Desenvolvedor</th>
-            <th className="px-4 py-2.5 font-medium">Atividade</th>
-            <th className="px-4 py-2.5 font-medium">Criada</th>
+            <SortableHeader label="Código" campo="codigo" sort={sort} onSortChange={onSortChange ?? (() => {})} />
+            <SortableHeader label="Título" campo="titulo" sort={sort} onSortChange={onSortChange ?? (() => {})} />
+            <SortableHeader label="Tipo" campo="tipo" sort={sort} onSortChange={onSortChange ?? (() => {})} />
+            <SortableHeader label="Data Criação" campo="data_criacao" sort={sort} onSortChange={onSortChange ?? (() => {})} />
+            <SortableHeader label="Data Desenv." campo="data_desenvolvimento" sort={sort} onSortChange={onSortChange ?? (() => {})} />
+            <SortableHeader label="Data Entrega" campo="data_entrega" sort={sort} onSortChange={onSortChange ?? (() => {})} />
+            <SortableHeader label="Prior." campo="prioridade" sort={sort} onSortChange={onSortChange ?? (() => {})} />
+            <SortableHeader label="Status" campo="status" sort={sort} onSortChange={onSortChange ?? (() => {})} />
+            <SortableHeader label="Empresa" campo="empresa" sort={sort} onSortChange={onSortChange ?? (() => {})} />
+            <SortableHeader label="Solicitante" campo="solicitante" sort={sort} onSortChange={onSortChange ?? (() => {})} />
+            <SortableHeader label="Desenvolvedor" campo="desenvolvedor" sort={sort} onSortChange={onSortChange ?? (() => {})} />
+            <SortableHeader label="Atividade" campo="total_atividade" sort={sort} onSortChange={onSortChange ?? (() => {})} />
           </tr>
         </thead>
         <tbody className="divide-y divide-border">
