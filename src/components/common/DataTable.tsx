@@ -20,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { ScrollableTable } from "@/components/ui/ScrollableTable";
 
 export interface DataTableColumn<T> {
   key: string;
