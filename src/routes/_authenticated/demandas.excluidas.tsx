@@ -12,6 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { supabase } from "@/lib/supabase";
+import { ScrollableTable } from "@/components/ui/ScrollableTable";
 import { useRestaurarDemanda } from "@/hooks/useExcluirDemanda";
 import { useProfile } from "@/hooks/useProfile";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
