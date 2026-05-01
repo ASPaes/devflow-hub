@@ -141,6 +141,15 @@ function DemandaRow({ row, onClick }: DemandaRowProps) {
           {TIPO_DEMANDA_LABEL[tipo]}
         </Badge>
       </td>
+      <td className="whitespace-nowrap px-4 py-3 align-middle text-xs text-muted-foreground">
+        {formatDateSP(row.created_at)}
+      </td>
+      <td className="whitespace-nowrap px-4 py-3 align-middle text-xs text-muted-foreground">
+        {formatDateSP(row.dev_deadline)}
+      </td>
+      <td className="whitespace-nowrap px-4 py-3 align-middle text-xs text-muted-foreground">
+        {formatDateSP(row.deadline)}
+      </td>
       <td className="px-4 py-3 align-middle">
         <span
           className={cn(
