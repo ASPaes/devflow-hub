@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn, initials } from "@/lib/utils";
 import { formatRelativeSP } from "@/lib/format";
+import { ScrollableTable } from "@/components/ui/ScrollableTable";
 import {
   PRIORIDADE_LABEL_CURTA,
   STATUS_DEMANDA_LABEL,
