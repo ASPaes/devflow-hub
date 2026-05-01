@@ -88,7 +88,7 @@ function DemandasExcluidasPage() {
           Nenhuma demanda excluída.
         </div>
       ) : (
-        <div className="rounded-lg border border-border bg-card">
+        <ScrollableTable className="rounded-lg border border-border bg-card">
           <Table>
             <TableHeader>
               <TableRow>
