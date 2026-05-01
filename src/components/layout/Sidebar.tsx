@@ -145,9 +145,6 @@ export function Sidebar() {
               {temPermissao("gerenciar_submodulos") && (
                 <NavItem to="/admin/submodulos" icon={Network} label="Submódulos" />
               )}
-              {temPermissao("gerenciar_areas") && (
-                <NavItem to="/admin/areas" icon={Building2} label="Áreas" />
-              )}
               {temPermissao("deletar_demanda") && (
                 <NavItem to="/admin/produtos" icon={Package2} label="Produtos" />
               )}

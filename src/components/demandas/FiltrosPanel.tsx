@@ -217,26 +217,6 @@ export function FiltrosPanel({
         </SelectContent>
       </Select>
 
-      {/* Área (single) */}
-      <Select
-        value={value.area_id ?? "__all__"}
-        onValueChange={(v) =>
-          onChange({ area_id: v === "__all__" ? undefined : v })
-        }
-      >
-        <SelectTrigger className="h-9 w-auto min-w-[140px]">
-          <SelectValue placeholder="Área" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="__all__">Todas as áreas</SelectItem>
-          {areas.map((a) => (
-            <SelectItem key={a.id} value={a.id}>
-              {a.nome}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-
       {/* Desenvolvedor (single + sentinel) */}
       <Select
         value={value.responsavel_id ?? "__all__"}

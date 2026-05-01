@@ -632,30 +632,6 @@ function ClassificacaoEditor({
         </Select>
       </div>
 
-      <div className="space-y-1">
-        <label className="text-xs text-muted-foreground">Área</label>
-        <Select
-          value={demanda.area_id}
-          onValueChange={(v) => {
-            if (v === demanda.area_id) return;
-            void onPatch({ area_id: v });
-          }}
-          disabled={disabled}
-        >
-          <SelectTrigger className="h-8 text-sm">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {areas
-              .filter((a) => a.ativo)
-              .map((a) => (
-                <SelectItem key={a.id} value={a.id}>
-                  {a.nome}
-                </SelectItem>
-              ))}
-          </SelectContent>
-        </Select>
-      </div>
     </div>
   );
 }
