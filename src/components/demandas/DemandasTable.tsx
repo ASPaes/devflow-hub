@@ -50,7 +50,7 @@ export function DemandasTable({
   }
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-border bg-card">
+    <ScrollableTable className="rounded-lg border border-border bg-card">
       <table className="w-full text-sm">
         <thead className="bg-secondary/30">
           <tr className="text-left text-xs uppercase tracking-wider text-muted-foreground">
@@ -72,7 +72,7 @@ export function DemandasTable({
           ))}
         </tbody>
       </table>
-    </div>
+    </ScrollableTable>
   );
 }
 
