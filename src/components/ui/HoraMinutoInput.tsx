@@ -52,6 +52,7 @@ export function parseHM(input: string): number | null {
   const s = input.trim().toLowerCase();
   if (s === "" || s === "0" || s === "00h 00m" || s === "0h 0m") return 0;
 
+  // "2h 30m" ou "2h30m" ou "2h"
   const matchHM = s.match(/^(\d+)\s*h(?:\s*(\d+)\s*m?)?$/);
   if (matchHM) {
     const h = Number(matchHM[1]);
@@ -59,17 +60,15 @@ export function parseHM(input: string): number | null {
     if (m >= 60) return null;
     return hmParaDecimal(h, m);
   }
+
+  // "30m" sozinho
   const matchM = s.match(/^(\d+)\s*m$/);
   if (matchM) {
     const m = Number(matchM[1]);
     return m / 60;
   }
 
-  const matchDecimal = s.match(/^(\d+(\.\d+)?)$/);
-  if (matchDecimal) {
-    return Number(matchDecimal[1]);
-  }
-
+  // 4 dígitos: "0230" → 2h 30m  (ANTES do decimal!)
   const matchFour = s.match(/^(\d{2})(\d{2})$/);
   if (matchFour) {
     const h = Number(matchFour[1]);
@@ -78,12 +77,25 @@ export function parseHM(input: string): number | null {
     return hmParaDecimal(h, m);
   }
 
+  // 3 dígitos: "230" → 2h 30m  (ANTES do decimal!)
   const matchThree = s.match(/^(\d)(\d{2})$/);
   if (matchThree) {
     const h = Number(matchThree[1]);
     const m = Number(matchThree[2]);
     if (m >= 60) return null;
     return hmParaDecimal(h, m);
+  }
+
+  // Decimal: "2.5", "0.25" — APENAS se tiver ponto, pra não pegar 230 como decimal
+  const matchDecimalComPonto = s.match(/^(\d+)\.(\d+)$/);
+  if (matchDecimalComPonto) {
+    return Number(s);
+  }
+
+  // Inteiro de 1-2 dígitos: "2" → 2h, "12" → 12h
+  const matchInteiroPequeno = s.match(/^(\d{1,2})$/);
+  if (matchInteiroPequeno) {
+    return Number(matchInteiroPequeno[1]);
   }
 
   return null;
