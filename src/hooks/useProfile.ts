@@ -19,7 +19,8 @@ export type AppPermissao =
   | "ver_dashboard_metricas"
   | "gerenciar_tenants"
   | "alterar_produto_demanda"
-  | "inserir_tempo_manual";
+  | "inserir_tempo_manual"
+  | "criar_retorno_demanda";
 
 export type ProfileWithPerfil = {
   id: string;
