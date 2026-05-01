@@ -341,6 +341,91 @@ export type Database = {
           },
         ]
       }
+      demanda_retornos: {
+        Row: {
+          autor_id: string | null
+          created_at: string
+          demanda_id: string
+          id: string
+          midia_nome_original: string | null
+          midia_tamanho_bytes: number | null
+          midia_tipo: Database["public"]["Enums"]["tipo_midia_retorno"] | null
+          midia_url: string | null
+          ordem: number
+          texto: string | null
+          updated_at: string
+        }
+        Insert: {
+          autor_id?: string | null
+          created_at?: string
+          demanda_id: string
+          id?: string
+          midia_nome_original?: string | null
+          midia_tamanho_bytes?: number | null
+          midia_tipo?: Database["public"]["Enums"]["tipo_midia_retorno"] | null
+          midia_url?: string | null
+          ordem?: number
+          texto?: string | null
+          updated_at?: string
+        }
+        Update: {
+          autor_id?: string | null
+          created_at?: string
+          demanda_id?: string
+          id?: string
+          midia_nome_original?: string | null
+          midia_tamanho_bytes?: number | null
+          midia_tipo?: Database["public"]["Enums"]["tipo_midia_retorno"] | null
+          midia_url?: string | null
+          ordem?: number
+          texto?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demanda_retornos_autor_id_fkey"
+            columns: ["autor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demanda_retornos_autor_id_fkey"
+            columns: ["autor_id"]
+            isOneToOne: false
+            referencedRelation: "vw_potenciais_responsaveis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demanda_retornos_autor_id_fkey"
+            columns: ["autor_id"]
+            isOneToOne: false
+            referencedRelation: "vw_solicitantes_por_empresa"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demanda_retornos_demanda_id_fkey"
+            columns: ["demanda_id"]
+            isOneToOne: false
+            referencedRelation: "demandas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demanda_retornos_demanda_id_fkey"
+            columns: ["demanda_id"]
+            isOneToOne: false
+            referencedRelation: "vw_demandas_excluidas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demanda_retornos_demanda_id_fkey"
+            columns: ["demanda_id"]
+            isOneToOne: false
+            referencedRelation: "vw_demandas_lista"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       demanda_timer_log: {
         Row: {
           autor_manual_id: string | null
@@ -1406,6 +1491,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      excluir_retorno_demanda: {
+        Args: { p_retorno_id: string }
+        Returns: undefined
+      }
       excluir_tempo_manual_log: {
         Args: { p_log_id: string }
         Returns: undefined
@@ -1660,6 +1749,7 @@ export type Database = {
         | "nova_funcionalidade"
         | "duvida"
         | "tarefa"
+      tipo_midia_retorno: "imagem" | "video" | "audio"
       tipo_vinculo: "depende_de" | "bloqueia" | "relacionada" | "duplicada"
     }
     CompositeTypes: {
@@ -1826,6 +1916,7 @@ export const Constants = {
         "duvida",
         "tarefa",
       ],
+      tipo_midia_retorno: ["imagem", "video", "audio"],
       tipo_vinculo: ["depende_de", "bloqueia", "relacionada", "duplicada"],
     },
   },
