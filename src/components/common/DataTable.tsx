@@ -95,7 +95,7 @@ export function DataTable<T extends Record<string, unknown>>({
       {showEmpty && !showFilteredEmpty ? (
         emptyState
       ) : (
-        <div className="rounded-lg border border-border bg-card">
+        <ScrollableTable className="rounded-lg border border-border bg-card">
           <Table>
             <TableHeader>
               <TableRow>
