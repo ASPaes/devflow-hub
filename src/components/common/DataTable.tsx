@@ -20,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { ScrollableTable } from "@/components/ui/ScrollableTable";
 
 export interface DataTableColumn<T> {
   key: string;
@@ -94,7 +95,7 @@ export function DataTable<T extends Record<string, unknown>>({
       {showEmpty && !showFilteredEmpty ? (
         emptyState
       ) : (
-        <div className="rounded-lg border border-border bg-card">
+        <ScrollableTable className="rounded-lg border border-border bg-card">
           <Table>
             <TableHeader>
               <TableRow>
@@ -182,7 +183,7 @@ export function DataTable<T extends Record<string, unknown>>({
                 ))}
             </TableBody>
           </Table>
-        </div>
+        </ScrollableTable>
       )}
     </div>
   );

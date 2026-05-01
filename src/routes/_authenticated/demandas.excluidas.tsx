@@ -12,6 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { supabase } from "@/lib/supabase";
+import { ScrollableTable } from "@/components/ui/ScrollableTable";
 import { useRestaurarDemanda } from "@/hooks/useExcluirDemanda";
 import { useProfile } from "@/hooks/useProfile";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
@@ -87,7 +88,7 @@ function DemandasExcluidasPage() {
           Nenhuma demanda excluída.
         </div>
       ) : (
-        <div className="rounded-lg border border-border bg-card">
+        <ScrollableTable className="rounded-lg border border-border bg-card">
           <Table>
             <TableHeader>
               <TableRow>
@@ -140,7 +141,7 @@ function DemandasExcluidasPage() {
               ))}
             </TableBody>
           </Table>
-        </div>
+        </ScrollableTable>
       )}
     </div>
   );
