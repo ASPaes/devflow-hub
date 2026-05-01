@@ -89,7 +89,13 @@ function DraggableCard({
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
+    <div
+      ref={setNodeRef}
+      style={style}
+      data-kanban-card="true"
+      {...listeners}
+      {...attributes}
+    >
       <KanbanCard row={row} onClick={onCardClick} />
     </div>
   );
