@@ -183,7 +183,7 @@ export function DataTable<T extends Record<string, unknown>>({
                 ))}
             </TableBody>
           </Table>
-        </div>
+        </ScrollableTable>
       )}
     </div>
   );
