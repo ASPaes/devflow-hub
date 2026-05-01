@@ -221,9 +221,6 @@ function DemandaRow({ row, onClick }: DemandaRowProps) {
           <ActivityCount icon={Link2} count={row.total_vinculos} />
         </div>
       </td>
-      <td className="whitespace-nowrap px-4 py-3 align-middle text-xs text-muted-foreground">
-        {formatRelativeSP(row.created_at)}
-      </td>
     </tr>
   );
 }
