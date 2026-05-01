@@ -67,6 +67,12 @@ const GROUPS: Group[] = [
         description:
           "Pode adicionar, editar e excluir lançamentos manuais de tempo no histórico do timer",
       },
+      {
+        key: "criar_retorno_demanda",
+        label: "Publicar retornos",
+        description:
+          "Pode criar, editar e excluir retornos (entregas com texto, imagem, vídeo ou áudio) na aba Retornos da demanda",
+      },
     ],
   },
   {
