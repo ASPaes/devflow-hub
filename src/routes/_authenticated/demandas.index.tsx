@@ -13,6 +13,7 @@ import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import {
   useDemandasLista,
   type FiltrosDemanda,
+  type SortConfig,
   type StatusDemanda,
   type TipoDemanda,
 } from "@/hooks/useDemandas";
