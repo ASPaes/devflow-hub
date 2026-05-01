@@ -141,7 +141,7 @@ function DemandasExcluidasPage() {
               ))}
             </TableBody>
           </Table>
-        </div>
+        </ScrollableTable>
       )}
     </div>
   );
