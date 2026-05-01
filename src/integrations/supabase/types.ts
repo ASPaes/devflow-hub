@@ -1642,6 +1642,7 @@ export type Database = {
         | "pode_ser_responsavel"
         | "alterar_produto_demanda"
         | "inserir_tempo_manual"
+        | "criar_retorno_demanda"
       status_demanda:
         | "triagem"
         | "analise"
@@ -1804,6 +1805,7 @@ export const Constants = {
         "pode_ser_responsavel",
         "alterar_produto_demanda",
         "inserir_tempo_manual",
+        "criar_retorno_demanda",
       ],
       status_demanda: [
         "triagem",

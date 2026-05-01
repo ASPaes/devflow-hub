@@ -1,0 +1,1 @@
+ALTER TYPE public.app_permissao ADD VALUE IF NOT EXISTS 'criar_retorno_demanda';
