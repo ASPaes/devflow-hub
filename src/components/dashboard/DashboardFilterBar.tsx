@@ -98,10 +98,6 @@ export function DashboardFilterBar({
     value: m.id,
     label: m.nome,
   }));
-  const areaOptions: FilterOption<string>[] = areas.map((a) => ({
-    value: a.id,
-    label: a.nome,
-  }));
   const tenantOptions: FilterOption<string>[] = tenants.map((t) => ({
     value: t.id,
     label: t.nome,
