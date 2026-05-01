@@ -88,8 +88,9 @@ function DemandasListagem() {
     f.apenasSemData = apenasSemData;
 
     if (buscaDebounced.trim()) f.busca = buscaDebounced.trim();
+    if (sort) f.sort = sort;
     return f;
-  }, [filtrosCompartilhados, periodo, tipoData, apenasSemData, buscaDebounced]);
+  }, [filtrosCompartilhados, periodo, tipoData, apenasSemData, buscaDebounced, sort]);
 
   const { data: rows = [], isLoading } = useDemandasLista(filtrosQuery);
 
