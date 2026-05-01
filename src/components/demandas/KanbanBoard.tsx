@@ -89,7 +89,13 @@ function DraggableCard({
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
+    <div
+      ref={setNodeRef}
+      style={style}
+      data-kanban-card="true"
+      {...listeners}
+      {...attributes}
+    >
       <KanbanCard row={row} onClick={onCardClick} />
     </div>
   );
@@ -177,6 +183,52 @@ export function KanbanBoard({ rows, isLoading, onCardClick }: KanbanBoardProps) 
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
   );
 
+  // === Drag-to-scroll horizontal no board (ignora cliques em cards) ===
+  const boardRef = React.useRef<HTMLDivElement>(null);
+  const dragScrollRef = React.useRef({
+    isDown: false,
+    startX: 0,
+    scrollLeftStart: 0,
+    moved: false,
+  });
+
+  const handleBoardMouseDown = (e: React.MouseEvent) => {
+    if (e.button !== 0) return;
+    const target = e.target as HTMLElement;
+    if (target.closest("[data-kanban-card]")) return;
+    if (!boardRef.current) return;
+    dragScrollRef.current.isDown = true;
+    dragScrollRef.current.startX = e.pageX - boardRef.current.offsetLeft;
+    dragScrollRef.current.scrollLeftStart = boardRef.current.scrollLeft;
+    dragScrollRef.current.moved = false;
+  };
+
+  const handleBoardMouseMove = (e: React.MouseEvent) => {
+    if (!dragScrollRef.current.isDown || !boardRef.current) return;
+    const x = e.pageX - boardRef.current.offsetLeft;
+    const walk = x - dragScrollRef.current.startX;
+    if (Math.abs(walk) > 5) {
+      dragScrollRef.current.moved = true;
+      boardRef.current.style.cursor = "grabbing";
+      boardRef.current.style.userSelect = "none";
+    }
+    if (dragScrollRef.current.moved) {
+      e.preventDefault();
+      boardRef.current.scrollLeft =
+        dragScrollRef.current.scrollLeftStart - walk;
+    }
+  };
+
+  const endBoardDrag = () => {
+    if (!boardRef.current) return;
+    dragScrollRef.current.isDown = false;
+    boardRef.current.style.cursor = "";
+    boardRef.current.style.userSelect = "";
+    requestAnimationFrame(() => {
+      dragScrollRef.current.moved = false;
+    });
+  };
+
   const porColuna = React.useMemo(() => {
     const mapa: Record<ColunaStatus, DemandaListaRow[]> = {
       triagem: [],
@@ -254,7 +306,14 @@ export function KanbanBoard({ rows, isLoading, onCardClick }: KanbanBoardProps) 
       onDragEnd={handleDragEnd}
       onDragCancel={handleDragCancel}
     >
-      <div className="flex gap-4 overflow-x-auto pb-4">
+      <div
+        ref={boardRef}
+        className="flex cursor-grab gap-4 overflow-x-auto pb-4"
+        onMouseDown={handleBoardMouseDown}
+        onMouseMove={handleBoardMouseMove}
+        onMouseUp={endBoardDrag}
+        onMouseLeave={endBoardDrag}
+      >
         {COLUNAS.map((col) => (
           <ColunaDroppable
             key={col.key}
