@@ -237,6 +237,8 @@ function DemandasListagem() {
           <DemandasTable
             rows={rows}
             isLoading={isLoading}
+            sort={sort}
+            onSortChange={setSort}
             onRowClick={(row) => {
               if (row.codigo) {
                 navigate({
