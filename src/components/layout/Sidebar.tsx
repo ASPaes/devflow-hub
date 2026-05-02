@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   LogOut,
   Network,
+  NotebookPen,
   Package2,
   PlusCircle,
   ShieldCheck,
@@ -133,6 +134,8 @@ export function Sidebar() {
               )}
             </>
           )}
+
+          <NavItem to="/rascunhos" icon={NotebookPen} label="Rascunhos" />
 
           {mostraAdmin && (
             <>
