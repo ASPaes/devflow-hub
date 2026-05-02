@@ -24,10 +24,22 @@ export type Rascunho = {
   updated_at: string;
 };
 
+export type RascunhoCompartilhamento = {
+  id: string;
+  rascunho_id: string;
+  usuario_id: string | null;
+  tenant_id: string | null;
+  created_at: string;
+  created_by: string;
+  usuario_nome?: string | null;
+  tenant_nome?: string | null;
+};
+
 export type RascunhoComItens = Rascunho & {
   itens: RascunhoChecklistItem[];
   autor_nome?: string | null;
   autor_avatar?: string | null;
+  compartilhamentos: RascunhoCompartilhamento[];
 };
 
 export const COR_RASCUNHO_CLASSES: Record<CorRascunho, string> = {
