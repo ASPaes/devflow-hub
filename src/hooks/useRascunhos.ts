@@ -79,11 +79,20 @@ export function useCriarRascunho() {
     }
   >({
     mutationFn: async (input) => {
-      if (!user?.id) throw new Error("Não autenticado");
+      // Revalida a sessão direto no Supabase pra evitar autor_id stale
+      // após refresh de token (causa de RLS violation intermitente)
+      const { data: authData, error: authErr } = await supabase.auth.getUser();
+      if (authErr || !authData.user?.id) {
+        throw new Error("Sessão expirada. Faça login novamente.");
+      }
+      const autorId = authData.user.id;
+      if (!user?.id || user.id !== autorId) {
+        // continua, mas usa o ID do Supabase como fonte da verdade
+      }
       const { data: criado, error } = await supabase
         .from("rascunhos")
         .insert({
-          autor_id: user.id,
+          autor_id: autorId,
           titulo: input.titulo?.trim() || null,
           tipo: input.tipo,
           conteudo_texto:
