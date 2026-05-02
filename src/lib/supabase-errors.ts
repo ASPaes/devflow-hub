@@ -61,7 +61,29 @@ export function translateSupabaseError(
       return "Esta empresa tem usuários ou demandas vinculados. Mude eles para outra empresa antes de excluir.";
     return "Este registro está em uso e não pode ser removido. Considere desativá-lo.";
   }
-  if (code === "23502") return "Campo obrigatório não preenchido";
+  if (code === "23502") {
+    const haystack = `${rawMessage ?? ""} ${e?.details ?? ""}`;
+    const match = haystack.match(/column "([^"]+)"/i);
+    const coluna = match?.[1];
+    const labels: Record<string, string> = {
+      tenant_id: "Empresa",
+      solicitante_id: "Solicitante",
+      produto_id: "Produto",
+      modulo_id: "Módulo",
+      submodulo_id: "Submódulo",
+      area_id: "Área",
+      titulo: "Título",
+      descricao: "Descrição",
+      tipo: "Tipo",
+      prioridade: "Prioridade",
+      responsavel_id: "Responsável",
+    };
+    if (coluna) {
+      const label = labels[coluna] ?? coluna;
+      return `Campo obrigatório não preenchido: ${label}`;
+    }
+    return "Campo obrigatório não preenchido";
+  }
   if (code === "42501" || code === "PGRST301") {
     if (entity === "demanda")
       return "Você não tem permissão para criar demandas";
