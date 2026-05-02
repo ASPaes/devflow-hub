@@ -1000,6 +1000,76 @@ export type Database = {
           },
         ]
       }
+      rascunho_compartilhamentos: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          rascunho_id: string
+          tenant_id: string | null
+          usuario_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          rascunho_id: string
+          tenant_id?: string | null
+          usuario_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          rascunho_id?: string
+          tenant_id?: string | null
+          usuario_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rascunho_compartilhamentos_rascunho_id_fkey"
+            columns: ["rascunho_id"]
+            isOneToOne: false
+            referencedRelation: "rascunhos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rascunho_compartilhamentos_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rascunho_compartilhamentos_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "vw_tenants_com_usuarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rascunho_compartilhamentos_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rascunho_compartilhamentos_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "vw_potenciais_responsaveis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rascunho_compartilhamentos_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "vw_solicitantes_por_empresa"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rascunhos: {
         Row: {
           autor_id: string
@@ -1743,6 +1813,8 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      rascunho_acessivel: { Args: { p_rascunho_id: string }; Returns: boolean }
+      rascunho_editavel: { Args: { p_rascunho_id: string }; Returns: boolean }
       reabrir_demanda: {
         Args: { p_demanda_id: string; p_motivo: string }
         Returns: {
