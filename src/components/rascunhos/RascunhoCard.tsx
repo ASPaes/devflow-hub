@@ -45,6 +45,7 @@ import {
 } from "@/types/rascunho";
 import { cn } from "@/lib/utils";
 import { formatRelativeSP } from "@/lib/format";
+import { CompartilharDialog } from "./CompartilharDialog";
 
 const CORES: CorRascunho[] = ["cinza", "verde", "azul", "amarelo", "vermelho"];
 
@@ -99,6 +100,7 @@ function CardConteudo({
   const [titulo, setTitulo] = React.useState(rascunho.titulo ?? "");
   const [texto, setTexto] = React.useState(rascunho.conteudo_texto ?? "");
   const [novoItem, setNovoItem] = React.useState("");
+  const [shareOpen, setShareOpen] = React.useState(false);
 
   React.useEffect(() => setTitulo(rascunho.titulo ?? ""), [rascunho.titulo]);
   React.useEffect(
@@ -256,7 +258,9 @@ function CardConteudo({
         <span className="truncate text-[10px] text-muted-foreground">
           {ehDono ? "" : `${rascunho.autor_nome ?? "—"} · `}
           {formatRelativeSP(rascunho.updated_at)}
-          {rascunho.compartilhada && " · compartilhado"}
+          {(rascunho.compartilhada ||
+            rascunho.compartilhamentos.length > 0) &&
+            " · compartilhado"}
         </span>
 
         <DropdownMenu>
@@ -294,18 +298,9 @@ function CardConteudo({
                   ))}
                 </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onSelect={() =>
-                    atualizar.mutate({
-                      id: rascunho.id,
-                      patch: { compartilhada: !rascunho.compartilhada },
-                    })
-                  }
-                >
+                <DropdownMenuItem onSelect={() => setShareOpen(true)}>
                   <Share2 className="mr-2 h-3.5 w-3.5" />
-                  {rascunho.compartilhada
-                    ? "Tornar privado"
-                    : "Compartilhar com time"}
+                  Compartilhar…
                 </DropdownMenuItem>
               </>
             )}
@@ -333,6 +328,13 @@ function CardConteudo({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+      {ehDono && (
+        <CompartilharDialog
+          rascunho={rascunho}
+          open={shareOpen}
+          onOpenChange={setShareOpen}
+        />
+      )}
     </Wrapper>
   );
 }
