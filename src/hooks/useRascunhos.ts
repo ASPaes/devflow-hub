@@ -23,13 +23,19 @@ export function useRascunhos(filtro: Filtro = "todos") {
           `id, autor_id, titulo, tipo, conteudo_texto, cor, fixada, compartilhada,
            created_at, updated_at,
            autor:profiles!rascunhos_autor_id_fkey(nome, avatar_url),
-           itens:rascunho_checklist_itens(id, rascunho_id, texto, marcado, ordem, created_at)`,
+           itens:rascunho_checklist_itens(id, rascunho_id, texto, marcado, ordem, created_at),
+           compartilhamentos:rascunho_compartilhamentos(
+             id, rascunho_id, usuario_id, tenant_id, created_at, created_by,
+             usuario:profiles!rascunho_compartilhamentos_usuario_id_fkey(nome),
+             tenant:tenants!rascunho_compartilhamentos_tenant_id_fkey(nome)
+           )`,
         )
         .order("fixada", { ascending: false })
         .order("updated_at", { ascending: false });
 
       if (filtro === "meus" && user?.id) q = q.eq("autor_id", user.id);
-      if (filtro === "compartilhados") q = q.eq("compartilhada", true);
+      if (filtro === "compartilhados" && user?.id)
+        q = q.neq("autor_id", user.id);
 
       const { data, error } = await q;
       if (error) throw error;
@@ -41,6 +47,16 @@ export function useRascunhos(filtro: Filtro = "todos") {
           (a: RascunhoChecklistItem, b: RascunhoChecklistItem) =>
             a.ordem - b.ordem,
         ),
+        compartilhamentos: (r.compartilhamentos ?? []).map((c: any) => ({
+          id: c.id,
+          rascunho_id: c.rascunho_id,
+          usuario_id: c.usuario_id,
+          tenant_id: c.tenant_id,
+          created_at: c.created_at,
+          created_by: c.created_by,
+          usuario_nome: c.usuario?.nome ?? null,
+          tenant_nome: c.tenant?.nome ?? null,
+        })),
       })) as RascunhoComItens[];
     },
     enabled: !!user?.id,
