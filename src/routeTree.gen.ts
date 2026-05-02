@@ -17,6 +17,7 @@ import { Route as CadastroRouteImport } from './routes/cadastro'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthConfirmRouteImport } from './routes/auth/confirm'
+import { Route as AuthenticatedRascunhosRouteImport } from './routes/_authenticated/rascunhos'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedDemandasIndexRouteImport } from './routes/_authenticated/demandas.index'
@@ -70,6 +71,11 @@ const AuthConfirmRoute = AuthConfirmRouteImport.update({
   id: '/auth/confirm',
   path: '/auth/confirm',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRascunhosRoute = AuthenticatedRascunhosRouteImport.update({
+  id: '/rascunhos',
+  path: '/rascunhos',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedPerfilRoute = AuthenticatedPerfilRouteImport.update({
   id: '/perfil',
@@ -162,6 +168,7 @@ export interface FileRoutesByFullPath {
   '/sso-callback': typeof SsoCallbackRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/perfil': typeof AuthenticatedPerfilRoute
+  '/rascunhos': typeof AuthenticatedRascunhosRoute
   '/auth/confirm': typeof AuthConfirmRoute
   '/admin/areas': typeof AuthenticatedAdminAreasRoute
   '/admin/modulos': typeof AuthenticatedAdminModulosRoute
@@ -184,6 +191,7 @@ export interface FileRoutesByTo {
   '/sso-callback': typeof SsoCallbackRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/perfil': typeof AuthenticatedPerfilRoute
+  '/rascunhos': typeof AuthenticatedRascunhosRoute
   '/auth/confirm': typeof AuthConfirmRoute
   '/': typeof AuthenticatedIndexRoute
   '/admin/areas': typeof AuthenticatedAdminAreasRoute
@@ -209,6 +217,7 @@ export interface FileRoutesById {
   '/sso-callback': typeof SsoCallbackRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
+  '/_authenticated/rascunhos': typeof AuthenticatedRascunhosRoute
   '/auth/confirm': typeof AuthConfirmRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/admin/areas': typeof AuthenticatedAdminAreasRoute
@@ -235,6 +244,7 @@ export interface FileRouteTypes {
     | '/sso-callback'
     | '/admin'
     | '/perfil'
+    | '/rascunhos'
     | '/auth/confirm'
     | '/admin/areas'
     | '/admin/modulos'
@@ -257,6 +267,7 @@ export interface FileRouteTypes {
     | '/sso-callback'
     | '/admin'
     | '/perfil'
+    | '/rascunhos'
     | '/auth/confirm'
     | '/'
     | '/admin/areas'
@@ -281,6 +292,7 @@ export interface FileRouteTypes {
     | '/sso-callback'
     | '/_authenticated/admin'
     | '/_authenticated/perfil'
+    | '/_authenticated/rascunhos'
     | '/auth/confirm'
     | '/_authenticated/'
     | '/_authenticated/admin/areas'
@@ -364,6 +376,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/auth/confirm'
       preLoaderRoute: typeof AuthConfirmRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/rascunhos': {
+      id: '/_authenticated/rascunhos'
+      path: '/rascunhos'
+      fullPath: '/rascunhos'
+      preLoaderRoute: typeof AuthenticatedRascunhosRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/perfil': {
       id: '/_authenticated/perfil'
@@ -492,6 +511,7 @@ const AuthenticatedAdminRouteWithChildren =
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
+  AuthenticatedRascunhosRoute: typeof AuthenticatedRascunhosRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedDemandasCodigoRoute: typeof AuthenticatedDemandasCodigoRoute
   AuthenticatedDemandasExcluidasRoute: typeof AuthenticatedDemandasExcluidasRoute
@@ -503,6 +523,7 @@ interface AuthenticatedRouteChildren {
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
+  AuthenticatedRascunhosRoute: AuthenticatedRascunhosRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedDemandasCodigoRoute: AuthenticatedDemandasCodigoRoute,
   AuthenticatedDemandasExcluidasRoute: AuthenticatedDemandasExcluidasRoute,
