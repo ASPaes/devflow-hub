@@ -34,6 +34,8 @@ import {
   useDuplicarRascunho,
   useExcluirItem,
   useExcluirRascunho,
+  useExcluirRascunhoDefinitivo,
+  useRestaurarRascunho,
   useToggleItem,
 } from "@/hooks/useRascunhos";
 import { useAuth } from "@/hooks/useAuth";
