@@ -5,7 +5,8 @@ import {
   notFound,
   useNavigate,
 } from "@tanstack/react-router";
-import { ChevronLeft, FileQuestion, Link as LinkIcon, MoreHorizontal, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronUp, FileQuestion, Link as LinkIcon, MoreHorizontal, Trash2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
