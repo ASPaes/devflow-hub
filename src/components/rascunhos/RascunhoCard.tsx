@@ -45,6 +45,7 @@ import {
 } from "@/types/rascunho";
 import { cn } from "@/lib/utils";
 import { formatRelativeSP } from "@/lib/format";
+import { CompartilharDialog } from "./CompartilharDialog";
 
 const CORES: CorRascunho[] = ["cinza", "verde", "azul", "amarelo", "vermelho"];
 
