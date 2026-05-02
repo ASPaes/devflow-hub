@@ -328,6 +328,13 @@ function CardConteudo({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+      {ehDono && (
+        <CompartilharDialog
+          rascunho={rascunho}
+          open={shareOpen}
+          onOpenChange={setShareOpen}
+        />
+      )}
     </Wrapper>
   );
 }
