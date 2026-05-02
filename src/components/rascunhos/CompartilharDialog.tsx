@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Building2, Check, Globe, Trash2, User, X } from "lucide-react";
+import { Building2, Check, Globe, User, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
