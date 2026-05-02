@@ -65,10 +65,12 @@ function Secao({
   titulo,
   icon,
   itens,
+  naLixeira,
 }: {
   titulo?: string;
   icon?: React.ReactNode;
   itens: RascunhoComItens[];
+  naLixeira?: boolean;
 }) {
   return (
     <div className="space-y-2">
@@ -80,7 +82,7 @@ function Secao({
       )}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {itens.map((r) => (
-          <RascunhoCard key={r.id} rascunho={r} />
+          <RascunhoCard key={r.id} rascunho={r} naLixeira={naLixeira} />
         ))}
       </div>
     </div>
