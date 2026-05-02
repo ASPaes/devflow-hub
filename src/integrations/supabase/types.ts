@@ -965,6 +965,102 @@ export type Database = {
           },
         ]
       }
+      rascunho_checklist_itens: {
+        Row: {
+          created_at: string
+          id: string
+          marcado: boolean
+          ordem: number
+          rascunho_id: string
+          texto: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          marcado?: boolean
+          ordem?: number
+          rascunho_id: string
+          texto: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          marcado?: boolean
+          ordem?: number
+          rascunho_id?: string
+          texto?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rascunho_checklist_itens_rascunho_id_fkey"
+            columns: ["rascunho_id"]
+            isOneToOne: false
+            referencedRelation: "rascunhos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rascunhos: {
+        Row: {
+          autor_id: string
+          compartilhada: boolean
+          conteudo_texto: string | null
+          cor: Database["public"]["Enums"]["cor_rascunho"]
+          created_at: string
+          fixada: boolean
+          id: string
+          tipo: Database["public"]["Enums"]["tipo_rascunho"]
+          titulo: string | null
+          updated_at: string
+        }
+        Insert: {
+          autor_id: string
+          compartilhada?: boolean
+          conteudo_texto?: string | null
+          cor?: Database["public"]["Enums"]["cor_rascunho"]
+          created_at?: string
+          fixada?: boolean
+          id?: string
+          tipo?: Database["public"]["Enums"]["tipo_rascunho"]
+          titulo?: string | null
+          updated_at?: string
+        }
+        Update: {
+          autor_id?: string
+          compartilhada?: boolean
+          conteudo_texto?: string | null
+          cor?: Database["public"]["Enums"]["cor_rascunho"]
+          created_at?: string
+          fixada?: boolean
+          id?: string
+          tipo?: Database["public"]["Enums"]["tipo_rascunho"]
+          titulo?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rascunhos_autor_id_fkey"
+            columns: ["autor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rascunhos_autor_id_fkey"
+            columns: ["autor_id"]
+            isOneToOne: false
+            referencedRelation: "vw_potenciais_responsaveis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rascunhos_autor_id_fkey"
+            columns: ["autor_id"]
+            isOneToOne: false
+            referencedRelation: "vw_solicitantes_por_empresa"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       submodulos: {
         Row: {
           ativo: boolean
@@ -1431,6 +1527,27 @@ export type Database = {
         Returns: Json
       }
       demanda_visivel: { Args: { p_demanda_id: string }; Returns: boolean }
+      duplicar_rascunho: {
+        Args: { p_rascunho_id: string }
+        Returns: {
+          autor_id: string
+          compartilhada: boolean
+          conteudo_texto: string | null
+          cor: Database["public"]["Enums"]["cor_rascunho"]
+          created_at: string
+          fixada: boolean
+          id: string
+          tipo: Database["public"]["Enums"]["tipo_rascunho"]
+          titulo: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "rascunhos"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       enqueue_cobranca: {
         Args: {
           p_condicao: number
@@ -1732,6 +1849,7 @@ export type Database = {
         | "alterar_produto_demanda"
         | "inserir_tempo_manual"
         | "criar_retorno_demanda"
+      cor_rascunho: "cinza" | "verde" | "azul" | "amarelo" | "vermelho"
       status_demanda:
         | "triagem"
         | "analise"
@@ -1750,6 +1868,7 @@ export type Database = {
         | "duvida"
         | "tarefa"
       tipo_midia_retorno: "imagem" | "video" | "audio"
+      tipo_rascunho: "texto" | "checklist"
       tipo_vinculo: "depende_de" | "bloqueia" | "relacionada" | "duplicada"
     }
     CompositeTypes: {
@@ -1897,6 +2016,7 @@ export const Constants = {
         "inserir_tempo_manual",
         "criar_retorno_demanda",
       ],
+      cor_rascunho: ["cinza", "verde", "azul", "amarelo", "vermelho"],
       status_demanda: [
         "triagem",
         "analise",
@@ -1917,6 +2037,7 @@ export const Constants = {
         "tarefa",
       ],
       tipo_midia_retorno: ["imagem", "video", "audio"],
+      tipo_rascunho: ["texto", "checklist"],
       tipo_vinculo: ["depende_de", "bloqueia", "relacionada", "duplicada"],
     },
   },
