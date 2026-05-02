@@ -165,22 +165,11 @@ function DemandaDetalhe() {
           <ReaberturaBanner demanda={demanda} isOwner={isOwner} />
 
           {/* Descrição */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Descrição</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <EditableField
-                value={demanda.descricao}
-                multiline
-                disabled={!canEditTextual || updateMutation.isPending}
-                minLength={10}
-                placeholder="Sem descrição"
-                ariaLabel="Descrição da demanda"
-                onSave={(v) => handlePatch({ descricao: v })}
-              />
-            </CardContent>
-          </Card>
+          <DescricaoCard
+            value={demanda.descricao}
+            disabled={!canEditTextual || updateMutation.isPending}
+            onSave={(v) => handlePatch({ descricao: v })}
+          />
 
           {/* Anexos */}
           {user && (
