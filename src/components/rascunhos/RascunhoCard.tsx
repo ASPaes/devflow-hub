@@ -258,7 +258,9 @@ function CardConteudo({
         <span className="truncate text-[10px] text-muted-foreground">
           {ehDono ? "" : `${rascunho.autor_nome ?? "—"} · `}
           {formatRelativeSP(rascunho.updated_at)}
-          {rascunho.compartilhada && " · compartilhado"}
+          {(rascunho.compartilhada ||
+            rascunho.compartilhamentos.length > 0) &&
+            " · compartilhado"}
         </span>
 
         <DropdownMenu>
