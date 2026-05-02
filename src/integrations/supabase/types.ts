@@ -1077,6 +1077,8 @@ export type Database = {
           conteudo_texto: string | null
           cor: Database["public"]["Enums"]["cor_rascunho"]
           created_at: string
+          deleted_at: string | null
+          deleted_by: string | null
           fixada: boolean
           id: string
           tipo: Database["public"]["Enums"]["tipo_rascunho"]
@@ -1089,6 +1091,8 @@ export type Database = {
           conteudo_texto?: string | null
           cor?: Database["public"]["Enums"]["cor_rascunho"]
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           fixada?: boolean
           id?: string
           tipo?: Database["public"]["Enums"]["tipo_rascunho"]
@@ -1101,6 +1105,8 @@ export type Database = {
           conteudo_texto?: string | null
           cor?: Database["public"]["Enums"]["cor_rascunho"]
           created_at?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           fixada?: boolean
           id?: string
           tipo?: Database["public"]["Enums"]["tipo_rascunho"]
@@ -1605,6 +1611,8 @@ export type Database = {
           conteudo_texto: string | null
           cor: Database["public"]["Enums"]["cor_rascunho"]
           created_at: string
+          deleted_at: string | null
+          deleted_by: string | null
           fixada: boolean
           id: string
           tipo: Database["public"]["Enums"]["tipo_rascunho"]
