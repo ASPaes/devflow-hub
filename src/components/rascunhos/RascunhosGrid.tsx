@@ -7,6 +7,7 @@ type Filtro = "meus" | "compartilhados" | "todos" | "lixeira";
 
 export function RascunhosGrid({ filtro = "todos" }: { filtro?: Filtro }) {
   const { data: rascunhos = [], isLoading } = useRascunhos(filtro);
+  const naLixeira = filtro === "lixeira";
 
   if (isLoading) {
     return (
@@ -24,8 +25,21 @@ export function RascunhosGrid({ filtro = "todos" }: { filtro?: Filtro }) {
   if (rascunhos.length === 0) {
     return (
       <div className="rounded-lg border border-dashed border-border bg-card/50 p-12 text-center text-sm text-muted-foreground">
-        Nenhum rascunho ainda. Crie um acima.
+        {naLixeira
+          ? "A Lixeira está vazia."
+          : "Nenhum rascunho ainda. Crie um acima."}
       </div>
+    );
+  }
+
+  if (naLixeira) {
+    return (
+      <Secao
+        titulo="Itens na Lixeira"
+        icon={null}
+        itens={rascunhos}
+        naLixeira
+      />
     );
   }
 
