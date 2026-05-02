@@ -52,7 +52,13 @@ import { CompartilharDialog } from "./CompartilharDialog";
 
 const CORES: CorRascunho[] = ["cinza", "verde", "azul", "amarelo", "vermelho"];
 
-export function RascunhoCard({ rascunho }: { rascunho: RascunhoComItens }) {
+export function RascunhoCard({
+  rascunho,
+  naLixeira = false,
+}: {
+  rascunho: RascunhoComItens;
+  naLixeira?: boolean;
+}) {
   const [expandido, setExpandido] = React.useState(false);
 
   return (
@@ -60,7 +66,8 @@ export function RascunhoCard({ rascunho }: { rascunho: RascunhoComItens }) {
       <CardConteudo
         rascunho={rascunho}
         expandido={false}
-        onExpandir={() => setExpandido(true)}
+        naLixeira={naLixeira}
+        onExpandir={naLixeira ? undefined : () => setExpandido(true)}
       />
       <Dialog open={expandido} onOpenChange={setExpandido}>
         <DialogContent
@@ -73,7 +80,7 @@ export function RascunhoCard({ rascunho }: { rascunho: RascunhoComItens }) {
             {rascunho.titulo || "Rascunho"}
           </DialogTitle>
           <div className="p-5">
-            <CardConteudo rascunho={rascunho} expandido={true} />
+            <CardConteudo rascunho={rascunho} expandido={true} naLixeira={naLixeira} />
           </div>
         </DialogContent>
       </Dialog>
@@ -85,15 +92,19 @@ function CardConteudo({
   rascunho,
   expandido,
   onExpandir,
+  naLixeira = false,
 }: {
   rascunho: RascunhoComItens;
   expandido: boolean;
   onExpandir?: () => void;
+  naLixeira?: boolean;
 }) {
   const { user } = useAuth();
   const ehDono = user?.id === rascunho.autor_id;
   const atualizar = useAtualizarRascunho();
   const excluir = useExcluirRascunho();
+  const restaurar = useRestaurarRascunho();
+  const excluirDef = useExcluirRascunhoDefinitivo();
   const duplicar = useDuplicarRascunho();
   const toggleItem = useToggleItem();
   const addItem = useAdicionarItem();
