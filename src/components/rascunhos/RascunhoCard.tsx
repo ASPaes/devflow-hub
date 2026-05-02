@@ -298,18 +298,9 @@ function CardConteudo({
                   ))}
                 </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onSelect={() =>
-                    atualizar.mutate({
-                      id: rascunho.id,
-                      patch: { compartilhada: !rascunho.compartilhada },
-                    })
-                  }
-                >
+                <DropdownMenuItem onSelect={() => setShareOpen(true)}>
                   <Share2 className="mr-2 h-3.5 w-3.5" />
-                  {rascunho.compartilhada
-                    ? "Tornar privado"
-                    : "Compartilhar com time"}
+                  Compartilhar…
                 </DropdownMenuItem>
               </>
             )}
