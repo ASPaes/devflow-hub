@@ -595,7 +595,7 @@ export type Database = {
       }
       demandas: {
         Row: {
-          area_id: string
+          area_id: string | null
           closed_at: string | null
           codigo: string | null
           created_at: string
@@ -625,7 +625,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          area_id: string
+          area_id?: string | null
           closed_at?: string | null
           codigo?: string | null
           created_at?: string
@@ -655,7 +655,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          area_id?: string
+          area_id?: string | null
           closed_at?: string | null
           codigo?: string | null
           created_at?: string
@@ -1642,7 +1642,7 @@ export type Database = {
       excluir_demanda: {
         Args: { p_demanda_id: string; p_motivo: string }
         Returns: {
-          area_id: string
+          area_id: string | null
           closed_at: string | null
           codigo: string | null
           created_at: string
@@ -1689,7 +1689,7 @@ export type Database = {
       iniciar_timer_demanda: {
         Args: { p_demanda_id: string }
         Returns: {
-          area_id: string
+          area_id: string | null
           closed_at: string | null
           codigo: string | null
           created_at: string
@@ -1777,7 +1777,7 @@ export type Database = {
       pausar_timer_demanda: {
         Args: { p_demanda_id: string }
         Returns: {
-          area_id: string
+          area_id: string | null
           closed_at: string | null
           codigo: string | null
           created_at: string
@@ -1818,7 +1818,7 @@ export type Database = {
       reabrir_demanda: {
         Args: { p_demanda_id: string; p_motivo: string }
         Returns: {
-          area_id: string
+          area_id: string | null
           closed_at: string | null
           codigo: string | null
           created_at: string
@@ -1857,7 +1857,7 @@ export type Database = {
       restaurar_demanda: {
         Args: { p_demanda_id: string }
         Returns: {
-          area_id: string
+          area_id: string | null
           closed_at: string | null
           codigo: string | null
           created_at: string

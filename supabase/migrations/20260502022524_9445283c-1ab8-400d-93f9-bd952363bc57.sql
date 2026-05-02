@@ -1,0 +1,1 @@
+ALTER TABLE public.demandas ALTER COLUMN area_id DROP NOT NULL;
