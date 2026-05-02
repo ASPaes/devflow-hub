@@ -3,7 +3,7 @@ import { useRascunhos } from "@/hooks/useRascunhos";
 import { RascunhoCard } from "./RascunhoCard";
 import type { RascunhoComItens } from "@/types/rascunho";
 
-type Filtro = "meus" | "compartilhados" | "todos";
+type Filtro = "meus" | "compartilhados" | "todos" | "lixeira";
 
 export function RascunhosGrid({ filtro = "todos" }: { filtro?: Filtro }) {
   const { data: rascunhos = [], isLoading } = useRascunhos(filtro);
