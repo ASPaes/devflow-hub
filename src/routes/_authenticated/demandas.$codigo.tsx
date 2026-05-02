@@ -5,7 +5,8 @@ import {
   notFound,
   useNavigate,
 } from "@tanstack/react-router";
-import { ChevronLeft, FileQuestion, Link as LinkIcon, MoreHorizontal, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronUp, FileQuestion, Link as LinkIcon, MoreHorizontal, Trash2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -165,22 +166,11 @@ function DemandaDetalhe() {
           <ReaberturaBanner demanda={demanda} isOwner={isOwner} />
 
           {/* Descrição */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Descrição</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <EditableField
-                value={demanda.descricao}
-                multiline
-                disabled={!canEditTextual || updateMutation.isPending}
-                minLength={10}
-                placeholder="Sem descrição"
-                ariaLabel="Descrição da demanda"
-                onSave={(v) => handlePatch({ descricao: v })}
-              />
-            </CardContent>
-          </Card>
+          <DescricaoCard
+            value={demanda.descricao}
+            disabled={!canEditTextual || updateMutation.isPending}
+            onSave={(v) => handlePatch({ descricao: v })}
+          />
 
           {/* Anexos */}
           {user && (
@@ -328,5 +318,83 @@ function DetalheTabs({
         />
       </TabsContent>
     </Tabs>
+  );
+}
+
+interface DescricaoCardProps {
+  value: string;
+  disabled: boolean;
+  onSave: (v: string) => Promise<void> | void;
+}
+
+// Altura colapsada alinhada ao sidebar (Status → Estimativa ≈ 6 cards)
+const DESCRICAO_COLLAPSED_MAX_PX = 520;
+
+function DescricaoCard({ value, disabled, onSave }: DescricaoCardProps) {
+  const [expanded, setExpanded] = React.useState(false);
+  const contentRef = React.useRef<HTMLDivElement>(null);
+  const [overflowing, setOverflowing] = React.useState(false);
+
+  React.useLayoutEffect(() => {
+    const el = contentRef.current;
+    if (!el) return;
+    const check = () => {
+      setOverflowing(el.scrollHeight > DESCRICAO_COLLAPSED_MAX_PX + 4);
+    };
+    check();
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [value]);
+
+  const showToggle = overflowing || expanded;
+
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0">
+        <CardTitle className="text-base">Descrição</CardTitle>
+        {showToggle && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-7 gap-1 px-2 text-xs text-muted-foreground"
+            onClick={() => setExpanded((v) => !v)}
+            aria-expanded={expanded}
+            aria-label={expanded ? "Recolher descrição" : "Expandir descrição"}
+          >
+            {expanded ? (
+              <>
+                Recolher <ChevronUp className="h-3.5 w-3.5" />
+              </>
+            ) : (
+              <>
+                Expandir <ChevronDown className="h-3.5 w-3.5" />
+              </>
+            )}
+          </Button>
+        )}
+      </CardHeader>
+      <CardContent>
+        <div
+          ref={contentRef}
+          className={cn(
+            "overflow-y-auto overscroll-contain pr-1",
+            !expanded && "max-h-[520px]",
+          )}
+          style={!expanded ? { maxHeight: DESCRICAO_COLLAPSED_MAX_PX } : undefined}
+        >
+          <EditableField
+            value={value}
+            multiline
+            disabled={disabled}
+            minLength={10}
+            placeholder="Sem descrição"
+            ariaLabel="Descrição da demanda"
+            onSave={onSave}
+          />
+        </div>
+      </CardContent>
+    </Card>
   );
 }
