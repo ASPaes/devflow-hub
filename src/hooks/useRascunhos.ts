@@ -245,3 +245,52 @@ export function useExcluirItem() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["rascunhos"] }),
   });
 }
+
+/* ====== Compartilhamentos granulares ====== */
+
+export function useAdicionarCompartilhamento() {
+  const qc = useQueryClient();
+  const { user } = useAuth();
+  return useMutation<
+    void,
+    Error,
+    { rascunhoId: string; usuarioId?: string; tenantId?: string }
+  >({
+    mutationFn: async ({ rascunhoId, usuarioId, tenantId }) => {
+      if (!user?.id) throw new Error("Não autenticado");
+      if (!usuarioId && !tenantId) throw new Error("Selecione um destinatário");
+      const { error } = await supabase
+        .from("rascunho_compartilhamentos")
+        .insert({
+          rascunho_id: rascunhoId,
+          usuario_id: usuarioId ?? null,
+          tenant_id: tenantId ?? null,
+          created_by: user.id,
+        });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["rascunhos"] });
+      toast.success("Compartilhamento adicionado");
+    },
+    onError: (err) => toast.error(err.message || "Erro ao compartilhar"),
+  });
+}
+
+export function useRemoverCompartilhamento() {
+  const qc = useQueryClient();
+  return useMutation<void, Error, { id: string }>({
+    mutationFn: async ({ id }) => {
+      const { error } = await supabase
+        .from("rascunho_compartilhamentos")
+        .delete()
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["rascunhos"] });
+      toast.success("Compartilhamento removido");
+    },
+    onError: (err) => toast.error(err.message || "Erro ao remover"),
+  });
+}
