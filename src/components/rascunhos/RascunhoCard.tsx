@@ -100,6 +100,7 @@ function CardConteudo({
   const [titulo, setTitulo] = React.useState(rascunho.titulo ?? "");
   const [texto, setTexto] = React.useState(rascunho.conteudo_texto ?? "");
   const [novoItem, setNovoItem] = React.useState("");
+  const [shareOpen, setShareOpen] = React.useState(false);
 
   React.useEffect(() => setTitulo(rascunho.titulo ?? ""), [rascunho.titulo]);
   React.useEffect(
