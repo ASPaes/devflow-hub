@@ -10,7 +10,7 @@ import type {
   TipoRascunho,
 } from "@/types/rascunho";
 
-type Filtro = "meus" | "compartilhados" | "todos";
+type Filtro = "meus" | "compartilhados" | "todos" | "lixeira";
 
 export function useRascunhos(filtro: Filtro = "todos") {
   const { user } = useAuth();
