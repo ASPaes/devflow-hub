@@ -10,7 +10,7 @@ import type {
   TipoRascunho,
 } from "@/types/rascunho";
 
-type Filtro = "meus" | "compartilhados" | "todos";
+type Filtro = "meus" | "compartilhados" | "todos" | "lixeira";
 
 export function useRascunhos(filtro: Filtro = "todos") {
   const { user } = useAuth();
@@ -33,9 +33,14 @@ export function useRascunhos(filtro: Filtro = "todos") {
         .order("fixada", { ascending: false })
         .order("updated_at", { ascending: false });
 
-      if (filtro === "meus" && user?.id) q = q.eq("autor_id", user.id);
-      if (filtro === "compartilhados" && user?.id)
-        q = q.neq("autor_id", user.id);
+      if (filtro === "lixeira" && user?.id) {
+        q = q.eq("autor_id", user.id).not("deleted_at", "is", null);
+      } else {
+        q = q.is("deleted_at", null);
+        if (filtro === "meus" && user?.id) q = q.eq("autor_id", user.id);
+        if (filtro === "compartilhados" && user?.id)
+          q = q.neq("autor_id", user.id);
+      }
 
       const { data, error } = await q;
       if (error) throw error;
@@ -160,6 +165,43 @@ export function useAtualizarRascunho() {
 
 export function useExcluirRascunho() {
   const qc = useQueryClient();
+  const { user } = useAuth();
+  return useMutation<void, Error, { id: string }>({
+    mutationFn: async ({ id }) => {
+      const { error } = await supabase
+        .from("rascunhos")
+        .update({ deleted_at: new Date().toISOString(), deleted_by: user?.id ?? null })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["rascunhos"] });
+      toast.success("Rascunho movido para a Lixeira");
+    },
+    onError: (err) => toast.error(err.message || "Erro ao excluir"),
+  });
+}
+
+export function useRestaurarRascunho() {
+  const qc = useQueryClient();
+  return useMutation<void, Error, { id: string }>({
+    mutationFn: async ({ id }) => {
+      const { error } = await supabase
+        .from("rascunhos")
+        .update({ deleted_at: null, deleted_by: null })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["rascunhos"] });
+      toast.success("Rascunho restaurado");
+    },
+    onError: (err) => toast.error(err.message || "Erro ao restaurar"),
+  });
+}
+
+export function useExcluirRascunhoDefinitivo() {
+  const qc = useQueryClient();
   return useMutation<void, Error, { id: string }>({
     mutationFn: async ({ id }) => {
       const { error } = await supabase.from("rascunhos").delete().eq("id", id);
@@ -167,7 +209,7 @@ export function useExcluirRascunho() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["rascunhos"] });
-      toast.success("Rascunho excluído");
+      toast.success("Rascunho excluído definitivamente");
     },
     onError: (err) => toast.error(err.message || "Erro ao excluir"),
   });

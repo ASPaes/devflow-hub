@@ -3,10 +3,11 @@ import { useRascunhos } from "@/hooks/useRascunhos";
 import { RascunhoCard } from "./RascunhoCard";
 import type { RascunhoComItens } from "@/types/rascunho";
 
-type Filtro = "meus" | "compartilhados" | "todos";
+type Filtro = "meus" | "compartilhados" | "todos" | "lixeira";
 
 export function RascunhosGrid({ filtro = "todos" }: { filtro?: Filtro }) {
   const { data: rascunhos = [], isLoading } = useRascunhos(filtro);
+  const naLixeira = filtro === "lixeira";
 
   if (isLoading) {
     return (
@@ -24,8 +25,21 @@ export function RascunhosGrid({ filtro = "todos" }: { filtro?: Filtro }) {
   if (rascunhos.length === 0) {
     return (
       <div className="rounded-lg border border-dashed border-border bg-card/50 p-12 text-center text-sm text-muted-foreground">
-        Nenhum rascunho ainda. Crie um acima.
+        {naLixeira
+          ? "A Lixeira está vazia."
+          : "Nenhum rascunho ainda. Crie um acima."}
       </div>
+    );
+  }
+
+  if (naLixeira) {
+    return (
+      <Secao
+        titulo="Itens na Lixeira"
+        icon={null}
+        itens={rascunhos}
+        naLixeira
+      />
     );
   }
 
@@ -51,10 +65,12 @@ function Secao({
   titulo,
   icon,
   itens,
+  naLixeira,
 }: {
   titulo?: string;
   icon?: React.ReactNode;
   itens: RascunhoComItens[];
+  naLixeira?: boolean;
 }) {
   return (
     <div className="space-y-2">
@@ -66,7 +82,7 @@ function Secao({
       )}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {itens.map((r) => (
-          <RascunhoCard key={r.id} rascunho={r} />
+          <RascunhoCard key={r.id} rascunho={r} naLixeira={naLixeira} />
         ))}
       </div>
     </div>

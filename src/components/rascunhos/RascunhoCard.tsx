@@ -6,6 +6,7 @@ import {
   Pin,
   PinOff,
   Plus,
+  RotateCcw,
   Share2,
   Trash2,
 } from "lucide-react";
@@ -33,6 +34,8 @@ import {
   useDuplicarRascunho,
   useExcluirItem,
   useExcluirRascunho,
+  useExcluirRascunhoDefinitivo,
+  useRestaurarRascunho,
   useToggleItem,
 } from "@/hooks/useRascunhos";
 import { useAuth } from "@/hooks/useAuth";
@@ -49,7 +52,13 @@ import { CompartilharDialog } from "./CompartilharDialog";
 
 const CORES: CorRascunho[] = ["cinza", "verde", "azul", "amarelo", "vermelho"];
 
-export function RascunhoCard({ rascunho }: { rascunho: RascunhoComItens }) {
+export function RascunhoCard({
+  rascunho,
+  naLixeira = false,
+}: {
+  rascunho: RascunhoComItens;
+  naLixeira?: boolean;
+}) {
   const [expandido, setExpandido] = React.useState(false);
 
   return (
@@ -57,7 +66,8 @@ export function RascunhoCard({ rascunho }: { rascunho: RascunhoComItens }) {
       <CardConteudo
         rascunho={rascunho}
         expandido={false}
-        onExpandir={() => setExpandido(true)}
+        naLixeira={naLixeira}
+        onExpandir={naLixeira ? undefined : () => setExpandido(true)}
       />
       <Dialog open={expandido} onOpenChange={setExpandido}>
         <DialogContent
@@ -70,7 +80,7 @@ export function RascunhoCard({ rascunho }: { rascunho: RascunhoComItens }) {
             {rascunho.titulo || "Rascunho"}
           </DialogTitle>
           <div className="p-5">
-            <CardConteudo rascunho={rascunho} expandido={true} />
+            <CardConteudo rascunho={rascunho} expandido={true} naLixeira={naLixeira} />
           </div>
         </DialogContent>
       </Dialog>
@@ -82,15 +92,19 @@ function CardConteudo({
   rascunho,
   expandido,
   onExpandir,
+  naLixeira = false,
 }: {
   rascunho: RascunhoComItens;
   expandido: boolean;
   onExpandir?: () => void;
+  naLixeira?: boolean;
 }) {
   const { user } = useAuth();
   const ehDono = user?.id === rascunho.autor_id;
   const atualizar = useAtualizarRascunho();
   const excluir = useExcluirRascunho();
+  const restaurar = useRestaurarRascunho();
+  const excluirDef = useExcluirRascunhoDefinitivo();
   const duplicar = useDuplicarRascunho();
   const toggleItem = useToggleItem();
   const addItem = useAdicionarItem();
@@ -257,76 +271,112 @@ function CardConteudo({
       <div className="flex items-center justify-between gap-1 border-t border-border/50 pt-2">
         <span className="truncate text-[10px] text-muted-foreground">
           {ehDono ? "" : `${rascunho.autor_nome ?? "—"} · `}
-          {formatRelativeSP(rascunho.updated_at)}
-          {(rascunho.compartilhada ||
-            rascunho.compartilhamentos.length > 0) &&
+          {naLixeira && rascunho.deleted_at
+            ? `Excluído ${formatRelativeSP(rascunho.deleted_at)}`
+            : formatRelativeSP(rascunho.updated_at)}
+          {!naLixeira &&
+            (rascunho.compartilhada ||
+              rascunho.compartilhamentos.length > 0) &&
             " · compartilhado"}
         </span>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-6 w-6">
-              <MoreHorizontal className="h-3.5 w-3.5" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {ehDono && (
-              <>
-                <div className="px-2 py-1.5 text-xs text-muted-foreground">
-                  Cor
-                </div>
-                <div className="flex items-center gap-1 px-2 pb-1.5">
-                  {CORES.map((c) => (
-                    <button
-                      key={c}
-                      type="button"
-                      onClick={() =>
-                        atualizar.mutate({
-                          id: rascunho.id,
-                          patch: { cor: c },
-                        })
-                      }
-                      title={COR_RASCUNHO_LABEL[c]}
-                      className={cn(
-                        "h-5 w-5 rounded-full border",
-                        COR_RASCUNHO_SWATCH[c],
-                        rascunho.cor === c
-                          ? "ring-2 ring-foreground ring-offset-1 ring-offset-background"
-                          : "border-border",
-                      )}
-                    />
-                  ))}
-                </div>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onSelect={() => setShareOpen(true)}>
-                  <Share2 className="mr-2 h-3.5 w-3.5" />
-                  Compartilhar…
-                </DropdownMenuItem>
-              </>
-            )}
-            <DropdownMenuItem
-              onSelect={() => duplicar.mutate({ id: rascunho.id })}
+        {naLixeira && ehDono ? (
+          <div className="flex items-center gap-1">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-6 px-2 text-[11px]"
+              onClick={() => restaurar.mutate({ id: rascunho.id })}
+              title="Restaurar"
             >
-              <Copy className="mr-2 h-3.5 w-3.5" />
-              Duplicar
-            </DropdownMenuItem>
-            {ehDono && (
-              <>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="text-destructive focus:text-destructive"
-                  onSelect={() => {
-                    if (confirm("Excluir este rascunho?"))
-                      excluir.mutate({ id: rascunho.id });
-                  }}
-                >
-                  <Trash2 className="mr-2 h-3.5 w-3.5" />
-                  Excluir
-                </DropdownMenuItem>
-              </>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <RotateCcw className="mr-1 h-3 w-3" />
+              Restaurar
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6 text-destructive hover:text-destructive"
+              onClick={() => {
+                if (
+                  confirm(
+                    "Excluir definitivamente? Esta ação não pode ser desfeita.",
+                  )
+                )
+                  excluirDef.mutate({ id: rascunho.id });
+              }}
+              title="Excluir definitivamente"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        ) : (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-6 w-6">
+                <MoreHorizontal className="h-3.5 w-3.5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {ehDono && (
+                <>
+                  <div className="px-2 py-1.5 text-xs text-muted-foreground">
+                    Cor
+                  </div>
+                  <div className="flex items-center gap-1 px-2 pb-1.5">
+                    {CORES.map((c) => (
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() =>
+                          atualizar.mutate({
+                            id: rascunho.id,
+                            patch: { cor: c },
+                          })
+                        }
+                        title={COR_RASCUNHO_LABEL[c]}
+                        className={cn(
+                          "h-5 w-5 rounded-full border",
+                          COR_RASCUNHO_SWATCH[c],
+                          rascunho.cor === c
+                            ? "ring-2 ring-foreground ring-offset-1 ring-offset-background"
+                            : "border-border",
+                        )}
+                      />
+                    ))}
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onSelect={() => setShareOpen(true)}>
+                    <Share2 className="mr-2 h-3.5 w-3.5" />
+                    Compartilhar…
+                  </DropdownMenuItem>
+                </>
+              )}
+              <DropdownMenuItem
+                onSelect={() => duplicar.mutate({ id: rascunho.id })}
+              >
+                <Copy className="mr-2 h-3.5 w-3.5" />
+                Duplicar
+              </DropdownMenuItem>
+              {ehDono && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    className="text-destructive focus:text-destructive"
+                    onSelect={() => {
+                      if (confirm("Mover este rascunho para a Lixeira?"))
+                        excluir.mutate({ id: rascunho.id });
+                    }}
+                  >
+                    <Trash2 className="mr-2 h-3.5 w-3.5" />
+                    Mover para Lixeira
+                  </DropdownMenuItem>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
       {ehDono && (
         <CompartilharDialog

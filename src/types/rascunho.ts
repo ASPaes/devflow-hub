@@ -22,6 +22,8 @@ export type Rascunho = {
   demanda_id?: string | null;
   created_at: string;
   updated_at: string;
+  deleted_at?: string | null;
+  deleted_by?: string | null;
 };
 
 export type RascunhoCompartilhamento = {
