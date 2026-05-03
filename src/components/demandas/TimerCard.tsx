@@ -1,6 +1,11 @@
 import * as React from "react";
 import { Clock, Hand, History, Pause, Pencil, Play, Plus, Trash2 } from "lucide-react";
 
+import { PausarComAjusteDialog } from "./PausarComAjusteDialog";
+import { distribuirTempoEntreDoisDias } from "@/lib/timer";
+
+const LIMITE_AVISO_SEGUNDOS = 5 * 60 * 60;
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
