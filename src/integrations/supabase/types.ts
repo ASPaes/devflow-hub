@@ -1070,6 +1070,44 @@ export type Database = {
           },
         ]
       }
+      rascunho_imagens: {
+        Row: {
+          created_at: string
+          id: string
+          nome_original: string | null
+          ordem: number
+          rascunho_id: string
+          storage_path: string
+          tamanho_bytes: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          nome_original?: string | null
+          ordem?: number
+          rascunho_id: string
+          storage_path: string
+          tamanho_bytes?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          nome_original?: string | null
+          ordem?: number
+          rascunho_id?: string
+          storage_path?: string
+          tamanho_bytes?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rascunho_imagens_rascunho_id_fkey"
+            columns: ["rascunho_id"]
+            isOneToOne: false
+            referencedRelation: "rascunhos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rascunhos: {
         Row: {
           autor_id: string
@@ -1686,6 +1724,14 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      excluir_imagem_rascunho: {
+        Args: { p_imagem_id: string }
+        Returns: undefined
+      }
+      excluir_rascunho_definitivo: {
+        Args: { p_rascunho_id: string }
+        Returns: undefined
+      }
       excluir_retorno_demanda: {
         Args: { p_retorno_id: string }
         Returns: undefined
@@ -1781,6 +1827,29 @@ export type Database = {
       mark_cobranca_skipped: {
         Args: { p_id: string; p_reason: string }
         Returns: undefined
+      }
+      mover_rascunho_lixeira: {
+        Args: { p_rascunho_id: string }
+        Returns: {
+          autor_id: string
+          compartilhada: boolean
+          conteudo_texto: string | null
+          cor: Database["public"]["Enums"]["cor_rascunho"]
+          created_at: string
+          deleted_at: string | null
+          deleted_by: string | null
+          fixada: boolean
+          id: string
+          tipo: Database["public"]["Enums"]["tipo_rascunho"]
+          titulo: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "rascunhos"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       pausar_timer_demanda: {
         Args: { p_demanda_id: string }
@@ -1897,6 +1966,29 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "demandas"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      restaurar_rascunho: {
+        Args: { p_rascunho_id: string }
+        Returns: {
+          autor_id: string
+          compartilhada: boolean
+          conteudo_texto: string | null
+          cor: Database["public"]["Enums"]["cor_rascunho"]
+          created_at: string
+          deleted_at: string | null
+          deleted_by: string | null
+          fixada: boolean
+          id: string
+          tipo: Database["public"]["Enums"]["tipo_rascunho"]
+          titulo: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "rascunhos"
           isOneToOne: true
           isSetofReturn: false
         }
