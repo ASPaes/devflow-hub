@@ -173,13 +173,11 @@ export function useAtualizarRascunho() {
 
 export function useExcluirRascunho() {
   const qc = useQueryClient();
-  const { user } = useAuth();
   return useMutation<void, Error, { id: string }>({
     mutationFn: async ({ id }) => {
-      const { error } = await supabase
-        .from("rascunhos")
-        .update({ deleted_at: new Date().toISOString(), deleted_by: user?.id ?? null })
-        .eq("id", id);
+      const { error } = await supabase.rpc("mover_rascunho_lixeira", {
+        p_rascunho_id: id,
+      });
       if (error) throw error;
     },
     onSuccess: () => {
@@ -194,10 +192,9 @@ export function useRestaurarRascunho() {
   const qc = useQueryClient();
   return useMutation<void, Error, { id: string }>({
     mutationFn: async ({ id }) => {
-      const { error } = await supabase
-        .from("rascunhos")
-        .update({ deleted_at: null, deleted_by: null })
-        .eq("id", id);
+      const { error } = await supabase.rpc("restaurar_rascunho", {
+        p_rascunho_id: id,
+      });
       if (error) throw error;
     },
     onSuccess: () => {
