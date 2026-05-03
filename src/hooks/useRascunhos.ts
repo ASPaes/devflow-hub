@@ -12,10 +12,10 @@ import type {
 
 type Filtro = "meus" | "compartilhados" | "todos" | "lixeira";
 
-export function useRascunhos(filtro: Filtro = "todos") {
+export function useRascunhos(filtro: Filtro = "todos", busca = "") {
   const { user } = useAuth();
   return useQuery({
-    queryKey: ["rascunhos", filtro, user?.id],
+    queryKey: ["rascunhos", filtro, busca, user?.id],
     queryFn: async () => {
       let q = supabase
         .from("rascunhos")
