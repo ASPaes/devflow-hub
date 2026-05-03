@@ -186,29 +186,31 @@ export function TimerCard({ demanda, isResponsavel }: TimerCardProps) {
                         {formatHMFromSegundos(row.segundos)}
                       </span>
 
-                      {isManual && podeInserirManual && (
+                      {podeInserirManual && (
                         <span className="flex items-center gap-0.5">
                           <Button
                             type="button"
                             variant="ghost"
                             size="icon"
                             className="h-6 w-6 text-muted-foreground hover:text-foreground"
-                            title="Editar"
+                            title="Editar tempo"
                             onClick={() => abrirEditar(row)}
                           >
                             <Pencil className="h-3 w-3" />
                           </Button>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6 text-muted-foreground hover:text-destructive"
-                            title="Excluir"
-                            onClick={() => confirmarExcluir(row)}
-                            disabled={excluirManual.isPending}
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
+                          {isManual && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                              title="Excluir"
+                              onClick={() => confirmarExcluir(row)}
+                              disabled={excluirManual.isPending}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          )}
                         </span>
                       )}
                     </li>
