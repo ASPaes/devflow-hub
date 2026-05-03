@@ -49,6 +49,7 @@ import {
 import { cn } from "@/lib/utils";
 import { formatRelativeSP } from "@/lib/format";
 import { CompartilharDialog } from "./CompartilharDialog";
+import { RascunhoGaleria } from "./RascunhoGaleria";
 
 const CORES: CorRascunho[] = ["cinza", "verde", "azul", "amarelo", "vermelho"];
 
@@ -189,6 +190,12 @@ function CardConteudo({
           </Button>
         )}
       </div>
+
+      <RascunhoGaleria
+        rascunhoId={rascunho.id}
+        ehDono={ehDono && !naLixeira}
+        expandido={expandido}
+      />
 
       {rascunho.tipo === "texto" ? (
         <Textarea

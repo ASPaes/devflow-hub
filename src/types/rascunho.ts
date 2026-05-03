@@ -1,6 +1,16 @@
 export type TipoRascunho = "texto" | "checklist";
 export type CorRascunho = "cinza" | "verde" | "azul" | "amarelo" | "vermelho";
 
+export type RascunhoImagem = {
+  id: string;
+  rascunho_id: string;
+  ordem: number;
+  storage_path: string;
+  nome_original: string | null;
+  tamanho_bytes: number | null;
+  created_at: string;
+};
+
 export type RascunhoChecklistItem = {
   id: string;
   rascunho_id: string;

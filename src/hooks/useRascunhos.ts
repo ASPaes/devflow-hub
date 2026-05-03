@@ -12,10 +12,10 @@ import type {
 
 type Filtro = "meus" | "compartilhados" | "todos" | "lixeira";
 
-export function useRascunhos(filtro: Filtro = "todos") {
+export function useRascunhos(filtro: Filtro = "todos", busca = "") {
   const { user } = useAuth();
   return useQuery({
-    queryKey: ["rascunhos", filtro, user?.id],
+    queryKey: ["rascunhos", filtro, busca, user?.id],
     queryFn: async () => {
       let q = supabase
         .from("rascunhos")
@@ -40,6 +40,14 @@ export function useRascunhos(filtro: Filtro = "todos") {
         if (filtro === "meus" && user?.id) q = q.eq("autor_id", user.id);
         if (filtro === "compartilhados" && user?.id)
           q = q.neq("autor_id", user.id);
+      }
+
+      const termo = busca.trim();
+      if (termo.length > 0) {
+        const safe = termo.replace(/[%,()]/g, " ");
+        q = q.or(
+          `titulo.ilike.%${safe}%,conteudo_texto.ilike.%${safe}%`,
+        );
       }
 
       const { data, error } = await q;
@@ -165,13 +173,11 @@ export function useAtualizarRascunho() {
 
 export function useExcluirRascunho() {
   const qc = useQueryClient();
-  const { user } = useAuth();
   return useMutation<void, Error, { id: string }>({
     mutationFn: async ({ id }) => {
-      const { error } = await supabase
-        .from("rascunhos")
-        .update({ deleted_at: new Date().toISOString(), deleted_by: user?.id ?? null })
-        .eq("id", id);
+      const { error } = await supabase.rpc("mover_rascunho_lixeira", {
+        p_rascunho_id: id,
+      });
       if (error) throw error;
     },
     onSuccess: () => {
@@ -186,10 +192,9 @@ export function useRestaurarRascunho() {
   const qc = useQueryClient();
   return useMutation<void, Error, { id: string }>({
     mutationFn: async ({ id }) => {
-      const { error } = await supabase
-        .from("rascunhos")
-        .update({ deleted_at: null, deleted_by: null })
-        .eq("id", id);
+      const { error } = await supabase.rpc("restaurar_rascunho", {
+        p_rascunho_id: id,
+      });
       if (error) throw error;
     },
     onSuccess: () => {
@@ -204,7 +209,9 @@ export function useExcluirRascunhoDefinitivo() {
   const qc = useQueryClient();
   return useMutation<void, Error, { id: string }>({
     mutationFn: async ({ id }) => {
-      const { error } = await supabase.from("rascunhos").delete().eq("id", id);
+      const { error } = await supabase.rpc("excluir_rascunho_definitivo", {
+        p_rascunho_id: id,
+      });
       if (error) throw error;
     },
     onSuccess: () => {
