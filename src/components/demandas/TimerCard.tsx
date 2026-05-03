@@ -65,6 +65,37 @@ export function TimerCard({ demanda, isResponsavel }: TimerCardProps) {
   const [logEditando, setLogEditando] = React.useState<TimerLogRow | null>(
     null,
   );
+  const [ajusteOpen, setAjusteOpen] = React.useState(false);
+  const [dadosAjuste, setDadosAjuste] = React.useState<{
+    segundosTotais: number;
+    distribuicao: Array<{ data: string; segundos: number }>;
+  } | null>(null);
+
+  const handleClickPausar = () => {
+    if (!demanda.timer_iniciado_em) {
+      pausarMutation.mutate(demanda.id);
+      return;
+    }
+    const inicio = new Date(demanda.timer_iniciado_em);
+    const agora = new Date();
+    const segundosSessao = Math.floor(
+      (agora.getTime() - inicio.getTime()) / 1000,
+    );
+    if (segundosSessao <= LIMITE_AVISO_SEGUNDOS) {
+      pausarMutation.mutate(demanda.id);
+      return;
+    }
+    setDadosAjuste({
+      segundosTotais: segundosSessao,
+      distribuicao: distribuirTempoEntreDoisDias(inicio, agora),
+    });
+    setAjusteOpen(true);
+  };
+
+  const handleConfirmarNormal = () => {
+    setAjusteOpen(false);
+    pausarMutation.mutate(demanda.id);
+  };
 
   const abrirCriar = () => {
     setLogEditando(null);
