@@ -263,6 +263,17 @@ export function TimerCard({ demanda, isResponsavel }: TimerCardProps) {
           onOpenChange={setFormOpen}
           logExistente={logEditando}
         />
+
+        {dadosAjuste && (
+          <PausarComAjusteDialog
+            open={ajusteOpen}
+            onOpenChange={setAjusteOpen}
+            demandaId={demanda.id}
+            segundosTotais={dadosAjuste.segundosTotais}
+            distribuicao={dadosAjuste.distribuicao}
+            onConfirmarNormal={handleConfirmarNormal}
+          />
+        )}
       </div>
 
       {/* Cards lado a lado */}
