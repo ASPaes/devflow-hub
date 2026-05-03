@@ -209,7 +209,9 @@ export function useExcluirRascunhoDefinitivo() {
   const qc = useQueryClient();
   return useMutation<void, Error, { id: string }>({
     mutationFn: async ({ id }) => {
-      const { error } = await supabase.from("rascunhos").delete().eq("id", id);
+      const { error } = await supabase.rpc("excluir_rascunho_definitivo", {
+        p_rascunho_id: id,
+      });
       if (error) throw error;
     },
     onSuccess: () => {
