@@ -1851,6 +1851,45 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      pausar_timer_com_ajuste: {
+        Args: { p_ajustes: Json; p_demanda_id: string }
+        Returns: {
+          area_id: string | null
+          closed_at: string | null
+          codigo: string | null
+          created_at: string
+          deadline: string | null
+          delete_motivo: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          delivered_at: string | null
+          descricao: string
+          dev_deadline: string | null
+          estimativa_horas: number | null
+          id: string
+          modulo_id: string
+          prioridade: number
+          produto_id: string | null
+          reopen_deadline: string | null
+          responsavel_id: string | null
+          solicitante_id: string
+          status: Database["public"]["Enums"]["status_demanda"]
+          submodulo_id: string
+          tempo_em_andamento_segundos: number
+          tempo_realizado_segundos: number
+          tenant_id: string
+          timer_iniciado_em: string | null
+          tipo: Database["public"]["Enums"]["tipo_demanda"]
+          titulo: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "demandas"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       pausar_timer_demanda: {
         Args: { p_demanda_id: string }
         Returns: {
