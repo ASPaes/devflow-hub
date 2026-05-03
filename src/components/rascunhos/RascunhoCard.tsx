@@ -191,6 +191,12 @@ function CardConteudo({
         )}
       </div>
 
+      <RascunhoGaleria
+        rascunhoId={rascunho.id}
+        ehDono={ehDono && !naLixeira}
+        expandido={expandido}
+      />
+
       {rascunho.tipo === "texto" ? (
         <Textarea
           value={texto}
