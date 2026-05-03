@@ -42,6 +42,14 @@ export function useRascunhos(filtro: Filtro = "todos", busca = "") {
           q = q.neq("autor_id", user.id);
       }
 
+      const termo = busca.trim();
+      if (termo.length > 0) {
+        const safe = termo.replace(/[%,()]/g, " ");
+        q = q.or(
+          `titulo.ilike.%${safe}%,conteudo_texto.ilike.%${safe}%`,
+        );
+      }
+
       const { data, error } = await q;
       if (error) throw error;
       return (data ?? []).map((r: any) => ({
