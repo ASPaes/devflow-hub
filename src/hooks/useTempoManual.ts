@@ -60,6 +60,31 @@ export function useAtualizarTempoManual(demandaId: string) {
   });
 }
 
+export function usePausarTimerComAjuste() {
+  const qc = useQueryClient();
+  return useMutation<
+    void,
+    Error,
+    { demandaId: string; ajustes: Array<{ data: string; segundos: number }> }
+  >({
+    mutationFn: async ({ demandaId, ajustes }) => {
+      const { error } = await supabase.rpc("pausar_timer_com_ajuste", {
+        p_demanda_id: demandaId,
+        p_ajustes: ajustes,
+      });
+      if (error) throw error;
+    },
+    onSuccess: (_d, vars) => {
+      qc.invalidateQueries({ queryKey: ["demandas"] });
+      qc.invalidateQueries({ queryKey: ["demanda"] });
+      qc.invalidateQueries({ queryKey: ["timer-log", vars.demandaId] });
+      qc.invalidateQueries({ queryKey: ["dashboard-metrics"] });
+      toast.success("Timer pausado com tempo ajustado");
+    },
+    onError: (err) => toast.error(err.message || "Erro ao ajustar tempo"),
+  });
+}
+
 export function useExcluirTempoManual(demandaId: string) {
   const qc = useQueryClient();
   return useMutation<void, Error, string>({

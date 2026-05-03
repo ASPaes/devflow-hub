@@ -1,6 +1,11 @@
 import * as React from "react";
 import { Clock, Hand, History, Pause, Pencil, Play, Plus, Trash2 } from "lucide-react";
 
+import { PausarComAjusteDialog } from "./PausarComAjusteDialog";
+import { distribuirTempoEntreDoisDias } from "@/lib/timer";
+
+const LIMITE_AVISO_SEGUNDOS = 5 * 60 * 60;
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -60,6 +65,37 @@ export function TimerCard({ demanda, isResponsavel }: TimerCardProps) {
   const [logEditando, setLogEditando] = React.useState<TimerLogRow | null>(
     null,
   );
+  const [ajusteOpen, setAjusteOpen] = React.useState(false);
+  const [dadosAjuste, setDadosAjuste] = React.useState<{
+    segundosTotais: number;
+    distribuicao: Array<{ data: string; segundos: number }>;
+  } | null>(null);
+
+  const handleClickPausar = () => {
+    if (!demanda.timer_iniciado_em) {
+      pausarMutation.mutate(demanda.id);
+      return;
+    }
+    const inicio = new Date(demanda.timer_iniciado_em);
+    const agora = new Date();
+    const segundosSessao = Math.floor(
+      (agora.getTime() - inicio.getTime()) / 1000,
+    );
+    if (segundosSessao <= LIMITE_AVISO_SEGUNDOS) {
+      pausarMutation.mutate(demanda.id);
+      return;
+    }
+    setDadosAjuste({
+      segundosTotais: segundosSessao,
+      distribuicao: distribuirTempoEntreDoisDias(inicio, agora),
+    });
+    setAjusteOpen(true);
+  };
+
+  const handleConfirmarNormal = () => {
+    setAjusteOpen(false);
+    pausarMutation.mutate(demanda.id);
+  };
 
   const abrirCriar = () => {
     setLogEditando(null);
@@ -186,29 +222,31 @@ export function TimerCard({ demanda, isResponsavel }: TimerCardProps) {
                         {formatHMFromSegundos(row.segundos)}
                       </span>
 
-                      {isManual && podeInserirManual && (
+                      {podeInserirManual && (
                         <span className="flex items-center gap-0.5">
                           <Button
                             type="button"
                             variant="ghost"
                             size="icon"
                             className="h-6 w-6 text-muted-foreground hover:text-foreground"
-                            title="Editar"
+                            title="Editar tempo"
                             onClick={() => abrirEditar(row)}
                           >
                             <Pencil className="h-3 w-3" />
                           </Button>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6 text-muted-foreground hover:text-destructive"
-                            title="Excluir"
-                            onClick={() => confirmarExcluir(row)}
-                            disabled={excluirManual.isPending}
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
+                          {isManual && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                              title="Excluir"
+                              onClick={() => confirmarExcluir(row)}
+                              disabled={excluirManual.isPending}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          )}
                         </span>
                       )}
                     </li>
@@ -225,6 +263,17 @@ export function TimerCard({ demanda, isResponsavel }: TimerCardProps) {
           onOpenChange={setFormOpen}
           logExistente={logEditando}
         />
+
+        {dadosAjuste && (
+          <PausarComAjusteDialog
+            open={ajusteOpen}
+            onOpenChange={setAjusteOpen}
+            demandaId={demanda.id}
+            segundosTotais={dadosAjuste.segundosTotais}
+            distribuicao={dadosAjuste.distribuicao}
+            onConfirmarNormal={handleConfirmarNormal}
+          />
+        )}
       </div>
 
       {/* Cards lado a lado */}
@@ -270,7 +319,7 @@ export function TimerCard({ demanda, isResponsavel }: TimerCardProps) {
                     variant="outline"
                     className="w-full"
                     disabled={!podeOperar || operando}
-                    onClick={() => pausarMutation.mutate(demanda.id)}
+                    onClick={handleClickPausar}
                   >
                     <Pause className="mr-1.5 h-3.5 w-3.5" />
                     Pausar
