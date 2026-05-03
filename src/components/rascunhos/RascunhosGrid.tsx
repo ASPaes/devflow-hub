@@ -32,9 +32,11 @@ export function RascunhosGrid({
   if (rascunhos.length === 0) {
     return (
       <div className="rounded-lg border border-dashed border-border bg-card/50 p-12 text-center text-sm text-muted-foreground">
-        {naLixeira
-          ? "A Lixeira está vazia."
-          : "Nenhum rascunho ainda. Crie um acima."}
+        {temBusca
+          ? "Nada encontrado para essa busca."
+          : naLixeira
+            ? "A Lixeira está vazia."
+            : "Nenhum rascunho ainda. Crie um acima."}
       </div>
     );
   }
