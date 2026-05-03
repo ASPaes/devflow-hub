@@ -5,9 +5,16 @@ import type { RascunhoComItens } from "@/types/rascunho";
 
 type Filtro = "meus" | "compartilhados" | "todos" | "lixeira";
 
-export function RascunhosGrid({ filtro = "todos" }: { filtro?: Filtro }) {
-  const { data: rascunhos = [], isLoading } = useRascunhos(filtro);
+export function RascunhosGrid({
+  filtro = "todos",
+  busca = "",
+}: {
+  filtro?: Filtro;
+  busca?: string;
+}) {
+  const { data: rascunhos = [], isLoading } = useRascunhos(filtro, busca);
   const naLixeira = filtro === "lixeira";
+  const temBusca = busca.trim().length > 0;
 
   if (isLoading) {
     return (
