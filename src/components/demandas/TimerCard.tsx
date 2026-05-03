@@ -308,7 +308,7 @@ export function TimerCard({ demanda, isResponsavel }: TimerCardProps) {
                     variant="outline"
                     className="w-full"
                     disabled={!podeOperar || operando}
-                    onClick={() => pausarMutation.mutate(demanda.id)}
+                    onClick={handleClickPausar}
                   >
                     <Pause className="mr-1.5 h-3.5 w-3.5" />
                     Pausar
