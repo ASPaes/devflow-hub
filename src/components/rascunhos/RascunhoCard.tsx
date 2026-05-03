@@ -49,6 +49,7 @@ import {
 import { cn } from "@/lib/utils";
 import { formatRelativeSP } from "@/lib/format";
 import { CompartilharDialog } from "./CompartilharDialog";
+import { RascunhoGaleria } from "./RascunhoGaleria";
 
 const CORES: CorRascunho[] = ["cinza", "verde", "azul", "amarelo", "vermelho"];
 
