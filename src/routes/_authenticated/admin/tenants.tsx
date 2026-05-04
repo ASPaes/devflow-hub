@@ -304,3 +304,80 @@ function TenantFields({ form }: { form: UseFormReturn<TenantInput> }) {
     </>
   );
 }
+
+function TenantLogoUpload({
+  tenant,
+}: {
+  tenant: { id: string; nome: string; logo_url: string | null };
+}) {
+  const upload = useUploadTenantLogo();
+  const remover = useRemoverTenantLogo();
+  const inputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    if (f.size > 2 * 1024 * 1024) {
+      toast.error("Logo maior que 2MB");
+      e.target.value = "";
+      return;
+    }
+    upload.mutate({ tenantId: tenant.id, arquivo: f });
+    e.target.value = "";
+  };
+
+  return (
+    <div className="space-y-2">
+      <label className="text-sm font-medium">Logo</label>
+      <div className="flex items-center gap-4">
+        <TenantLogo
+          nome={tenant.nome}
+          logoUrl={tenant.logo_url}
+          size="lg"
+        />
+        <div className="flex flex-col gap-2">
+          <input
+            ref={inputRef}
+            type="file"
+            accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml"
+            className="hidden"
+            onChange={handleFile}
+          />
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => inputRef.current?.click()}
+              disabled={upload.isPending}
+            >
+              <Upload className="mr-2 h-3.5 w-3.5" />
+              {tenant.logo_url ? "Trocar" : "Enviar"}
+            </Button>
+            {tenant.logo_url && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  if (window.confirm("Remover logo?")) {
+                    remover.mutate({
+                      tenantId: tenant.id,
+                      logoUrl: tenant.logo_url!,
+                    });
+                  }
+                }}
+                disabled={remover.isPending}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            PNG, JPG, SVG, WEBP ou GIF até 2MB.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
