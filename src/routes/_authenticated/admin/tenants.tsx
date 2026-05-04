@@ -77,7 +77,7 @@ function TenantsPage() {
       key: "logo",
       header: "",
       render: (row) => (
-        <TenantLogo nome={row.nome} logoUrl={row.logo_url} size="md" />
+        <TenantLogo nome={row.nome} logoUrl={row.logo_url} updatedAt={row.updated_at} size="md" />
       ),
     },
     {
