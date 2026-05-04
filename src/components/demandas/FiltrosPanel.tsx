@@ -238,6 +238,8 @@ export function FiltrosPanel({
         </SelectContent>
       </Select>
 
+      {extraFilters}
+
       {hasFiltros && (
         <Button
           variant="ghost"
