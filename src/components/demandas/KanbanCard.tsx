@@ -2,12 +2,14 @@ import * as React from "react";
 import { Link2, MessageSquare, Paperclip } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { TenantLogo } from "@/components/ui/TenantLogo";
 import { cn, initials } from "@/lib/utils";
 import {
   PRIORIDADE_LABEL_CURTA,
   TIPO_DEMANDA_LABEL,
   type DemandaListaRow,
 } from "@/hooks/useDemandas";
+import { useTenants } from "@/hooks/useTenants";
 import { PRIORIDADE_BADGE_STYLES } from "@/components/demandas/MetadataSidebar";
 
 interface KanbanCardProps {
