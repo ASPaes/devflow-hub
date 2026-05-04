@@ -25,6 +25,12 @@ import {
   KanbanBoard,
   STATUS_NO_BOARD,
 } from "@/components/demandas/KanbanBoard";
+import { useDashboardFilters } from "@/contexts/DashboardFiltersContext";
+import { useTenants } from "@/hooks/useTenants";
+import {
+  MultiSelectFilter,
+  type FilterOption,
+} from "@/components/dashboard/MultiSelectFilter";
 
 const kanbanSearchSchema = z.object({
   status: fallback(z.array(z.enum(STATUS_DEMANDA_VALUES)), []).default([]),
@@ -53,10 +59,23 @@ function KanbanPage() {
   const { temPermissao } = useProfile();
   useDocumentTitle("Kanban");
 
+  const {
+    filtros: filtrosCompartilhados,
+    setFiltros: setFiltrosCompartilhados,
+  } = useDashboardFilters();
+
+  const { data: tenantsData = [] } = useTenants();
+  const tenantOptions: FilterOption<string>[] = React.useMemo(
+    () =>
+      tenantsData
+        .filter((t) => t.ativo)
+        .map((t) => ({ value: t.id, label: t.nome })),
+    [tenantsData],
+  );
+
   const filtrosState: FiltrosState = React.useMemo(
     () => ({
       busca: search.busca,
-      // No Kanban, status é controlado pelo board, mas mantemos no state pra compatibilidade
       status: search.status,
       prioridade: search.prioridade,
       tipo: search.tipo,
@@ -71,7 +90,6 @@ function KanbanPage() {
 
   const filtrosQuery: FiltrosDemanda = React.useMemo(() => {
     const f: FiltrosDemanda = {
-      // Restringe ao que cabe no board (ignora encerrada/cancelada)
       status: STATUS_NO_BOARD,
     };
     if (filtrosState.prioridade.length) f.prioridade = filtrosState.prioridade;
@@ -83,9 +101,12 @@ function KanbanPage() {
     } else if (filtrosState.responsavel_id) {
       f.responsavel_id = filtrosState.responsavel_id;
     }
+    if (filtrosCompartilhados.tenant_id.length > 0) {
+      f.tenant_ids = filtrosCompartilhados.tenant_id;
+    }
     if (buscaDebounced.trim()) f.busca = buscaDebounced.trim();
     return f;
-  }, [filtrosState, buscaDebounced]);
+  }, [filtrosState, buscaDebounced, filtrosCompartilhados.tenant_id]);
 
   const { data: rows = [], isLoading } = useDemandasLista(filtrosQuery);
 
@@ -112,7 +133,21 @@ function KanbanPage() {
       },
       replace: true,
     });
-  }, [navigate]);
+    setFiltrosCompartilhados({
+      ...filtrosCompartilhados,
+      tenant_id: [],
+    });
+  }, [navigate, setFiltrosCompartilhados, filtrosCompartilhados]);
+
+  const setTenantIds = React.useCallback(
+    (values: string[]) => {
+      setFiltrosCompartilhados({
+        ...filtrosCompartilhados,
+        tenant_id: values,
+      });
+    },
+    [filtrosCompartilhados, setFiltrosCompartilhados],
+  );
 
   const podeCriar = temPermissao("criar_demanda");
 
@@ -141,6 +176,14 @@ function KanbanPage() {
         onChange={setPatch}
         onClear={limpar}
         hideStatus
+        extraFilters={
+          <MultiSelectFilter
+            label="Empresa"
+            options={tenantOptions}
+            selected={filtrosCompartilhados.tenant_id}
+            onChange={setTenantIds}
+          />
+        }
       />
 
       <KanbanBoard
