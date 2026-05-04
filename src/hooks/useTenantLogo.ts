@@ -26,7 +26,10 @@ export function useUploadTenantLogo() {
 
       const { error: errUpdate } = await supabase
         .from("tenants")
-        .update({ logo_url: path })
+        .update({
+          logo_url: path,
+          updated_at: new Date().toISOString(),
+        })
         .eq("id", tenantId);
       if (errUpdate) throw errUpdate;
 
