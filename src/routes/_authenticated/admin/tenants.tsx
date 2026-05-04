@@ -1,7 +1,14 @@
 import * as React from "react";
 import type { UseFormReturn } from "react-hook-form";
 import { createFileRoute } from "@tanstack/react-router";
-import { Building, Plus } from "lucide-react";
+import { Building, Plus, Trash2, Upload } from "lucide-react";
+import { toast } from "sonner";
+
+import { TenantLogo } from "@/components/ui/TenantLogo";
+import {
+  useRemoverTenantLogo,
+  useUploadTenantLogo,
+} from "@/hooks/useTenantLogo";
 
 import { PageHeader } from "@/components/common/PageHeader";
 import { EmptyState } from "@/components/common/EmptyState";
@@ -66,6 +73,13 @@ function TenantsPage() {
   }, [editing]);
 
   const columns: DataTableColumn<Tenant>[] = [
+    {
+      key: "logo",
+      header: "",
+      render: (row) => (
+        <TenantLogo nome={row.nome} logoUrl={row.logo_url} size="md" />
+      ),
+    },
     {
       key: "nome",
       header: "Nome",
