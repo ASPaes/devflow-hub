@@ -256,3 +256,21 @@ function ActivityCount({ icon: Icon, count }: ActivityCountProps) {
     </span>
   );
 }
+
+function TenantLogoCell({
+  tenantId,
+  tenantNome,
+}: {
+  tenantId: string;
+  tenantNome: string | null;
+}) {
+  const { data: tenants } = useTenants();
+  const tenant = tenants?.find((t) => t.id === tenantId);
+  return (
+    <TenantLogo
+      nome={tenant?.nome ?? tenantNome}
+      logoUrl={tenant?.logo_url}
+      size="sm"
+    />
+  );
+}
