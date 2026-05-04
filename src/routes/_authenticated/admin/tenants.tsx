@@ -194,7 +194,12 @@ function TenantsPage() {
           await updateMut.mutateAsync({ id: editing.id, input: values });
         }}
       >
-        {(form) => <TenantFields form={form} />}
+        {(form) => (
+          <>
+            {editing && <TenantLogoUpload tenant={editing} />}
+            <TenantFields form={form} />
+          </>
+        )}
       </ModalForm>
 
       <ConfirmDialog
