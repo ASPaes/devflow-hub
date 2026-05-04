@@ -333,6 +333,7 @@ function TenantLogoUpload({
         <TenantLogo
           nome={tenant.nome}
           logoUrl={tenant.logo_url}
+          updatedAt={tenant.updated_at}
           size="lg"
         />
         <div className="flex flex-col gap-2">
