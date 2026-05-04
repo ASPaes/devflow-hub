@@ -42,7 +42,12 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string | undefined;
  */
 export function getTenantLogoPublicUrl(
   logoPath: string | null | undefined,
+  updatedAt?: string | null,
 ): string | null {
   if (!logoPath || !SUPABASE_URL) return null;
-  return `${SUPABASE_URL}/storage/v1/object/public/tenant-logos/${logoPath}`;
+  const baseUrl = `${SUPABASE_URL}/storage/v1/object/public/tenant-logos/${logoPath}`;
+  if (!updatedAt) return baseUrl;
+  const versao = new Date(updatedAt).getTime();
+  if (Number.isNaN(versao)) return baseUrl;
+  return `${baseUrl}?v=${versao}`;
 }
