@@ -1220,6 +1220,7 @@ export type Database = {
           descricao: string | null
           doctorsaas_tenant_id: string | null
           id: string
+          logo_url: string | null
           nome: string
           updated_at: string
         }
@@ -1229,6 +1230,7 @@ export type Database = {
           descricao?: string | null
           doctorsaas_tenant_id?: string | null
           id?: string
+          logo_url?: string | null
           nome: string
           updated_at?: string
         }
@@ -1238,6 +1240,7 @@ export type Database = {
           descricao?: string | null
           doctorsaas_tenant_id?: string | null
           id?: string
+          logo_url?: string | null
           nome?: string
           updated_at?: string
         }

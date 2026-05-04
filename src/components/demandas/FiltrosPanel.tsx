@@ -54,6 +54,8 @@ interface FiltrosPanelProps {
   onClear: () => void;
   /** Esconde o dropdown de Status (usado no Kanban, onde status é o board). */
   hideStatus?: boolean;
+  /** Filtros extras renderizados ao lado dos filtros padrão. */
+  extraFilters?: React.ReactNode;
 }
 
 export function FiltrosPanel({
@@ -61,6 +63,7 @@ export function FiltrosPanel({
   onChange,
   onClear,
   hideStatus,
+  extraFilters,
 }: FiltrosPanelProps) {
   const modulosQuery = useModulos();
   
@@ -234,6 +237,8 @@ export function FiltrosPanel({
           ))}
         </SelectContent>
       </Select>
+
+      {extraFilters}
 
       {hasFiltros && (
         <Button

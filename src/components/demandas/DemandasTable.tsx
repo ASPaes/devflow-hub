@@ -2,6 +2,8 @@ import * as React from "react";
 import { Link2, MessageSquare, Paperclip } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { TenantLogo } from "@/components/ui/TenantLogo";
+import { useTenants } from "@/hooks/useTenants";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn, initials } from "@/lib/utils";
@@ -172,9 +174,19 @@ function DemandaRow({ row, onClick }: DemandaRowProps) {
         </span>
       </td>
       <td className="px-4 py-3 align-middle">
-        <span className="text-xs text-muted-foreground">
-          {row.tenant_nome ?? "—"}
-        </span>
+        {row.tenant_id ? (
+          <div className="flex items-center gap-2">
+            <TenantLogoCell
+              tenantId={row.tenant_id}
+              tenantNome={row.tenant_nome}
+            />
+            <span className="truncate text-xs text-foreground">
+              {row.tenant_nome ?? "—"}
+            </span>
+          </div>
+        ) : (
+          <span className="text-xs text-muted-foreground">—</span>
+        )}
       </td>
       <td className="px-4 py-3 align-middle">
         {row.solicitante_id ? (
@@ -242,5 +254,23 @@ function ActivityCount({ icon: Icon, count }: ActivityCountProps) {
       <Icon className="h-3 w-3" />
       {n}
     </span>
+  );
+}
+
+function TenantLogoCell({
+  tenantId,
+  tenantNome,
+}: {
+  tenantId: string;
+  tenantNome: string | null;
+}) {
+  const { data: tenants } = useTenants();
+  const tenant = tenants?.find((t) => t.id === tenantId);
+  return (
+    <TenantLogo
+      nome={tenant?.nome ?? tenantNome}
+      logoUrl={tenant?.logo_url}
+      size="sm"
+    />
   );
 }

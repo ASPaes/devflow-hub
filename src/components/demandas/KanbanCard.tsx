@@ -2,12 +2,14 @@ import * as React from "react";
 import { Link2, MessageSquare, Paperclip } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { TenantLogo } from "@/components/ui/TenantLogo";
 import { cn, initials } from "@/lib/utils";
 import {
   PRIORIDADE_LABEL_CURTA,
   TIPO_DEMANDA_LABEL,
   type DemandaListaRow,
 } from "@/hooks/useDemandas";
+import { useTenants } from "@/hooks/useTenants";
 import { PRIORIDADE_BADGE_STYLES } from "@/components/demandas/MetadataSidebar";
 
 interface KanbanCardProps {
@@ -27,6 +29,12 @@ export function KanbanCard({ row, onClick }: KanbanCardProps) {
     [onClick, row],
   );
 
+  const { data: tenants } = useTenants();
+  const tenant = React.useMemo(
+    () => tenants?.find((t) => t.id === row.tenant_id),
+    [tenants, row.tenant_id],
+  );
+
   const prioridade = (row.prioridade ?? 3) as 1 | 2 | 3 | 4 | 5;
   const tipo = row.tipo ?? "tarefa";
   const totalC = row.total_comentarios ?? 0;
@@ -41,12 +49,19 @@ export function KanbanCard({ row, onClick }: KanbanCardProps) {
       onKeyDown={handleKey}
       className="group cursor-pointer rounded-lg border border-border bg-card p-3 outline-none transition-colors hover:border-primary/40 hover:bg-secondary/30 focus-visible:border-primary/40 focus-visible:bg-secondary/30"
     >
-      {/* Linha 1: código + prioridade + tipo */}
+      {/* Linha 1: código + logo + prioridade + tipo */}
       <div className="flex items-center justify-between gap-2">
         <span className="font-mono text-[11px] text-muted-foreground">
           {row.codigo}
         </span>
         <div className="flex items-center gap-1.5">
+          {row.tenant_id && (
+            <TenantLogo
+              nome={tenant?.nome ?? row.tenant_nome}
+              logoUrl={tenant?.logo_url}
+              size="sm"
+            />
+          )}
           <span
             className={cn(
               "inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-semibold",
@@ -102,13 +117,6 @@ export function KanbanCard({ row, onClick }: KanbanCardProps) {
           </div>
         )}
 
-        {/* Empresa */}
-        {row.tenant_nome && (
-          <div className="flex items-center gap-1.5 text-xs">
-            <span className="shrink-0 text-muted-foreground">Empresa:</span>
-            <span className="truncate text-foreground">{row.tenant_nome}</span>
-          </div>
-        )}
 
         {/* Dev + contadores */}
         <div className="flex items-center justify-between gap-2 text-xs">
