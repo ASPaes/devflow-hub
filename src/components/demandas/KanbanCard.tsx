@@ -29,6 +29,12 @@ export function KanbanCard({ row, onClick }: KanbanCardProps) {
     [onClick, row],
   );
 
+  const { data: tenants } = useTenants();
+  const tenant = React.useMemo(
+    () => tenants?.find((t) => t.id === row.tenant_id),
+    [tenants, row.tenant_id],
+  );
+
   const prioridade = (row.prioridade ?? 3) as 1 | 2 | 3 | 4 | 5;
   const tipo = row.tipo ?? "tarefa";
   const totalC = row.total_comentarios ?? 0;
@@ -43,12 +49,19 @@ export function KanbanCard({ row, onClick }: KanbanCardProps) {
       onKeyDown={handleKey}
       className="group cursor-pointer rounded-lg border border-border bg-card p-3 outline-none transition-colors hover:border-primary/40 hover:bg-secondary/30 focus-visible:border-primary/40 focus-visible:bg-secondary/30"
     >
-      {/* Linha 1: código + prioridade + tipo */}
+      {/* Linha 1: código + logo + prioridade + tipo */}
       <div className="flex items-center justify-between gap-2">
         <span className="font-mono text-[11px] text-muted-foreground">
           {row.codigo}
         </span>
         <div className="flex items-center gap-1.5">
+          {row.tenant_id && (
+            <TenantLogo
+              nome={tenant?.nome ?? row.tenant_nome}
+              logoUrl={tenant?.logo_url}
+              size="sm"
+            />
+          )}
           <span
             className={cn(
               "inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-semibold",
