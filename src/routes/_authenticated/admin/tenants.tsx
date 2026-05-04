@@ -308,7 +308,7 @@ function TenantFields({ form }: { form: UseFormReturn<TenantInput> }) {
 function TenantLogoUpload({
   tenant,
 }: {
-  tenant: { id: string; nome: string; logo_url: string | null };
+  tenant: { id: string; nome: string; logo_url: string | null; updated_at?: string | null };
 }) {
   const upload = useUploadTenantLogo();
   const remover = useRemoverTenantLogo();
