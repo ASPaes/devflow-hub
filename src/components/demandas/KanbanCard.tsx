@@ -117,13 +117,6 @@ export function KanbanCard({ row, onClick }: KanbanCardProps) {
           </div>
         )}
 
-        {/* Empresa */}
-        {row.tenant_nome && (
-          <div className="flex items-center gap-1.5 text-xs">
-            <span className="shrink-0 text-muted-foreground">Empresa:</span>
-            <span className="truncate text-foreground">{row.tenant_nome}</span>
-          </div>
-        )}
 
         {/* Dev + contadores */}
         <div className="flex items-center justify-between gap-2 text-xs">
