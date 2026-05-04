@@ -77,7 +77,7 @@ function TenantsPage() {
       key: "logo",
       header: "",
       render: (row) => (
-        <TenantLogo nome={row.nome} logoUrl={row.logo_url} size="md" />
+        <TenantLogo nome={row.nome} logoUrl={row.logo_url} updatedAt={row.updated_at} size="md" />
       ),
     },
     {
@@ -308,7 +308,7 @@ function TenantFields({ form }: { form: UseFormReturn<TenantInput> }) {
 function TenantLogoUpload({
   tenant,
 }: {
-  tenant: { id: string; nome: string; logo_url: string | null };
+  tenant: { id: string; nome: string; logo_url: string | null; updated_at?: string | null };
 }) {
   const upload = useUploadTenantLogo();
   const remover = useRemoverTenantLogo();
@@ -333,6 +333,7 @@ function TenantLogoUpload({
         <TenantLogo
           nome={tenant.nome}
           logoUrl={tenant.logo_url}
+          updatedAt={tenant.updated_at}
           size="lg"
         />
         <div className="flex flex-col gap-2">

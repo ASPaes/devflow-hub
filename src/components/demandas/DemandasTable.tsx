@@ -270,6 +270,7 @@ function TenantLogoCell({
     <TenantLogo
       nome={tenant?.nome ?? tenantNome}
       logoUrl={tenant?.logo_url}
+      updatedAt={tenant?.updated_at}
       size="sm"
     />
   );

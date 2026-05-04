@@ -9,6 +9,7 @@ import {
 interface TenantLogoProps {
   nome: string | null | undefined;
   logoUrl?: string | null;
+  updatedAt?: string | null;
   size?: "sm" | "md" | "lg";
   className?: string;
 }
@@ -22,6 +23,7 @@ const SIZES = {
 export function TenantLogo({
   nome,
   logoUrl,
+  updatedAt,
   size = "md",
   className,
 }: TenantLogoProps) {
@@ -30,9 +32,9 @@ export function TenantLogo({
   // Reset error if logoUrl changes
   React.useEffect(() => {
     setImageError(false);
-  }, [logoUrl]);
+  }, [logoUrl, updatedAt]);
 
-  const url = getTenantLogoPublicUrl(logoUrl);
+  const url = getTenantLogoPublicUrl(logoUrl, updatedAt);
   const showImage = !!url && !imageError;
   const sizes = SIZES[size];
 

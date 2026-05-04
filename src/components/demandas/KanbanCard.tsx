@@ -59,6 +59,7 @@ export function KanbanCard({ row, onClick }: KanbanCardProps) {
             <TenantLogo
               nome={tenant?.nome ?? row.tenant_nome}
               logoUrl={tenant?.logo_url}
+              updatedAt={tenant?.updated_at}
               size="sm"
             />
           )}
