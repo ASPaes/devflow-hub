@@ -1973,6 +1973,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      recalcular_tenant_demandas_user: {
+        Args: { p_user_id: string }
+        Returns: number
+      }
       restaurar_demanda: {
         Args: { p_demanda_id: string }
         Returns: {

@@ -44,6 +44,8 @@ import {
   PRIORIDADE_LABEL_CURTA,
   PROXIMOS_STATUS,
   STATUS_DEMANDA_LABEL,
+  TIPO_DEMANDA_LABEL,
+  TIPO_DEMANDA_VALUES,
   TRANSICAO_LABEL,
   type DemandaCompleta,
   type StatusDemanda,
@@ -547,6 +549,35 @@ function ClassificacaoEditor({
 
   return (
     <div className="space-y-3">
+      <div className="space-y-1">
+        <label className="text-xs text-muted-foreground">Tipo</label>
+        {canEdit ? (
+          <Select
+            value={demanda.tipo}
+            onValueChange={(v) => {
+              if (v === demanda.tipo) return;
+              void onPatch({ tipo: v as (typeof TIPO_DEMANDA_VALUES)[number] });
+            }}
+            disabled={disabled}
+          >
+            <SelectTrigger className="h-8 text-sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {TIPO_DEMANDA_VALUES.map((t) => (
+                <SelectItem key={t} value={t}>
+                  {TIPO_DEMANDA_LABEL[t]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        ) : (
+          <Badge variant="outline" className="font-normal">
+            {TIPO_DEMANDA_LABEL[demanda.tipo]}
+          </Badge>
+        )}
+      </div>
+
       <div className="space-y-1">
         <label className="text-xs text-muted-foreground">Produto</label>
         {podeAlterarProduto ? (

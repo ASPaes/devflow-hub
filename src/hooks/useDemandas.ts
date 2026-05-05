@@ -61,6 +61,7 @@ export type UpdateDemandaPatch = Partial<
     | "submodulo_id"
     | "area_id"
     | "produto_id"
+    | "tipo"
   >
 >;
 
