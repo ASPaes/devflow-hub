@@ -51,6 +51,8 @@ import {
   TipoBadge,
 } from "@/components/demandas/MetadataSidebar";
 import { ExcluirDemandaDialog } from "@/components/demandas/ExcluirDemandaDialog";
+import { GerarPromptIADialog } from "@/components/demandas/GerarPromptIADialog";
+import { Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/demandas/$codigo")({
   component: DemandaDetalhe,
