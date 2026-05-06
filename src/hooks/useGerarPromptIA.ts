@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 
@@ -11,6 +11,7 @@ interface GerarPromptResponse {
 }
 
 export function useGerarPromptIA() {
+  const qc = useQueryClient();
   return useMutation<GerarPromptResponse, Error, { demandaId: string }>({
     mutationFn: async ({ demandaId }) => {
       const { data, error } = await supabase.functions.invoke(
@@ -29,6 +30,9 @@ export function useGerarPromptIA() {
       }
       return data as GerarPromptResponse;
     },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["demanda"] });
+    },
     onError: (err) => {
       const m = err.message || "";
       if (m.includes("permissão") || m.includes("403")) {
@@ -38,6 +42,22 @@ export function useGerarPromptIA() {
       } else {
         toast.error(`Erro ao gerar prompt: ${m}`);
       }
+    },
+  });
+}
+
+export function useSalvarPromptIA() {
+  const qc = useQueryClient();
+  return useMutation<void, Error, { demandaId: string; prompt: string }>({
+    mutationFn: async ({ demandaId, prompt }) => {
+      const { error } = await supabase.rpc("salvar_prompt_ia_demanda", {
+        p_demanda_id: demandaId,
+        p_prompt: prompt,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["demanda"] });
     },
   });
 }
