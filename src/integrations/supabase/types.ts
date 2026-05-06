@@ -611,6 +611,8 @@ export type Database = {
           modulo_id: string
           prioridade: number
           produto_id: string | null
+          prompt_ia: string | null
+          prompt_ia_atualizado_em: string | null
           reopen_deadline: string | null
           responsavel_id: string | null
           solicitante_id: string
@@ -641,6 +643,8 @@ export type Database = {
           modulo_id: string
           prioridade: number
           produto_id?: string | null
+          prompt_ia?: string | null
+          prompt_ia_atualizado_em?: string | null
           reopen_deadline?: string | null
           responsavel_id?: string | null
           solicitante_id: string
@@ -671,6 +675,8 @@ export type Database = {
           modulo_id?: string
           prioridade?: number
           produto_id?: string | null
+          prompt_ia?: string | null
+          prompt_ia_atualizado_em?: string | null
           reopen_deadline?: string | null
           responsavel_id?: string | null
           solicitante_id?: string
@@ -1707,6 +1713,8 @@ export type Database = {
           modulo_id: string
           prioridade: number
           produto_id: string | null
+          prompt_ia: string | null
+          prompt_ia_atualizado_em: string | null
           reopen_deadline: string | null
           responsavel_id: string | null
           solicitante_id: string
@@ -1762,6 +1770,8 @@ export type Database = {
           modulo_id: string
           prioridade: number
           produto_id: string | null
+          prompt_ia: string | null
+          prompt_ia_atualizado_em: string | null
           reopen_deadline: string | null
           responsavel_id: string | null
           solicitante_id: string
@@ -1874,6 +1884,8 @@ export type Database = {
           modulo_id: string
           prioridade: number
           produto_id: string | null
+          prompt_ia: string | null
+          prompt_ia_atualizado_em: string | null
           reopen_deadline: string | null
           responsavel_id: string | null
           solicitante_id: string
@@ -1913,6 +1925,8 @@ export type Database = {
           modulo_id: string
           prioridade: number
           produto_id: string | null
+          prompt_ia: string | null
+          prompt_ia_atualizado_em: string | null
           reopen_deadline: string | null
           responsavel_id: string | null
           solicitante_id: string
@@ -1954,6 +1968,8 @@ export type Database = {
           modulo_id: string
           prioridade: number
           produto_id: string | null
+          prompt_ia: string | null
+          prompt_ia_atualizado_em: string | null
           reopen_deadline: string | null
           responsavel_id: string | null
           solicitante_id: string
@@ -1997,6 +2013,8 @@ export type Database = {
           modulo_id: string
           prioridade: number
           produto_id: string | null
+          prompt_ia: string | null
+          prompt_ia_atualizado_em: string | null
           reopen_deadline: string | null
           responsavel_id: string | null
           solicitante_id: string
@@ -2039,6 +2057,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      salvar_prompt_ia_demanda: {
+        Args: { p_demanda_id: string; p_prompt: string }
+        Returns: undefined
       }
       set_perfil_padrao_novos_usuarios: {
         Args: { p_perfil_id: string }
