@@ -5,7 +5,7 @@ import {
   notFound,
   useNavigate,
 } from "@tanstack/react-router";
-import { ChevronDown, ChevronLeft, ChevronUp, FileQuestion, Link as LinkIcon, MoreHorizontal, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronUp, FileQuestion, Link as LinkIcon, MoreHorizontal, Sparkles, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -52,7 +52,6 @@ import {
 } from "@/components/demandas/MetadataSidebar";
 import { ExcluirDemandaDialog } from "@/components/demandas/ExcluirDemandaDialog";
 import { GerarPromptIADialog } from "@/components/demandas/GerarPromptIADialog";
-import { Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/demandas/$codigo")({
   component: DemandaDetalhe,
