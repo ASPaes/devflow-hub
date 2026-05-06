@@ -226,6 +226,8 @@ function DemandaDetalhe() {
           onOpenChange={setIaDialogOpen}
           demandaId={demanda.id}
           demandaCodigo={demanda.codigo ?? codigo}
+          promptInicial={demanda.prompt_ia}
+          promptAtualizadoEm={demanda.prompt_ia_atualizado_em}
         />
       )}
     </div>
