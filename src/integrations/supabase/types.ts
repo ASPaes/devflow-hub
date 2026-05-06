@@ -1854,6 +1854,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      obter_contexto_demanda: { Args: { p_demanda_id: string }; Returns: Json }
       pausar_timer_com_ajuste: {
         Args: { p_ajustes: Json; p_demanda_id: string }
         Returns: {

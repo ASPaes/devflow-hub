@@ -5,7 +5,7 @@ import {
   notFound,
   useNavigate,
 } from "@tanstack/react-router";
-import { ChevronDown, ChevronLeft, ChevronUp, FileQuestion, Link as LinkIcon, MoreHorizontal, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronUp, FileQuestion, Link as LinkIcon, MoreHorizontal, Sparkles, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -51,6 +51,7 @@ import {
   TipoBadge,
 } from "@/components/demandas/MetadataSidebar";
 import { ExcluirDemandaDialog } from "@/components/demandas/ExcluirDemandaDialog";
+import { GerarPromptIADialog } from "@/components/demandas/GerarPromptIADialog";
 
 export const Route = createFileRoute("/_authenticated/demandas/$codigo")({
   component: DemandaDetalhe,
@@ -64,6 +65,7 @@ function DemandaDetalhe() {
   const { data: demanda, isLoading, error } = useDemanda(codigo);
   const updateMutation = useUpdateDemanda();
   const [excluirOpen, setExcluirOpen] = React.useState(false);
+  const [iaDialogOpen, setIaDialogOpen] = React.useState(false);
 
   useDocumentTitle(
     demanda ? `${demanda.codigo ?? codigo} · ${demanda.titulo}` : codigo,
@@ -119,7 +121,18 @@ function DemandaDetalhe() {
               </span>
               <TipoBadge>{TIPO_DEMANDA_LABEL[demanda.tipo]}</TipoBadge>
               <StatusBadge status={demanda.status} />
-              <div className="ml-auto">
+              <div className="ml-auto flex items-center gap-2">
+                {canEditAny && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIaDialogOpen(true)}
+                    className="gap-1.5"
+                  >
+                    <Sparkles className="h-3.5 w-3.5 text-purple-500" />
+                    Gerar prompt IA
+                  </Button>
+                )}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -204,6 +217,15 @@ function DemandaDetalhe() {
           demandaCodigo={demanda.codigo ?? codigo}
           open={excluirOpen}
           onOpenChange={setExcluirOpen}
+        />
+      )}
+
+      {canEditAny && (
+        <GerarPromptIADialog
+          open={iaDialogOpen}
+          onOpenChange={setIaDialogOpen}
+          demandaId={demanda.id}
+          demandaCodigo={demanda.codigo ?? codigo}
         />
       )}
     </div>
