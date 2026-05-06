@@ -11,13 +11,15 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Sparkles, Copy, Loader2, Check } from "lucide-react";
 import { toast } from "sonner";
-import { useGerarPromptIA } from "@/hooks/useGerarPromptIA";
+import { useGerarPromptIA, useSalvarPromptIA } from "@/hooks/useGerarPromptIA";
 
 interface GerarPromptIADialogProps {
   open: boolean;
   onOpenChange: (o: boolean) => void;
   demandaId: string;
   demandaCodigo: string;
+  promptInicial?: string | null;
+  promptAtualizadoEm?: string | null;
 }
 
 export function GerarPromptIADialog({
@@ -25,25 +27,59 @@ export function GerarPromptIADialog({
   onOpenChange,
   demandaId,
   demandaCodigo,
+  promptInicial,
+  promptAtualizadoEm,
 }: GerarPromptIADialogProps) {
   const gerar = useGerarPromptIA();
-  const [prompt, setPrompt] = React.useState("");
+  const salvar = useSalvarPromptIA();
+  const [prompt, setPrompt] = React.useState(promptInicial ?? "");
   const [usage, setUsage] = React.useState<{ input: number; output: number } | null>(null);
   const [copiado, setCopiado] = React.useState(false);
+  const [statusSalvo, setStatusSalvo] = React.useState<"idle" | "salvando" | "salvo">("idle");
 
   React.useEffect(() => {
     if (open) {
-      setPrompt("");
+      setPrompt(promptInicial ?? "");
       setUsage(null);
       setCopiado(false);
+      setStatusSalvo("idle");
     }
-  }, [open]);
+  }, [open, promptInicial]);
+
+  const debounceTimerRef = React.useRef<number | null>(null);
+
+  React.useEffect(() => {
+    if (!open) return;
+    if (prompt === (promptInicial ?? "")) return;
+    if (!prompt.trim()) return;
+
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    setStatusSalvo("salvando");
+    debounceTimerRef.current = window.setTimeout(async () => {
+      try {
+        await salvar.mutateAsync({ demandaId, prompt });
+        setStatusSalvo("salvo");
+        setTimeout(() => setStatusSalvo("idle"), 2000);
+      } catch {
+        setStatusSalvo("idle");
+      }
+    }, 1000);
+
+    return () => {
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    };
+  }, [prompt, open, promptInicial, demandaId, salvar]);
 
   const handleGerar = async () => {
     try {
       const res = await gerar.mutateAsync({ demandaId });
       setPrompt(res.prompt);
       setUsage({ input: res.usage.input_tokens, output: res.usage.output_tokens });
+      setStatusSalvo("salvo");
+      setTimeout(() => setStatusSalvo("idle"), 2000);
     } catch {
       // toast via hook
     }
@@ -59,6 +95,16 @@ export function GerarPromptIADialog({
     } catch {
       toast.error("Erro ao copiar");
     }
+  };
+
+  const formatarDataPequena = (iso: string) => {
+    const d = new Date(iso);
+    return d.toLocaleString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   };
 
   return (
@@ -105,19 +151,29 @@ export function GerarPromptIADialog({
             <div className="flex flex-col flex-1 gap-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs text-muted-foreground">
-                  Prompt gerado. Você pode editar antes de copiar.
+                  {promptAtualizadoEm
+                    ? `Salvo em ${formatarDataPequena(promptAtualizadoEm)}`
+                    : "Prompt gerado"}
                 </span>
-                {usage && (
-                  <span className="text-xs text-muted-foreground">
-                    {usage.input + usage.output} tokens
-                  </span>
-                )}
+                <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                  {statusSalvo === "salvando" && (
+                    <span className="flex items-center gap-1">
+                      <Loader2 className="h-3 w-3 animate-spin" /> Salvando...
+                    </span>
+                  )}
+                  {statusSalvo === "salvo" && (
+                    <span className="flex items-center gap-1 text-green-600">
+                      <Check className="h-3 w-3" /> Salvo
+                    </span>
+                  )}
+                  {usage && <span>{usage.input + usage.output} tokens</span>}
+                </div>
               </div>
               <Textarea
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 className="flex-1 min-h-[300px] font-mono text-xs resize-none"
-                placeholder="Prompt aparecerá aqui após geração..."
+                placeholder="Prompt aparecerá aqui..."
               />
             </div>
           )}
@@ -128,7 +184,15 @@ export function GerarPromptIADialog({
             <>
               <Button
                 variant="outline"
-                onClick={handleGerar}
+                onClick={() => {
+                  if (
+                    confirm(
+                      "Gerar novo prompt vai sobrescrever o atual. Continuar?",
+                    )
+                  ) {
+                    void handleGerar();
+                  }
+                }}
                 disabled={gerar.isPending}
               >
                 <Sparkles className="h-3.5 w-3.5 mr-1.5" />
