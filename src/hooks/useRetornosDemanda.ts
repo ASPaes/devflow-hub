@@ -62,10 +62,16 @@ export function useCriarRetorno() {
         throw new Error("Informe um texto ou uma mídia");
       }
 
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error("Não autenticado");
+
       const { data: criado, error: errInsert } = await supabase
         .from("demanda_retornos")
         .insert({
           demanda_id: demandaId,
+          autor_id: user.id,
           texto: temTexto ? texto!.trim() : null,
           midia_tipo: temMidia ? tipo! : null,
         })
