@@ -1599,6 +1599,7 @@ export type Database = {
           descricao: string | null
           dev_deadline: string | null
           estimativa_horas: number | null
+          foi_reaberta: boolean | null
           id: string | null
           modulo_cor: string | null
           modulo_id: string | null
@@ -1622,6 +1623,7 @@ export type Database = {
           titulo: string | null
           total_anexos: number | null
           total_comentarios: number | null
+          total_reaberturas: number | null
           total_vinculos: number | null
           updated_at: string | null
         }
