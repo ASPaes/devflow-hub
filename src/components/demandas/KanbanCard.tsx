@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Link2, MessageSquare, Paperclip } from "lucide-react";
+import { Link2, MessageSquare, Paperclip, Undo2 } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { TenantLogo } from "@/components/ui/TenantLogo";
@@ -75,6 +75,17 @@ export function KanbanCard({ row, onClick }: KanbanCardProps) {
           <span className="text-xs" title={TIPO_DEMANDA_LABEL[tipo]} aria-hidden>
             {TIPO_DEMANDA_LABEL[tipo].split(" ")[0]}
           </span>
+          {row.foi_reaberta && (
+            <span
+              className="inline-flex items-center gap-1 rounded border border-amber-500/30 bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-medium text-amber-300"
+              title={`Reaberta ${row.total_reaberturas ?? 1}x`}
+            >
+              <Undo2 className="h-2.5 w-2.5" />
+              {(row.total_reaberturas ?? 1) > 1
+                ? `Reaberta ${row.total_reaberturas}x`
+                : "Reaberta"}
+            </span>
+          )}
         </div>
       </div>
 
