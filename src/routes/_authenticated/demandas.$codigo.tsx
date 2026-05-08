@@ -40,6 +40,7 @@ import { ComentariosSecao } from "@/components/demandas/ComentariosSecao";
 import { TimelineHistorico } from "@/components/demandas/TimelineHistorico";
 import { VinculosSecao } from "@/components/demandas/VinculosSecao";
 import { ReaberturaBanner } from "@/components/demandas/ReaberturaBanner";
+import { ReabrirDemandaButton } from "@/components/demandas/ReabrirDemandaButton";
 import { DemandaReabertaBadge } from "@/components/demandas/DemandaReabertaBadge";
 import { RetornosTab } from "@/components/demandas/RetornosTab";
 import { useComentarios } from "@/hooks/useComentarios";
@@ -152,6 +153,7 @@ function DemandaDetalhe() {
               <TipoBadge>{TIPO_DEMANDA_LABEL[demanda.tipo]}</TipoBadge>
               <StatusBadge status={demanda.status} />
               <div className="ml-auto flex items-center gap-2">
+                <ReabrirDemandaButton demanda={demanda} isOwner={isOwner} />
                 {canEditAny && (
                   <Button
                     variant="outline"
