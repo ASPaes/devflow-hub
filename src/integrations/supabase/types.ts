@@ -608,6 +608,7 @@ export type Database = {
           dev_deadline: string | null
           estimativa_horas: number | null
           id: string
+          incluir_release: boolean
           modulo_id: string
           prioridade: number
           produto_id: string | null
@@ -640,6 +641,7 @@ export type Database = {
           dev_deadline?: string | null
           estimativa_horas?: number | null
           id?: string
+          incluir_release?: boolean
           modulo_id: string
           prioridade: number
           produto_id?: string | null
@@ -672,6 +674,7 @@ export type Database = {
           dev_deadline?: string | null
           estimativa_horas?: number | null
           id?: string
+          incluir_release?: boolean
           modulo_id?: string
           prioridade?: number
           produto_id?: string | null
@@ -1181,6 +1184,112 @@ export type Database = {
           },
         ]
       }
+      releases: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          data_publicacao: string | null
+          demanda_id: string
+          id: string
+          published_at: string | null
+          published_by: string | null
+          resumo: string
+          tipo_release: Database["public"]["Enums"]["tipo_release"]
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          data_publicacao?: string | null
+          demanda_id: string
+          id?: string
+          published_at?: string | null
+          published_by?: string | null
+          resumo: string
+          tipo_release: Database["public"]["Enums"]["tipo_release"]
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          data_publicacao?: string | null
+          demanda_id?: string
+          id?: string
+          published_at?: string | null
+          published_by?: string | null
+          resumo?: string
+          tipo_release?: Database["public"]["Enums"]["tipo_release"]
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "releases_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "releases_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "vw_potenciais_responsaveis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "releases_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "vw_solicitantes_por_empresa"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "releases_demanda_id_fkey"
+            columns: ["demanda_id"]
+            isOneToOne: true
+            referencedRelation: "demandas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "releases_demanda_id_fkey"
+            columns: ["demanda_id"]
+            isOneToOne: true
+            referencedRelation: "vw_demandas_excluidas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "releases_demanda_id_fkey"
+            columns: ["demanda_id"]
+            isOneToOne: true
+            referencedRelation: "vw_demandas_lista"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "releases_published_by_fkey"
+            columns: ["published_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "releases_published_by_fkey"
+            columns: ["published_by"]
+            isOneToOne: false
+            referencedRelation: "vw_potenciais_responsaveis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "releases_published_by_fkey"
+            columns: ["published_by"]
+            isOneToOne: false
+            referencedRelation: "vw_solicitantes_por_empresa"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       submodulos: {
         Row: {
           ativo: boolean
@@ -1551,6 +1660,42 @@ export type Database = {
           },
         ]
       }
+      vw_releases_publicadas: {
+        Row: {
+          data_publicacao: string | null
+          demanda_codigo: string | null
+          demanda_id: string | null
+          id: string | null
+          published_at: string | null
+          published_by_nome: string | null
+          resumo: string | null
+          tipo_release: Database["public"]["Enums"]["tipo_release"] | null
+          titulo: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "releases_demanda_id_fkey"
+            columns: ["demanda_id"]
+            isOneToOne: true
+            referencedRelation: "demandas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "releases_demanda_id_fkey"
+            columns: ["demanda_id"]
+            isOneToOne: true
+            referencedRelation: "vw_demandas_excluidas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "releases_demanda_id_fkey"
+            columns: ["demanda_id"]
+            isOneToOne: true
+            referencedRelation: "vw_demandas_lista"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vw_solicitantes_por_empresa: {
         Row: {
           avatar_url: string | null
@@ -1650,6 +1795,28 @@ export type Database = {
         Returns: Json
       }
       demanda_visivel: { Args: { p_demanda_id: string }; Returns: boolean }
+      despublicar_release: {
+        Args: { p_release_id: string }
+        Returns: {
+          created_at: string
+          created_by: string | null
+          data_publicacao: string | null
+          demanda_id: string
+          id: string
+          published_at: string | null
+          published_by: string | null
+          resumo: string
+          tipo_release: Database["public"]["Enums"]["tipo_release"]
+          titulo: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "releases"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       duplicar_rascunho: {
         Args: { p_rascunho_id: string }
         Returns: {
@@ -1710,6 +1877,7 @@ export type Database = {
           dev_deadline: string | null
           estimativa_horas: number | null
           id: string
+          incluir_release: boolean
           modulo_id: string
           prioridade: number
           produto_id: string | null
@@ -1767,6 +1935,7 @@ export type Database = {
           dev_deadline: string | null
           estimativa_horas: number | null
           id: string
+          incluir_release: boolean
           modulo_id: string
           prioridade: number
           produto_id: string | null
@@ -1829,6 +1998,10 @@ export type Database = {
           updated_at: string
         }[]
       }
+      marcar_incluir_release: {
+        Args: { p_demanda_id: string; p_incluir: boolean }
+        Returns: undefined
+      }
       mark_cobranca_failed: {
         Args: { p_error: string; p_id: string }
         Returns: undefined
@@ -1865,6 +2038,7 @@ export type Database = {
         }
       }
       obter_contexto_demanda: { Args: { p_demanda_id: string }; Returns: Json }
+      obter_contexto_release: { Args: { p_demanda_id: string }; Returns: Json }
       pausar_timer_com_ajuste: {
         Args: { p_ajustes: Json; p_demanda_id: string }
         Returns: {
@@ -1881,6 +2055,7 @@ export type Database = {
           dev_deadline: string | null
           estimativa_horas: number | null
           id: string
+          incluir_release: boolean
           modulo_id: string
           prioridade: number
           produto_id: string | null
@@ -1922,6 +2097,7 @@ export type Database = {
           dev_deadline: string | null
           estimativa_horas: number | null
           id: string
+          incluir_release: boolean
           modulo_id: string
           prioridade: number
           produto_id: string | null
@@ -1947,6 +2123,28 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      publicar_release: {
+        Args: { p_release_id: string }
+        Returns: {
+          created_at: string
+          created_by: string | null
+          data_publicacao: string | null
+          demanda_id: string
+          id: string
+          published_at: string | null
+          published_by: string | null
+          resumo: string
+          tipo_release: Database["public"]["Enums"]["tipo_release"]
+          titulo: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "releases"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       rascunho_acessivel: { Args: { p_rascunho_id: string }; Returns: boolean }
       rascunho_editavel: { Args: { p_rascunho_id: string }; Returns: boolean }
       reabrir_demanda: {
@@ -1965,6 +2163,7 @@ export type Database = {
           dev_deadline: string | null
           estimativa_horas: number | null
           id: string
+          incluir_release: boolean
           modulo_id: string
           prioridade: number
           produto_id: string | null
@@ -2010,6 +2209,7 @@ export type Database = {
           dev_deadline: string | null
           estimativa_horas: number | null
           id: string
+          incluir_release: boolean
           modulo_id: string
           prioridade: number
           produto_id: string | null
@@ -2062,6 +2262,33 @@ export type Database = {
         Args: { p_demanda_id: string; p_prompt: string }
         Returns: undefined
       }
+      salvar_rascunho_release: {
+        Args: {
+          p_demanda_id: string
+          p_resumo: string
+          p_tipo_release: Database["public"]["Enums"]["tipo_release"]
+          p_titulo: string
+        }
+        Returns: {
+          created_at: string
+          created_by: string | null
+          data_publicacao: string | null
+          demanda_id: string
+          id: string
+          published_at: string | null
+          published_by: string | null
+          resumo: string
+          tipo_release: Database["public"]["Enums"]["tipo_release"]
+          titulo: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "releases"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       set_perfil_padrao_novos_usuarios: {
         Args: { p_perfil_id: string }
         Returns: undefined
@@ -2090,6 +2317,7 @@ export type Database = {
         | "alterar_produto_demanda"
         | "inserir_tempo_manual"
         | "criar_retorno_demanda"
+        | "gerenciar_releases"
       cor_rascunho: "cinza" | "verde" | "azul" | "amarelo" | "vermelho"
       status_demanda:
         | "triagem"
@@ -2110,6 +2338,12 @@ export type Database = {
         | "tarefa"
       tipo_midia_retorno: "imagem" | "video" | "audio"
       tipo_rascunho: "texto" | "checklist"
+      tipo_release:
+        | "erro"
+        | "melhoria"
+        | "nova_funcionalidade"
+        | "duvida"
+        | "tarefa"
       tipo_vinculo: "depende_de" | "bloqueia" | "relacionada" | "duplicada"
     }
     CompositeTypes: {
@@ -2256,6 +2490,7 @@ export const Constants = {
         "alterar_produto_demanda",
         "inserir_tempo_manual",
         "criar_retorno_demanda",
+        "gerenciar_releases",
       ],
       cor_rascunho: ["cinza", "verde", "azul", "amarelo", "vermelho"],
       status_demanda: [
@@ -2279,6 +2514,13 @@ export const Constants = {
       ],
       tipo_midia_retorno: ["imagem", "video", "audio"],
       tipo_rascunho: ["texto", "checklist"],
+      tipo_release: [
+        "erro",
+        "melhoria",
+        "nova_funcionalidade",
+        "duvida",
+        "tarefa",
+      ],
       tipo_vinculo: ["depende_de", "bloqueia", "relacionada", "duplicada"],
     },
   },
