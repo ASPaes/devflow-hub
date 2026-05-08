@@ -303,11 +303,7 @@ export function KanbanBoard({ rows, isLoading, onCardClick }: KanbanBoardProps) 
       },
       {
         onSuccess: () => {
-          if (
-            novoStatus === "entregue" &&
-            podeGerenciarReleases &&
-            !demanda.incluir_release
-          ) {
+          if (novoStatus === "entregue" && podeGerenciarReleases) {
             setReleaseDialog({
               id: demandaId,
               codigo: demanda.codigo ?? "",
