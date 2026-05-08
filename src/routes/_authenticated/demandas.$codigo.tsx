@@ -53,6 +53,9 @@ import {
 } from "@/components/demandas/MetadataSidebar";
 import { ExcluirDemandaDialog } from "@/components/demandas/ExcluirDemandaDialog";
 import { GerarPromptIADialog } from "@/components/demandas/GerarPromptIADialog";
+import { IncluirReleaseDialog } from "@/components/demandas/IncluirReleaseDialog";
+import { ReleaseTab } from "@/components/demandas/ReleaseTab";
+import { useReleaseDaDemanda } from "@/hooks/useReleases";
 
 export const Route = createFileRoute("/_authenticated/demandas/$codigo")({
   component: DemandaDetalhe,
@@ -67,6 +70,8 @@ function DemandaDetalhe() {
   const updateMutation = useUpdateDemanda();
   const [excluirOpen, setExcluirOpen] = React.useState(false);
   const [iaDialogOpen, setIaDialogOpen] = React.useState(false);
+  const [releaseDialogOpen, setReleaseDialogOpen] = React.useState(false);
+  const { data: releaseDaDemanda } = useReleaseDaDemanda(demanda?.id);
 
   useDocumentTitle(
     demanda ? `${demanda.codigo ?? codigo} · ${demanda.titulo}` : codigo,
@@ -94,8 +99,17 @@ function DemandaDetalhe() {
 
   const handlePatch = async (patch: UpdateDemandaPatch) => {
     await updateMutation.mutateAsync({ id: demanda.id, patch });
-    if ("status" in patch) toast.success("Status alterado");
-    else if ("responsavel_id" in patch) toast.success("Desenvolvedor atualizado");
+    if ("status" in patch) {
+      toast.success("Status alterado");
+      if (
+        patch.status === "entregue" &&
+        canEditAny &&
+        !demanda.incluir_release &&
+        !releaseDaDemanda
+      ) {
+        setReleaseDialogOpen(true);
+      }
+    } else if ("responsavel_id" in patch) toast.success("Desenvolvedor atualizado");
     else toast.success("Atualizado");
   };
 
@@ -195,9 +209,10 @@ function DemandaDetalhe() {
             />
           )}
 
-          {/* Tabs: Comentários | Histórico | Vínculos */}
+          {/* Tabs: Comentários | Retornos | Histórico | Vínculos | Releases */}
           <DetalheTabs
             demandaId={demanda.id}
+            demandaTipo={demanda.tipo}
             podeAdicionarVinculo={canEditAny || canEditOwnTriagem}
             podeRemoverVinculo={canEditAny}
           />
@@ -229,6 +244,19 @@ function DemandaDetalhe() {
           demandaCodigo={demanda.codigo ?? codigo}
           promptInicial={demanda.prompt_ia}
           promptAtualizadoEm={demanda.prompt_ia_atualizado_em}
+        />
+      )}
+
+      {canEditAny && (
+        <IncluirReleaseDialog
+          open={releaseDialogOpen}
+          onOpenChange={setReleaseDialogOpen}
+          demanda={{
+            id: demanda.id,
+            codigo: demanda.codigo ?? codigo,
+            titulo: demanda.titulo,
+            tipo: demanda.tipo,
+          }}
         />
       )}
     </div>
@@ -301,12 +329,14 @@ function DemandaNaoEncontrada() {
 
 interface DetalheTabsProps {
   demandaId: string;
+  demandaTipo: string;
   podeAdicionarVinculo: boolean;
   podeRemoverVinculo: boolean;
 }
 
 function DetalheTabs({
   demandaId,
+  demandaTipo,
   podeAdicionarVinculo,
   podeRemoverVinculo,
 }: DetalheTabsProps) {
@@ -334,6 +364,7 @@ function DetalheTabs({
             </span>
           )}
         </TabsTrigger>
+        <TabsTrigger value="releases">Releases</TabsTrigger>
       </TabsList>
       <TabsContent value="comentarios" className="mt-4">
         <ComentariosSecao demandaId={demandaId} />
@@ -350,6 +381,9 @@ function DetalheTabs({
           podeAdicionar={podeAdicionarVinculo}
           podeRemover={podeRemoverVinculo}
         />
+      </TabsContent>
+      <TabsContent value="releases" className="mt-4">
+        <ReleaseTab demandaId={demandaId} demandaTipo={demandaTipo} />
       </TabsContent>
     </Tabs>
   );

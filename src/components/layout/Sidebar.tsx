@@ -12,6 +12,7 @@ import {
   NotebookPen,
   Package2,
   PlusCircle,
+  Rocket,
   ShieldCheck,
   UserCircle,
   Users,
@@ -136,6 +137,7 @@ export function Sidebar() {
           )}
 
           <NavItem to="/rascunhos" icon={NotebookPen} label="Rascunhos" />
+          <NavItem to="/releases" icon={Rocket} label="Releases" />
 
           {mostraAdmin && (
             <>

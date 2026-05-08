@@ -117,6 +117,17 @@ const GROUPS: Group[] = [
     ],
   },
   {
+    label: "Releases",
+    items: [
+      {
+        key: "gerenciar_releases",
+        label: "Gerenciar releases",
+        description:
+          "Marcar demandas para release, editar rascunhos, publicar e despublicar releases",
+      },
+    ],
+  },
+  {
     label: "Métricas",
     items: [
       {

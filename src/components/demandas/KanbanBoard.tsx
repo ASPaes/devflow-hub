@@ -23,6 +23,7 @@ import {
 import { useProfile } from "@/hooks/useProfile";
 import { useMoverStatusDemanda } from "@/hooks/useMoverStatusDemanda";
 import { KanbanCard } from "@/components/demandas/KanbanCard";
+import { IncluirReleaseDialog } from "@/components/demandas/IncluirReleaseDialog";
 
 export type ColunaStatus =
   | "triagem"
@@ -176,8 +177,12 @@ function ColunaDroppable({
 export function KanbanBoard({ rows, isLoading, onCardClick }: KanbanBoardProps) {
   const { temPermissao } = useProfile();
   const podeMover = temPermissao("editar_qualquer_demanda");
+  const podeGerenciarReleases = temPermissao("gerenciar_releases");
   const mover = useMoverStatusDemanda();
   const [activeId, setActiveId] = React.useState<string | null>(null);
+  const [releaseDialog, setReleaseDialog] = React.useState<
+    { id: string; codigo: string; titulo: string; tipo: string } | null
+  >(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -290,11 +295,25 @@ export function KanbanBoard({ rows, isLoading, onCardClick }: KanbanBoardProps) 
       demanda.status === "reaberta" ? "triagem" : (demanda.status as ColunaStatus);
     if (colunaAtual === novoStatus) return;
 
-    mover.mutate({
-      demandaId,
-      novoStatus: novoStatus as StatusDemanda,
-      statusAnterior: demanda.status,
-    });
+    mover.mutate(
+      {
+        demandaId,
+        novoStatus: novoStatus as StatusDemanda,
+        statusAnterior: demanda.status,
+      },
+      {
+        onSuccess: () => {
+          if (novoStatus === "entregue" && podeGerenciarReleases) {
+            setReleaseDialog({
+              id: demandaId,
+              codigo: demanda.codigo ?? "",
+              titulo: demanda.titulo ?? "",
+              tipo: demanda.tipo ?? "tarefa",
+            });
+          }
+        },
+      },
+    );
   };
 
   const handleDragCancel = () => setActiveId(null);
@@ -336,6 +355,12 @@ export function KanbanBoard({ rows, isLoading, onCardClick }: KanbanBoardProps) 
           </div>
         ) : null}
       </DragOverlay>
+
+      <IncluirReleaseDialog
+        open={!!releaseDialog}
+        onOpenChange={(o) => !o && setReleaseDialog(null)}
+        demanda={releaseDialog}
+      />
     </DndContext>
   );
 }
