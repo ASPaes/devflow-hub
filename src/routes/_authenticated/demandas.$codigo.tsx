@@ -4,6 +4,7 @@ import {
   Link,
   notFound,
   useNavigate,
+  useRouter,
 } from "@tanstack/react-router";
 import { ChevronDown, ChevronLeft, ChevronUp, FileQuestion, Link as LinkIcon, MoreHorizontal, Sparkles, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -235,15 +236,24 @@ function DemandaDetalhe() {
 }
 
 function Breadcrumb({ codigo }: { codigo: string }) {
+  const router = useRouter();
+  const handleVoltar = () => {
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.history.back();
+    } else {
+      void router.navigate({ to: "/demandas" });
+    }
+  };
   return (
     <nav className="flex items-center gap-1 text-sm text-muted-foreground">
-      <Link
-        to="/demandas"
+      <button
+        type="button"
+        onClick={handleVoltar}
         className="inline-flex items-center gap-1 transition-colors hover:text-foreground"
       >
         <ChevronLeft className="h-3.5 w-3.5" />
         Demandas
-      </Link>
+      </button>
       <span>/</span>
       <span className="font-mono text-foreground">{codigo}</span>
     </nav>
