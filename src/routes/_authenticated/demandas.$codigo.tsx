@@ -153,6 +153,7 @@ function DemandaDetalhe() {
               <TipoBadge>{TIPO_DEMANDA_LABEL[demanda.tipo]}</TipoBadge>
               <StatusBadge status={demanda.status} />
               <div className="ml-auto flex items-center gap-2">
+                <ReabrirDemandaButton demanda={demanda} isOwner={isOwner} />
                 {canEditAny && (
                   <Button
                     variant="outline"
