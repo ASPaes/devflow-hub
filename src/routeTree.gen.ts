@@ -17,6 +17,7 @@ import { Route as CadastroRouteImport } from './routes/cadastro'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthConfirmRouteImport } from './routes/auth/confirm'
+import { Route as AuthenticatedReleasesRouteImport } from './routes/_authenticated/releases'
 import { Route as AuthenticatedRascunhosRouteImport } from './routes/_authenticated/rascunhos'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
@@ -71,6 +72,11 @@ const AuthConfirmRoute = AuthConfirmRouteImport.update({
   id: '/auth/confirm',
   path: '/auth/confirm',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedReleasesRoute = AuthenticatedReleasesRouteImport.update({
+  id: '/releases',
+  path: '/releases',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedRascunhosRoute = AuthenticatedRascunhosRouteImport.update({
   id: '/rascunhos',
@@ -169,6 +175,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/perfil': typeof AuthenticatedPerfilRoute
   '/rascunhos': typeof AuthenticatedRascunhosRoute
+  '/releases': typeof AuthenticatedReleasesRoute
   '/auth/confirm': typeof AuthConfirmRoute
   '/admin/areas': typeof AuthenticatedAdminAreasRoute
   '/admin/modulos': typeof AuthenticatedAdminModulosRoute
@@ -192,6 +199,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/perfil': typeof AuthenticatedPerfilRoute
   '/rascunhos': typeof AuthenticatedRascunhosRoute
+  '/releases': typeof AuthenticatedReleasesRoute
   '/auth/confirm': typeof AuthConfirmRoute
   '/': typeof AuthenticatedIndexRoute
   '/admin/areas': typeof AuthenticatedAdminAreasRoute
@@ -218,6 +226,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/_authenticated/rascunhos': typeof AuthenticatedRascunhosRoute
+  '/_authenticated/releases': typeof AuthenticatedReleasesRoute
   '/auth/confirm': typeof AuthConfirmRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/admin/areas': typeof AuthenticatedAdminAreasRoute
@@ -245,6 +254,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/perfil'
     | '/rascunhos'
+    | '/releases'
     | '/auth/confirm'
     | '/admin/areas'
     | '/admin/modulos'
@@ -268,6 +278,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/perfil'
     | '/rascunhos'
+    | '/releases'
     | '/auth/confirm'
     | '/'
     | '/admin/areas'
@@ -293,6 +304,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/perfil'
     | '/_authenticated/rascunhos'
+    | '/_authenticated/releases'
     | '/auth/confirm'
     | '/_authenticated/'
     | '/_authenticated/admin/areas'
@@ -376,6 +388,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/auth/confirm'
       preLoaderRoute: typeof AuthConfirmRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/releases': {
+      id: '/_authenticated/releases'
+      path: '/releases'
+      fullPath: '/releases'
+      preLoaderRoute: typeof AuthenticatedReleasesRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/rascunhos': {
       id: '/_authenticated/rascunhos'
@@ -512,6 +531,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
   AuthenticatedRascunhosRoute: typeof AuthenticatedRascunhosRoute
+  AuthenticatedReleasesRoute: typeof AuthenticatedReleasesRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedDemandasCodigoRoute: typeof AuthenticatedDemandasCodigoRoute
   AuthenticatedDemandasExcluidasRoute: typeof AuthenticatedDemandasExcluidasRoute
@@ -524,6 +544,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
   AuthenticatedRascunhosRoute: AuthenticatedRascunhosRoute,
+  AuthenticatedReleasesRoute: AuthenticatedReleasesRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedDemandasCodigoRoute: AuthenticatedDemandasCodigoRoute,
   AuthenticatedDemandasExcluidasRoute: AuthenticatedDemandasExcluidasRoute,
@@ -548,3 +569,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
