@@ -27,10 +27,12 @@ export function useMarcarIncluirRelease() {
   const qc = useQueryClient();
   return useMutation<void, Error, { demandaId: string; incluir: boolean }>({
     mutationFn: async ({ demandaId, incluir }) => {
-      const { error } = await supabase.rpc("marcar_incluir_release", {
+      console.log("[marcar_incluir_release] CALL:", { demandaId, incluir });
+      const { data, error } = await supabase.rpc("marcar_incluir_release", {
         p_demanda_id: demandaId,
         p_incluir: incluir,
       });
+      console.log("[marcar_incluir_release] result:", { data, error });
       if (error) throw error;
     },
     onSuccess: (_, vars) => {
