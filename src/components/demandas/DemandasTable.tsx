@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Link2, MessageSquare, Paperclip } from "lucide-react";
+import { Link2, MessageSquare, Paperclip, Undo2 } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { TenantLogo } from "@/components/ui/TenantLogo";
@@ -123,8 +123,21 @@ function DemandaRow({ row, onClick }: DemandaRowProps) {
         </span>
       </td>
       <td className="max-w-md px-4 py-3 align-middle">
-        <div className="truncate text-sm font-medium text-foreground">
-          {row.titulo}
+        <div className="flex items-center gap-2">
+          <div className="truncate text-sm font-medium text-foreground">
+            {row.titulo}
+          </div>
+          {row.foi_reaberta && (
+            <span
+              className="inline-flex shrink-0 items-center gap-1 rounded border border-amber-500/30 bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-medium text-amber-300"
+              title={`Reaberta ${row.total_reaberturas ?? 1}x`}
+            >
+              <Undo2 className="h-2.5 w-2.5" />
+              {(row.total_reaberturas ?? 1) > 1
+                ? `Reaberta ${row.total_reaberturas}x`
+                : "Reaberta"}
+            </span>
+          )}
         </div>
         <div className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
           <span
