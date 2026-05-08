@@ -23,6 +23,7 @@ import {
 import { useProfile } from "@/hooks/useProfile";
 import { useMoverStatusDemanda } from "@/hooks/useMoverStatusDemanda";
 import { KanbanCard } from "@/components/demandas/KanbanCard";
+import { IncluirReleaseDialog } from "@/components/demandas/IncluirReleaseDialog";
 
 export type ColunaStatus =
   | "triagem"
