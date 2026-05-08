@@ -101,17 +101,30 @@ function DemandaDetalhe() {
     await updateMutation.mutateAsync({ id: demanda.id, patch });
     if ("status" in patch) {
       toast.success("Status alterado");
-      if (
-        patch.status === "entregue" &&
-        canEditAny &&
-        !demanda.incluir_release &&
-        !releaseDaDemanda
-      ) {
-        setReleaseDialogOpen(true);
-      }
     } else if ("responsavel_id" in patch) toast.success("Desenvolvedor atualizado");
     else toast.success("Atualizado");
   };
+
+  // Detecta TRANSIÇÃO de status para "entregue" e abre o dialog 1x.
+  // Ignora carregamento inicial (statusAnterior === undefined) — não reabre
+  // quando o usuário só está visualizando uma demanda já entregue.
+  const statusAnteriorRef = React.useRef<string | undefined>(undefined);
+  React.useEffect(() => {
+    const statusAtual = demanda?.status;
+    const statusAnterior = statusAnteriorRef.current;
+    if (
+      statusAnterior !== undefined &&
+      statusAnterior !== "entregue" &&
+      statusAtual === "entregue" &&
+      demanda &&
+      canEditAny &&
+      !demanda.incluir_release &&
+      !releaseDaDemanda
+    ) {
+      setReleaseDialogOpen(true);
+    }
+    statusAnteriorRef.current = statusAtual;
+  }, [demanda, canEditAny, releaseDaDemanda]);
 
   const copyLink = async () => {
     try {
