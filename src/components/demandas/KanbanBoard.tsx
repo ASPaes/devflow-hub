@@ -355,6 +355,12 @@ export function KanbanBoard({ rows, isLoading, onCardClick }: KanbanBoardProps) 
           </div>
         ) : null}
       </DragOverlay>
+
+      <IncluirReleaseDialog
+        open={!!releaseDialog}
+        onOpenChange={(o) => !o && setReleaseDialog(null)}
+        demanda={releaseDialog}
+      />
     </DndContext>
   );
 }
