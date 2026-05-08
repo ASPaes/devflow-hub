@@ -40,6 +40,7 @@ import { ComentariosSecao } from "@/components/demandas/ComentariosSecao";
 import { TimelineHistorico } from "@/components/demandas/TimelineHistorico";
 import { VinculosSecao } from "@/components/demandas/VinculosSecao";
 import { ReaberturaBanner } from "@/components/demandas/ReaberturaBanner";
+import { DemandaReabertaBadge } from "@/components/demandas/DemandaReabertaBadge";
 import { RetornosTab } from "@/components/demandas/RetornosTab";
 import { useComentarios } from "@/hooks/useComentarios";
 import { useVinculos } from "@/hooks/useVinculos";
