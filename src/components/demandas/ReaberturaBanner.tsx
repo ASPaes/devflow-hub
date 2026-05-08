@@ -14,6 +14,7 @@ import {
 import { ModalForm } from "@/components/common/ModalForm";
 import { formatDateSP, formatDateTimeSP } from "@/lib/format";
 import { useReabrirDemanda, type DemandaCompleta } from "@/hooks/useDemandas";
+import { useProfile } from "@/hooks/useProfile";
 
 interface ReaberturaBannerProps {
   demanda: DemandaCompleta;
@@ -47,16 +48,20 @@ function tempoRestanteLabel(reopenDeadline: string): string {
 export function ReaberturaBanner({ demanda, isOwner }: ReaberturaBannerProps) {
   const [open, setOpen] = React.useState(false);
   const reabrirMut = useReabrirDemanda();
+  const { temPermissao } = useProfile();
+  const podeEditarQualquer = temPermissao("editar_qualquer_demanda");
 
-  if (demanda.status !== "entregue") return null;
+  if (demanda.status !== "entregue" && demanda.status !== "encerrada") {
+    return null;
+  }
 
   const entreguEmFmt = demanda.delivered_at
     ? formatDateTimeSP(demanda.delivered_at)
     : null;
-  const podeReabrir =
-    isOwner &&
+  const dentroDoPrazo =
     demanda.reopen_deadline !== null &&
     diasRestantes(demanda.reopen_deadline) >= 0;
+  const podeReabrir = podeEditarQualquer || (isOwner && dentroDoPrazo);
 
   return (
     <>

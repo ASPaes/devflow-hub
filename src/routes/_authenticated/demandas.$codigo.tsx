@@ -40,6 +40,7 @@ import { ComentariosSecao } from "@/components/demandas/ComentariosSecao";
 import { TimelineHistorico } from "@/components/demandas/TimelineHistorico";
 import { VinculosSecao } from "@/components/demandas/VinculosSecao";
 import { ReaberturaBanner } from "@/components/demandas/ReaberturaBanner";
+import { DemandaReabertaBadge } from "@/components/demandas/DemandaReabertaBadge";
 import { RetornosTab } from "@/components/demandas/RetornosTab";
 import { useComentarios } from "@/hooks/useComentarios";
 import { useVinculos } from "@/hooks/useVinculos";
@@ -204,8 +205,16 @@ function DemandaDetalhe() {
             </p>
           </div>
 
-          {/* Reabertura (apenas se entregue) */}
+          {/* Reabertura (apenas se entregue/encerrada) */}
           <ReaberturaBanner demanda={demanda} isOwner={isOwner} />
+
+          {/* Badge "Reaberta" se foi reaberta no histórico */}
+          {demanda.foi_reaberta && (
+            <DemandaReabertaBadge
+              demandaId={demanda.id}
+              totalReaberturas={demanda.total_reaberturas}
+            />
+          )}
 
           {/* Descrição */}
           <DescricaoCard

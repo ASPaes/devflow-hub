@@ -341,6 +341,76 @@ export type Database = {
           },
         ]
       }
+      demanda_reaberturas: {
+        Row: {
+          demanda_id: string
+          id: string
+          motivo: string
+          reaberta_em: string
+          reaberta_por: string | null
+          status_anterior: Database["public"]["Enums"]["status_demanda"]
+        }
+        Insert: {
+          demanda_id: string
+          id?: string
+          motivo: string
+          reaberta_em?: string
+          reaberta_por?: string | null
+          status_anterior: Database["public"]["Enums"]["status_demanda"]
+        }
+        Update: {
+          demanda_id?: string
+          id?: string
+          motivo?: string
+          reaberta_em?: string
+          reaberta_por?: string | null
+          status_anterior?: Database["public"]["Enums"]["status_demanda"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demanda_reaberturas_demanda_id_fkey"
+            columns: ["demanda_id"]
+            isOneToOne: false
+            referencedRelation: "demandas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demanda_reaberturas_demanda_id_fkey"
+            columns: ["demanda_id"]
+            isOneToOne: false
+            referencedRelation: "vw_demandas_excluidas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demanda_reaberturas_demanda_id_fkey"
+            columns: ["demanda_id"]
+            isOneToOne: false
+            referencedRelation: "vw_demandas_lista"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demanda_reaberturas_reaberta_por_fkey"
+            columns: ["reaberta_por"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demanda_reaberturas_reaberta_por_fkey"
+            columns: ["reaberta_por"]
+            isOneToOne: false
+            referencedRelation: "vw_potenciais_responsaveis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demanda_reaberturas_reaberta_por_fkey"
+            columns: ["reaberta_por"]
+            isOneToOne: false
+            referencedRelation: "vw_solicitantes_por_empresa"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       demanda_retornos: {
         Row: {
           autor_id: string | null
@@ -607,6 +677,7 @@ export type Database = {
           descricao: string
           dev_deadline: string | null
           estimativa_horas: number | null
+          foi_reaberta: boolean
           id: string
           incluir_release: boolean
           modulo_id: string
@@ -625,6 +696,7 @@ export type Database = {
           timer_iniciado_em: string | null
           tipo: Database["public"]["Enums"]["tipo_demanda"]
           titulo: string
+          total_reaberturas: number
           updated_at: string
         }
         Insert: {
@@ -640,6 +712,7 @@ export type Database = {
           descricao: string
           dev_deadline?: string | null
           estimativa_horas?: number | null
+          foi_reaberta?: boolean
           id?: string
           incluir_release?: boolean
           modulo_id: string
@@ -658,6 +731,7 @@ export type Database = {
           timer_iniciado_em?: string | null
           tipo: Database["public"]["Enums"]["tipo_demanda"]
           titulo: string
+          total_reaberturas?: number
           updated_at?: string
         }
         Update: {
@@ -673,6 +747,7 @@ export type Database = {
           descricao?: string
           dev_deadline?: string | null
           estimativa_horas?: number | null
+          foi_reaberta?: boolean
           id?: string
           incluir_release?: boolean
           modulo_id?: string
@@ -691,6 +766,7 @@ export type Database = {
           timer_iniciado_em?: string | null
           tipo?: Database["public"]["Enums"]["tipo_demanda"]
           titulo?: string
+          total_reaberturas?: number
           updated_at?: string
         }
         Relationships: [
@@ -1876,6 +1952,7 @@ export type Database = {
           descricao: string
           dev_deadline: string | null
           estimativa_horas: number | null
+          foi_reaberta: boolean
           id: string
           incluir_release: boolean
           modulo_id: string
@@ -1894,6 +1971,7 @@ export type Database = {
           timer_iniciado_em: string | null
           tipo: Database["public"]["Enums"]["tipo_demanda"]
           titulo: string
+          total_reaberturas: number
           updated_at: string
         }
         SetofOptions: {
@@ -1934,6 +2012,7 @@ export type Database = {
           descricao: string
           dev_deadline: string | null
           estimativa_horas: number | null
+          foi_reaberta: boolean
           id: string
           incluir_release: boolean
           modulo_id: string
@@ -1952,6 +2031,7 @@ export type Database = {
           timer_iniciado_em: string | null
           tipo: Database["public"]["Enums"]["tipo_demanda"]
           titulo: string
+          total_reaberturas: number
           updated_at: string
         }
         SetofOptions: {
@@ -1996,6 +2076,17 @@ export type Database = {
           tenant_id: string
           tenant_nome: string
           updated_at: string
+        }[]
+      }
+      listar_reaberturas_demanda: {
+        Args: { p_demanda_id: string }
+        Returns: {
+          id: string
+          motivo: string
+          reaberta_em: string
+          reaberta_por: string
+          reaberta_por_nome: string
+          status_anterior: string
         }[]
       }
       marcar_incluir_release: {
@@ -2054,6 +2145,7 @@ export type Database = {
           descricao: string
           dev_deadline: string | null
           estimativa_horas: number | null
+          foi_reaberta: boolean
           id: string
           incluir_release: boolean
           modulo_id: string
@@ -2072,6 +2164,7 @@ export type Database = {
           timer_iniciado_em: string | null
           tipo: Database["public"]["Enums"]["tipo_demanda"]
           titulo: string
+          total_reaberturas: number
           updated_at: string
         }
         SetofOptions: {
@@ -2096,6 +2189,7 @@ export type Database = {
           descricao: string
           dev_deadline: string | null
           estimativa_horas: number | null
+          foi_reaberta: boolean
           id: string
           incluir_release: boolean
           modulo_id: string
@@ -2114,6 +2208,7 @@ export type Database = {
           timer_iniciado_em: string | null
           tipo: Database["public"]["Enums"]["tipo_demanda"]
           titulo: string
+          total_reaberturas: number
           updated_at: string
         }
         SetofOptions: {
@@ -2162,6 +2257,7 @@ export type Database = {
           descricao: string
           dev_deadline: string | null
           estimativa_horas: number | null
+          foi_reaberta: boolean
           id: string
           incluir_release: boolean
           modulo_id: string
@@ -2180,6 +2276,7 @@ export type Database = {
           timer_iniciado_em: string | null
           tipo: Database["public"]["Enums"]["tipo_demanda"]
           titulo: string
+          total_reaberturas: number
           updated_at: string
         }
         SetofOptions: {
@@ -2208,6 +2305,7 @@ export type Database = {
           descricao: string
           dev_deadline: string | null
           estimativa_horas: number | null
+          foi_reaberta: boolean
           id: string
           incluir_release: boolean
           modulo_id: string
@@ -2226,6 +2324,7 @@ export type Database = {
           timer_iniciado_em: string | null
           tipo: Database["public"]["Enums"]["tipo_demanda"]
           titulo: string
+          total_reaberturas: number
           updated_at: string
         }
         SetofOptions: {
