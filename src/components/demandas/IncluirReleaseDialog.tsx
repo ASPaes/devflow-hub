@@ -28,9 +28,15 @@ export function IncluirReleaseDialog({
   if (!demanda) return null;
 
   const handleIncluir = async () => {
-    await marcar.mutateAsync({ demandaId: demanda.id, incluir: true });
-    onOpenChange(false);
-    onIncluir?.();
+    console.log("[IncluirRelease] CHAMANDO RPC", demanda.id);
+    try {
+      await marcar.mutateAsync({ demandaId: demanda.id, incluir: true });
+      console.log("[IncluirRelease] SUCESSO");
+      onOpenChange(false);
+      onIncluir?.();
+    } catch (err) {
+      console.error("[IncluirRelease] ERRO:", err);
+    }
   };
 
   return (
