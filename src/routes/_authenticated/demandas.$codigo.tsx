@@ -53,6 +53,9 @@ import {
 } from "@/components/demandas/MetadataSidebar";
 import { ExcluirDemandaDialog } from "@/components/demandas/ExcluirDemandaDialog";
 import { GerarPromptIADialog } from "@/components/demandas/GerarPromptIADialog";
+import { IncluirReleaseDialog } from "@/components/demandas/IncluirReleaseDialog";
+import { ReleaseTab } from "@/components/demandas/ReleaseTab";
+import { useReleaseDaDemanda } from "@/hooks/useReleases";
 
 export const Route = createFileRoute("/_authenticated/demandas/$codigo")({
   component: DemandaDetalhe,
