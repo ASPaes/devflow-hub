@@ -14,6 +14,7 @@ import {
 import { ModalForm } from "@/components/common/ModalForm";
 import { formatDateSP, formatDateTimeSP } from "@/lib/format";
 import { useReabrirDemanda, type DemandaCompleta } from "@/hooks/useDemandas";
+import { useProfile } from "@/hooks/useProfile";
 
 interface ReaberturaBannerProps {
   demanda: DemandaCompleta;
