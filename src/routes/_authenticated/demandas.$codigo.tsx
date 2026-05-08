@@ -70,6 +70,8 @@ function DemandaDetalhe() {
   const updateMutation = useUpdateDemanda();
   const [excluirOpen, setExcluirOpen] = React.useState(false);
   const [iaDialogOpen, setIaDialogOpen] = React.useState(false);
+  const [releaseDialogOpen, setReleaseDialogOpen] = React.useState(false);
+  const { data: releaseDaDemanda } = useReleaseDaDemanda(demanda?.id);
 
   useDocumentTitle(
     demanda ? `${demanda.codigo ?? codigo} · ${demanda.titulo}` : codigo,
