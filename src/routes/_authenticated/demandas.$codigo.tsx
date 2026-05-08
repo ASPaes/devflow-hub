@@ -205,8 +205,16 @@ function DemandaDetalhe() {
             </p>
           </div>
 
-          {/* Reabertura (apenas se entregue) */}
+          {/* Reabertura (apenas se entregue/encerrada) */}
           <ReaberturaBanner demanda={demanda} isOwner={isOwner} />
+
+          {/* Badge "Reaberta" se foi reaberta no histórico */}
+          {demanda.foi_reaberta && (
+            <DemandaReabertaBadge
+              demandaId={demanda.id}
+              totalReaberturas={demanda.total_reaberturas}
+            />
+          )}
 
           {/* Descrição */}
           <DescricaoCard
