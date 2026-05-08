@@ -77,6 +77,29 @@ function DemandaDetalhe() {
     demanda ? `${demanda.codigo ?? codigo} · ${demanda.titulo}` : codigo,
   );
 
+  const canEditAny = temPermissao("editar_qualquer_demanda");
+
+  // Detecta TRANSIÇÃO de status para "entregue" e abre o dialog 1x.
+  // Ignora carregamento inicial (statusAnterior === undefined) — não reabre
+  // quando o usuário só está visualizando uma demanda já entregue.
+  const statusAnteriorRef = React.useRef<string | undefined>(undefined);
+  const statusAtual = demanda?.status;
+  const incluirRelease = demanda?.incluir_release;
+  React.useEffect(() => {
+    const statusAnterior = statusAnteriorRef.current;
+    if (
+      statusAnterior !== undefined &&
+      statusAnterior !== "entregue" &&
+      statusAtual === "entregue" &&
+      canEditAny &&
+      !incluirRelease &&
+      !releaseDaDemanda
+    ) {
+      setReleaseDialogOpen(true);
+    }
+    statusAnteriorRef.current = statusAtual;
+  }, [statusAtual, incluirRelease, canEditAny, releaseDaDemanda]);
+
   if (isLoading) return <DetalheSkeleton />;
   if (error) {
     return (
@@ -90,7 +113,6 @@ function DemandaDetalhe() {
   }
 
   const isOwner = demanda.solicitante_id === user?.id;
-  const canEditAny = temPermissao("editar_qualquer_demanda");
   const canEditOwnTriagem = isOwner && demanda.status === "triagem";
   const canEditTextual = canEditAny || canEditOwnTriagem;
   const canEditMetadata = canEditAny;
@@ -104,27 +126,6 @@ function DemandaDetalhe() {
     } else if ("responsavel_id" in patch) toast.success("Desenvolvedor atualizado");
     else toast.success("Atualizado");
   };
-
-  // Detecta TRANSIÇÃO de status para "entregue" e abre o dialog 1x.
-  // Ignora carregamento inicial (statusAnterior === undefined) — não reabre
-  // quando o usuário só está visualizando uma demanda já entregue.
-  const statusAnteriorRef = React.useRef<string | undefined>(undefined);
-  React.useEffect(() => {
-    const statusAtual = demanda?.status;
-    const statusAnterior = statusAnteriorRef.current;
-    if (
-      statusAnterior !== undefined &&
-      statusAnterior !== "entregue" &&
-      statusAtual === "entregue" &&
-      demanda &&
-      canEditAny &&
-      !demanda.incluir_release &&
-      !releaseDaDemanda
-    ) {
-      setReleaseDialogOpen(true);
-    }
-    statusAnteriorRef.current = statusAtual;
-  }, [demanda, canEditAny, releaseDaDemanda]);
 
   const copyLink = async () => {
     try {
