@@ -1,20 +1,7 @@
-import * as React from "react";
 import { Clock } from "lucide-react";
-import { z } from "zod";
 
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { ModalForm } from "@/components/common/ModalForm";
 import { formatDateSP, formatDateTimeSP } from "@/lib/format";
-import { useReabrirDemanda, type DemandaCompleta } from "@/hooks/useDemandas";
-import { useProfile } from "@/hooks/useProfile";
+import type { DemandaCompleta } from "@/hooks/useDemandas";
 
 interface ReaberturaBannerProps {
   demanda: DemandaCompleta;
