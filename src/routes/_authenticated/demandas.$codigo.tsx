@@ -209,9 +209,10 @@ function DemandaDetalhe() {
             />
           )}
 
-          {/* Tabs: Comentários | Histórico | Vínculos */}
+          {/* Tabs: Comentários | Retornos | Histórico | Vínculos | Releases */}
           <DetalheTabs
             demandaId={demanda.id}
+            demandaTipo={demanda.tipo}
             podeAdicionarVinculo={canEditAny || canEditOwnTriagem}
             podeRemoverVinculo={canEditAny}
           />
@@ -243,6 +244,19 @@ function DemandaDetalhe() {
           demandaCodigo={demanda.codigo ?? codigo}
           promptInicial={demanda.prompt_ia}
           promptAtualizadoEm={demanda.prompt_ia_atualizado_em}
+        />
+      )}
+
+      {canEditAny && (
+        <IncluirReleaseDialog
+          open={releaseDialogOpen}
+          onOpenChange={setReleaseDialogOpen}
+          demanda={{
+            id: demanda.id,
+            codigo: demanda.codigo ?? codigo,
+            titulo: demanda.titulo,
+            tipo: demanda.tipo,
+          }}
         />
       )}
     </div>
@@ -315,12 +329,14 @@ function DemandaNaoEncontrada() {
 
 interface DetalheTabsProps {
   demandaId: string;
+  demandaTipo: string;
   podeAdicionarVinculo: boolean;
   podeRemoverVinculo: boolean;
 }
 
 function DetalheTabs({
   demandaId,
+  demandaTipo,
   podeAdicionarVinculo,
   podeRemoverVinculo,
 }: DetalheTabsProps) {
@@ -348,6 +364,7 @@ function DetalheTabs({
             </span>
           )}
         </TabsTrigger>
+        <TabsTrigger value="releases">Releases</TabsTrigger>
       </TabsList>
       <TabsContent value="comentarios" className="mt-4">
         <ComentariosSecao demandaId={demandaId} />
@@ -364,6 +381,9 @@ function DetalheTabs({
           podeAdicionar={podeAdicionarVinculo}
           podeRemover={podeRemoverVinculo}
         />
+      </TabsContent>
+      <TabsContent value="releases" className="mt-4">
+        <ReleaseTab demandaId={demandaId} demandaTipo={demandaTipo} />
       </TabsContent>
     </Tabs>
   );
