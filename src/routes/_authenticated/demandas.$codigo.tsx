@@ -238,6 +238,7 @@ function DemandaDetalhe() {
           <DetalheTabs
             demandaId={demanda.id}
             demandaTipo={demanda.tipo}
+            incluirRelease={!!demanda.incluir_release}
             podeAdicionarVinculo={canEditAny || canEditOwnTriagem}
             podeRemoverVinculo={canEditAny}
           />
