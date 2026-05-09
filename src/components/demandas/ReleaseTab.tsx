@@ -249,7 +249,11 @@ export function ReleaseTab({ demandaId, demandaTipo, incluirRelease }: ReleaseTa
               >
                 Salvar rascunho
               </Button>
-              <Button onClick={handlePublicar} disabled={publicar.isPending}>
+              <Button
+                onClick={handlePublicar}
+                disabled={publicar.isPending || !temReleaseRascunho}
+                title={!temReleaseRascunho ? "Salve um rascunho antes de publicar" : undefined}
+              >
                 Publicar
               </Button>
             </div>
