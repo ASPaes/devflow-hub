@@ -268,6 +268,88 @@ export type Database = {
           },
         ]
       }
+      demanda_emails_enviados: {
+        Row: {
+          assunto: string
+          corpo_texto: string
+          demanda_id: string
+          email_destinatario: string
+          enviado_em: string
+          enviado_por: string | null
+          erro_detalhe: string | null
+          id: string
+          nome_destinatario: string | null
+          status: string
+        }
+        Insert: {
+          assunto: string
+          corpo_texto: string
+          demanda_id: string
+          email_destinatario: string
+          enviado_em?: string
+          enviado_por?: string | null
+          erro_detalhe?: string | null
+          id?: string
+          nome_destinatario?: string | null
+          status?: string
+        }
+        Update: {
+          assunto?: string
+          corpo_texto?: string
+          demanda_id?: string
+          email_destinatario?: string
+          enviado_em?: string
+          enviado_por?: string | null
+          erro_detalhe?: string | null
+          id?: string
+          nome_destinatario?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demanda_emails_enviados_demanda_id_fkey"
+            columns: ["demanda_id"]
+            isOneToOne: false
+            referencedRelation: "demandas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demanda_emails_enviados_demanda_id_fkey"
+            columns: ["demanda_id"]
+            isOneToOne: false
+            referencedRelation: "vw_demandas_excluidas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demanda_emails_enviados_demanda_id_fkey"
+            columns: ["demanda_id"]
+            isOneToOne: false
+            referencedRelation: "vw_demandas_lista"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demanda_emails_enviados_enviado_por_fkey"
+            columns: ["enviado_por"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demanda_emails_enviados_enviado_por_fkey"
+            columns: ["enviado_por"]
+            isOneToOne: false
+            referencedRelation: "vw_potenciais_responsaveis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demanda_emails_enviados_enviado_por_fkey"
+            columns: ["enviado_por"]
+            isOneToOne: false
+            referencedRelation: "vw_solicitantes_por_empresa"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       demanda_historico: {
         Row: {
           autor_id: string | null
@@ -2132,6 +2214,10 @@ export type Database = {
       }
       obter_contexto_demanda: { Args: { p_demanda_id: string }; Returns: Json }
       obter_contexto_release: { Args: { p_demanda_id: string }; Returns: Json }
+      obter_dados_email_demanda: {
+        Args: { p_demanda_id: string }
+        Returns: Json
+      }
       pausar_timer_com_ajuste: {
         Args: { p_ajustes: Json; p_demanda_id: string }
         Returns: {
@@ -2291,6 +2377,18 @@ export type Database = {
       recalcular_tenant_demandas_user: {
         Args: { p_user_id: string }
         Returns: number
+      }
+      registrar_email_demanda: {
+        Args: {
+          p_assunto: string
+          p_corpo_texto: string
+          p_demanda_id: string
+          p_email_destinatario: string
+          p_erro_detalhe?: string
+          p_nome_destinatario: string
+          p_status?: string
+        }
+        Returns: string
       }
       restaurar_demanda: {
         Args: { p_demanda_id: string }
