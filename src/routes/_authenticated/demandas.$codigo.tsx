@@ -356,6 +356,7 @@ function DemandaNaoEncontrada() {
 interface DetalheTabsProps {
   demandaId: string;
   demandaTipo: string;
+  incluirRelease: boolean;
   podeAdicionarVinculo: boolean;
   podeRemoverVinculo: boolean;
 }
@@ -363,6 +364,7 @@ interface DetalheTabsProps {
 function DetalheTabs({
   demandaId,
   demandaTipo,
+  incluirRelease,
   podeAdicionarVinculo,
   podeRemoverVinculo,
 }: DetalheTabsProps) {
