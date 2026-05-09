@@ -28,9 +28,10 @@ import { TIPO_RELEASE_LABEL, type TipoRelease } from "@/types/release";
 interface ReleaseTabProps {
   demandaId: string;
   demandaTipo: string;
+  incluirRelease: boolean;
 }
 
-export function ReleaseTab({ demandaId, demandaTipo }: ReleaseTabProps) {
+export function ReleaseTab({ demandaId, demandaTipo, incluirRelease }: ReleaseTabProps) {
   const { temPermissao } = useProfile();
   const podeGerenciar = temPermissao("gerenciar_releases");
   const { data: release } = useReleaseDaDemanda(demandaId);
@@ -58,7 +59,8 @@ export function ReleaseTab({ demandaId, demandaTipo }: ReleaseTabProps) {
     }
   }, [release, demandaTipo]);
 
-  const incluido = !!release;
+  const incluido = incluirRelease;
+  const temReleaseRascunho = !!release && !release.published_at;
   const publicada = !!release?.published_at;
   const podeEditar = podeGerenciar && !publicada;
 
@@ -247,7 +249,11 @@ export function ReleaseTab({ demandaId, demandaTipo }: ReleaseTabProps) {
               >
                 Salvar rascunho
               </Button>
-              <Button onClick={handlePublicar} disabled={publicar.isPending}>
+              <Button
+                onClick={handlePublicar}
+                disabled={publicar.isPending || !temReleaseRascunho}
+                title={!temReleaseRascunho ? "Salve um rascunho antes de publicar" : undefined}
+              >
                 Publicar
               </Button>
             </div>

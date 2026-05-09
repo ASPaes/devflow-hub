@@ -238,6 +238,7 @@ function DemandaDetalhe() {
           <DetalheTabs
             demandaId={demanda.id}
             demandaTipo={demanda.tipo}
+            incluirRelease={!!demanda.incluir_release}
             podeAdicionarVinculo={canEditAny || canEditOwnTriagem}
             podeRemoverVinculo={canEditAny}
           />
@@ -355,6 +356,7 @@ function DemandaNaoEncontrada() {
 interface DetalheTabsProps {
   demandaId: string;
   demandaTipo: string;
+  incluirRelease: boolean;
   podeAdicionarVinculo: boolean;
   podeRemoverVinculo: boolean;
 }
@@ -362,6 +364,7 @@ interface DetalheTabsProps {
 function DetalheTabs({
   demandaId,
   demandaTipo,
+  incluirRelease,
   podeAdicionarVinculo,
   podeRemoverVinculo,
 }: DetalheTabsProps) {
@@ -408,7 +411,11 @@ function DetalheTabs({
         />
       </TabsContent>
       <TabsContent value="releases" className="mt-4">
-        <ReleaseTab demandaId={demandaId} demandaTipo={demandaTipo} />
+        <ReleaseTab
+          demandaId={demandaId}
+          demandaTipo={demandaTipo}
+          incluirRelease={incluirRelease}
+        />
       </TabsContent>
     </Tabs>
   );
