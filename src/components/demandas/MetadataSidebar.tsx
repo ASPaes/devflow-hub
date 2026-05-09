@@ -288,6 +288,8 @@ export const STATUS_BADGE_STYLES: Record<StatusDemanda, string> = {
     "bg-status-analise/15 text-status-analise border-status-analise/30",
   desenvolvimento:
     "bg-status-desenvolvimento/15 text-status-desenvolvimento border-status-desenvolvimento/30",
+  aguardando_cliente:
+    "bg-status-aguardando_cliente/15 text-status-aguardando_cliente border-status-aguardando_cliente/30",
   teste: "bg-status-teste/15 text-status-teste border-status-teste/30",
   para_publicar:
     "bg-status-para_publicar/15 text-status-para_publicar border-status-para_publicar/30",
