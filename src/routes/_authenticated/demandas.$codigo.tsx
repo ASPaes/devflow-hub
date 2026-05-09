@@ -411,7 +411,11 @@ function DetalheTabs({
         />
       </TabsContent>
       <TabsContent value="releases" className="mt-4">
-        <ReleaseTab demandaId={demandaId} demandaTipo={demandaTipo} />
+        <ReleaseTab
+          demandaId={demandaId}
+          demandaTipo={demandaTipo}
+          incluirRelease={incluirRelease}
+        />
       </TabsContent>
     </Tabs>
   );
