@@ -2424,6 +2424,7 @@ export type Database = {
         | "triagem"
         | "analise"
         | "desenvolvimento"
+        | "aguardando_cliente"
         | "teste"
         | "para_publicar"
         | "entregue"
@@ -2598,6 +2599,7 @@ export const Constants = {
         "triagem",
         "analise",
         "desenvolvimento",
+        "aguardando_cliente",
         "teste",
         "para_publicar",
         "entregue",

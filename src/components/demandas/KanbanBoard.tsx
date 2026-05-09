@@ -29,6 +29,7 @@ export type ColunaStatus =
   | "triagem"
   | "analise"
   | "desenvolvimento"
+  | "aguardando_cliente"
   | "teste"
   | "para_publicar"
   | "entregue";
@@ -40,6 +41,11 @@ const COLUNAS: { key: ColunaStatus; label: string; cor: string }[] = [
     key: "desenvolvimento",
     label: "Desenvolvimento",
     cor: "var(--color-status-desenvolvimento)",
+  },
+  {
+    key: "aguardando_cliente",
+    label: "Aguardando Cliente",
+    cor: "var(--color-status-aguardando_cliente)",
   },
   { key: "teste", label: "Teste", cor: "var(--color-status-teste)" },
   {
@@ -55,6 +61,7 @@ export const STATUS_NO_BOARD: StatusDemanda[] = [
   "reaberta",
   "analise",
   "desenvolvimento",
+  "aguardando_cliente",
   "teste",
   "para_publicar",
   "entregue",
@@ -239,6 +246,7 @@ export function KanbanBoard({ rows, isLoading, onCardClick }: KanbanBoardProps) 
       triagem: [],
       analise: [],
       desenvolvimento: [],
+      aguardando_cliente: [],
       teste: [],
       para_publicar: [],
       entregue: [],
@@ -252,6 +260,7 @@ export function KanbanBoard({ rows, isLoading, onCardClick }: KanbanBoardProps) 
           : s === "triagem" ||
               s === "analise" ||
               s === "desenvolvimento" ||
+              s === "aguardando_cliente" ||
               s === "teste" ||
               s === "para_publicar" ||
               s === "entregue"
