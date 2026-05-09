@@ -98,6 +98,27 @@ export function MultiSelectFilter<T extends string | number>({
             </button>
           )}
         </div>
+        {!loading && options.length > 0 && (() => {
+          const allSelected = selected.length === options.length;
+          const someSelected = hasSelection && !allSelected;
+          return (
+            <button
+              type="button"
+              onClick={() =>
+                onChange(allSelected ? [] : options.map((o) => o.value))
+              }
+              className="flex w-full items-center gap-2 border-b border-border px-3 py-1.5 text-left text-sm hover:bg-secondary/60"
+            >
+              <Checkbox
+                checked={allSelected ? true : someSelected ? "indeterminate" : false}
+                className="pointer-events-none"
+              />
+              <span className="flex-1 truncate font-medium">
+                {allSelected ? "Desmarcar tudo" : "Selecionar tudo"}
+              </span>
+            </button>
+          );
+        })()}
         {loading ? (
           <div className="px-3 py-6 text-center text-xs text-muted-foreground">
             Carregando...
