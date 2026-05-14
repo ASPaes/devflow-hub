@@ -3,7 +3,6 @@ import {
   createFileRoute,
   Link,
   notFound,
-  useNavigate,
   useRouter,
 } from "@tanstack/react-router";
 import { ChevronDown, ChevronLeft, ChevronUp, FileQuestion, Link as LinkIcon, MoreHorizontal, Sparkles, Trash2 } from "lucide-react";
@@ -59,13 +58,26 @@ import { IncluirReleaseDialog } from "@/components/demandas/IncluirReleaseDialog
 import { ReleaseTab } from "@/components/demandas/ReleaseTab";
 import { useReleaseDaDemanda } from "@/hooks/useReleases";
 
+type DemandaSearch = {
+  tab?: string;
+  tituloIA?: string;
+  resumoIA?: string;
+};
+
 export const Route = createFileRoute("/_authenticated/demandas/$codigo")({
   component: DemandaDetalhe,
   notFoundComponent: DemandaNaoEncontrada,
+  validateSearch: (s: Record<string, unknown>): DemandaSearch => ({
+    tab: typeof s.tab === "string" ? s.tab : undefined,
+    tituloIA: typeof s.tituloIA === "string" ? s.tituloIA : undefined,
+    resumoIA: typeof s.resumoIA === "string" ? s.resumoIA : undefined,
+  }),
 });
 
 function DemandaDetalhe() {
   const { codigo } = Route.useParams();
+  const search = Route.useSearch();
+  const navigate = Route.useNavigate();
   const { user } = useAuth();
   const { temPermissao } = useProfile();
   const { data: demanda, isLoading, error } = useDemanda(codigo);
@@ -241,6 +253,25 @@ function DemandaDetalhe() {
             incluirRelease={!!demanda.incluir_release}
             podeAdicionarVinculo={canEditAny || canEditOwnTriagem}
             podeRemoverVinculo={canEditAny}
+            activeTab={search.tab ?? "comentarios"}
+            onTabChange={(tab) =>
+              navigate({
+                to: "/demandas/$codigo",
+                params: { codigo },
+                search: (prev) => ({ ...prev, tab }),
+                replace: true,
+              })
+            }
+            tituloIA={search.tituloIA}
+            resumoIA={search.resumoIA}
+            onConsumeIA={() =>
+              navigate({
+                to: "/demandas/$codigo",
+                params: { codigo },
+                search: (prev) => ({ ...prev, tituloIA: undefined, resumoIA: undefined }),
+                replace: true,
+              })
+            }
           />
         </div>
 
@@ -282,6 +313,14 @@ function DemandaDetalhe() {
             codigo: demanda.codigo ?? codigo,
             titulo: demanda.titulo,
             tipo: demanda.tipo,
+          }}
+          onConcluido={({ tituloIA, resumoIA }) => {
+            void navigate({
+              to: "/demandas/$codigo",
+              params: { codigo },
+              search: (prev) => ({ ...prev, tab: "releases", tituloIA, resumoIA }),
+              replace: true,
+            });
           }}
         />
       )}
@@ -359,6 +398,11 @@ interface DetalheTabsProps {
   incluirRelease: boolean;
   podeAdicionarVinculo: boolean;
   podeRemoverVinculo: boolean;
+  activeTab: string;
+  onTabChange: (tab: string) => void;
+  tituloIA?: string;
+  resumoIA?: string;
+  onConsumeIA: () => void;
 }
 
 function DetalheTabs({
@@ -367,12 +411,17 @@ function DetalheTabs({
   incluirRelease,
   podeAdicionarVinculo,
   podeRemoverVinculo,
+  activeTab,
+  onTabChange,
+  tituloIA,
+  resumoIA,
+  onConsumeIA,
 }: DetalheTabsProps) {
   const { data: comentarios = [] } = useComentarios(demandaId);
   const { data: vinculos = [] } = useVinculos(demandaId);
 
   return (
-    <Tabs defaultValue="comentarios" className="w-full">
+    <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
       <TabsList>
         <TabsTrigger value="comentarios">
           Comentários
@@ -415,6 +464,9 @@ function DetalheTabs({
           demandaId={demandaId}
           demandaTipo={demandaTipo}
           incluirRelease={incluirRelease}
+          tituloInicial={tituloIA}
+          resumoInicial={resumoIA}
+          onConsumeInicial={onConsumeIA}
         />
       </TabsContent>
     </Tabs>
