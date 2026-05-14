@@ -59,9 +59,20 @@ import { IncluirReleaseDialog } from "@/components/demandas/IncluirReleaseDialog
 import { ReleaseTab } from "@/components/demandas/ReleaseTab";
 import { useReleaseDaDemanda } from "@/hooks/useReleases";
 
+type DemandaSearch = {
+  tab?: string;
+  tituloIA?: string;
+  resumoIA?: string;
+};
+
 export const Route = createFileRoute("/_authenticated/demandas/$codigo")({
   component: DemandaDetalhe,
   notFoundComponent: DemandaNaoEncontrada,
+  validateSearch: (s: Record<string, unknown>): DemandaSearch => ({
+    tab: typeof s.tab === "string" ? s.tab : undefined,
+    tituloIA: typeof s.tituloIA === "string" ? s.tituloIA : undefined,
+    resumoIA: typeof s.resumoIA === "string" ? s.resumoIA : undefined,
+  }),
 });
 
 function DemandaDetalhe() {
