@@ -24,6 +24,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { useMoverStatusDemanda } from "@/hooks/useMoverStatusDemanda";
 import { KanbanCard } from "@/components/demandas/KanbanCard";
 import { IncluirReleaseDialog } from "@/components/demandas/IncluirReleaseDialog";
+import { useNavigate } from "@tanstack/react-router";
 
 export type ColunaStatus =
   | "triagem"
@@ -220,6 +221,7 @@ export function KanbanBoard({ rows, isLoading, onCardClick }: KanbanBoardProps) 
   const podeMover = temPermissao("editar_qualquer_demanda");
   const podeGerenciarReleases = temPermissao("gerenciar_releases");
   const mover = useMoverStatusDemanda();
+  const navigate = useNavigate();
   const [activeId, setActiveId] = React.useState<string | null>(null);
   const [releaseDialog, setReleaseDialog] = React.useState<
     { id: string; codigo: string; titulo: string; tipo: string } | null
@@ -403,6 +405,16 @@ export function KanbanBoard({ rows, isLoading, onCardClick }: KanbanBoardProps) 
         open={!!releaseDialog}
         onOpenChange={(o) => !o && setReleaseDialog(null)}
         demanda={releaseDialog}
+        onConcluido={({ tituloIA, resumoIA }) => {
+          const codigo = releaseDialog?.codigo;
+          console.log("[ReleaseFlow] 5. navegando pra aba Releases", { codigo, tituloIA, resumoIA });
+          if (!codigo) return;
+          void navigate({
+            to: "/demandas/$codigo",
+            params: { codigo },
+            search: { tab: "releases", tituloIA, resumoIA },
+          });
+        }}
       />
     </DndContext>
   );

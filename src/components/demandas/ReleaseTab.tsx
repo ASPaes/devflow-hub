@@ -74,6 +74,13 @@ export function ReleaseTab({
 
   // Aplica valores iniciais (vindos do dialog) quando ainda não há release
   React.useEffect(() => {
+    console.log("[ReleaseFlow] 6. ReleaseTab mount/update", {
+      demandaId,
+      incluirRelease,
+      tituloInicial,
+      resumoInicial,
+      hasRelease: !!release,
+    });
     if (!release && (tituloInicial || resumoInicial)) {
       if (tituloInicial) setTitulo(tituloInicial);
       if (resumoInicial) setResumo(resumoInicial);
