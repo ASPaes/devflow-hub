@@ -3,7 +3,6 @@ import {
   createFileRoute,
   Link,
   notFound,
-  useNavigate,
   useRouter,
 } from "@tanstack/react-router";
 import { ChevronDown, ChevronLeft, ChevronUp, FileQuestion, Link as LinkIcon, MoreHorizontal, Sparkles, Trash2 } from "lucide-react";
