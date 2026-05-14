@@ -221,6 +221,7 @@ export function KanbanBoard({ rows, isLoading, onCardClick }: KanbanBoardProps) 
   const podeMover = temPermissao("editar_qualquer_demanda");
   const podeGerenciarReleases = temPermissao("gerenciar_releases");
   const mover = useMoverStatusDemanda();
+  const navigate = useNavigate();
   const [activeId, setActiveId] = React.useState<string | null>(null);
   const [releaseDialog, setReleaseDialog] = React.useState<
     { id: string; codigo: string; titulo: string; tipo: string } | null
