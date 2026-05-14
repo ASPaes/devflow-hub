@@ -109,6 +109,17 @@ function DraggableCard({
   );
 }
 
+function isHoje(iso: string | null | undefined): boolean {
+  if (!iso) return false;
+  const d = new Date(iso);
+  const n = new Date();
+  return (
+    d.getFullYear() === n.getFullYear() &&
+    d.getMonth() === n.getMonth() &&
+    d.getDate() === n.getDate()
+  );
+}
+
 function ColunaDroppable({
   col,
   items,
@@ -123,6 +134,13 @@ function ColunaDroppable({
   onCardClick?: (row: DemandaListaRow) => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: col.key });
+  const [mostrarTodosEntregues, setMostrarTodosEntregues] = React.useState(false);
+
+  const isEntregue = col.key === "entregue";
+  const itemsExibidos = React.useMemo(() => {
+    if (!isEntregue || mostrarTodosEntregues) return items;
+    return items.filter((r) => isHoje(r.delivered_at));
+  }, [isEntregue, mostrarTodosEntregues, items]);
 
   return (
     <div className="flex max-h-[calc(100vh-260px)] w-80 flex-shrink-0 flex-col rounded-lg border border-border bg-secondary/20">
@@ -142,9 +160,23 @@ function ColunaDroppable({
               + reaberta
             </span>
           )}
+          {isEntregue && (
+            <button
+              type="button"
+              onClick={() => setMostrarTodosEntregues((v) => !v)}
+              className="rounded border border-border bg-secondary/40 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+              title={
+                mostrarTodosEntregues
+                  ? "Mostrando todos os entregues"
+                  : "Mostrando apenas os entregues hoje"
+              }
+            >
+              {mostrarTodosEntregues ? "Todos" : "Hoje"}
+            </button>
+          )}
         </div>
         <Badge variant="secondary" className="text-xs">
-          {items.length}
+          {itemsExibidos.length}
         </Badge>
       </div>
 
@@ -153,7 +185,7 @@ function ColunaDroppable({
         className={cn(
           "flex flex-1 flex-col gap-2 overflow-y-auto p-2 transition-colors",
           isOver && "border-2 border-dashed border-primary/60 bg-primary/5",
-          items.length === 0 && !isLoading && "justify-center",
+          itemsExibidos.length === 0 && !isLoading && "justify-center",
         )}
       >
         {isLoading ? (
@@ -162,12 +194,14 @@ function ColunaDroppable({
               <Skeleton key={i} className="h-28 w-full rounded-lg" />
             ))}
           </>
-        ) : items.length === 0 ? (
+        ) : itemsExibidos.length === 0 ? (
           <div className="py-12 text-center text-xs text-muted-foreground">
-            Sem demandas
+            {isEntregue && !mostrarTodosEntregues
+              ? "Nenhuma demanda entregue hoje"
+              : "Sem demandas"}
           </div>
         ) : (
-          items.map((row) => (
+          itemsExibidos.map((row) => (
             <DraggableCard
               key={row.id ?? row.codigo}
               row={row}
