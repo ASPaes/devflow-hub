@@ -77,6 +77,8 @@ export const Route = createFileRoute("/_authenticated/demandas/$codigo")({
 
 function DemandaDetalhe() {
   const { codigo } = Route.useParams();
+  const search = Route.useSearch();
+  const navigate = Route.useNavigate();
   const { user } = useAuth();
   const { temPermissao } = useProfile();
   const { data: demanda, isLoading, error } = useDemanda(codigo);
