@@ -115,35 +115,42 @@ function DemandaDetalhe() {
   }, [statusAtual, incluirRelease, canEditAny, releaseDaDemanda]);
 
   // Auto-scroll até a aba Releases quando chega via fluxo do Kanban (com IA preenchida)
+  // Flag persiste ao consume dos search params pelo ReleaseTab no mount.
+  const shouldScrollRef = React.useRef(false);
+
   React.useEffect(() => {
+    if (search.tab === "releases" && (search.tituloIA || search.resumoIA)) {
+      shouldScrollRef.current = true;
+      console.log("[ReleaseFlow] 7a. flag de scroll setada");
+    }
+  }, [search.tab, search.tituloIA, search.resumoIA]);
+
+  React.useEffect(() => {
+    if (!shouldScrollRef.current) return;
     if (search.tab !== "releases") return;
-    if (!search.tituloIA && !search.resumoIA) return;
 
     let tries = 0;
-    const maxTries = 20;
-    let cancelled = false;
+    const maxTries = 30;
 
     const tryScroll = () => {
-      if (cancelled) return;
       const el = document.getElementById("release-tab-section");
       if (el) {
-        console.log("[ReleaseFlow] 7. scrollando até aba Releases");
+        console.log("[ReleaseFlow] 7b. scrollando agora");
         el.scrollIntoView({ behavior: "smooth", block: "start" });
+        shouldScrollRef.current = false;
         return;
       }
       tries++;
       if (tries < maxTries) {
         requestAnimationFrame(tryScroll);
       } else {
-        console.warn("[ReleaseFlow] release-tab-section não encontrado após 20 tentativas");
+        console.warn("[ReleaseFlow] release-tab-section não encontrado");
+        shouldScrollRef.current = false;
       }
     };
 
     requestAnimationFrame(() => requestAnimationFrame(tryScroll));
-    return () => {
-      cancelled = true;
-    };
-  }, [search.tab, search.tituloIA, search.resumoIA]);
+  }, [search.tab]);
 
   if (isLoading) return <DetalheSkeleton />;
   if (error) {
