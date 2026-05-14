@@ -1,6 +1,7 @@
 import * as React from "react";
-import { Sparkles, Loader2, CheckCircle2, AlertTriangle, FileText } from "lucide-react";
+import { Sparkles, Loader2, CheckCircle2, AlertTriangle, FileText, Rocket } from "lucide-react";
 import { toast } from "sonner";
+import { useNavigate } from "@tanstack/react-router";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,9 +30,20 @@ interface ReleaseTabProps {
   demandaId: string;
   demandaTipo: string;
   incluirRelease: boolean;
+  tituloInicial?: string;
+  resumoInicial?: string;
+  onConsumeInicial?: () => void;
 }
 
-export function ReleaseTab({ demandaId, demandaTipo, incluirRelease }: ReleaseTabProps) {
+export function ReleaseTab({
+  demandaId,
+  demandaTipo,
+  incluirRelease,
+  tituloInicial,
+  resumoInicial,
+  onConsumeInicial,
+}: ReleaseTabProps) {
+  const navigate = useNavigate();
   const { temPermissao } = useProfile();
   const podeGerenciar = temPermissao("gerenciar_releases");
   const { data: release } = useReleaseDaDemanda(demandaId);
@@ -44,8 +56,8 @@ export function ReleaseTab({ demandaId, demandaTipo, incluirRelease }: ReleaseTa
   const [tipoRelease, setTipoRelease] = React.useState<TipoRelease>(
     (release?.tipo_release ?? demandaTipo) as TipoRelease,
   );
-  const [titulo, setTitulo] = React.useState(release?.titulo ?? "");
-  const [resumo, setResumo] = React.useState(release?.resumo ?? "");
+  const [titulo, setTitulo] = React.useState(release?.titulo ?? tituloInicial ?? "");
+  const [resumo, setResumo] = React.useState(release?.resumo ?? resumoInicial ?? "");
 
   React.useEffect(() => {
     if (release) {
@@ -53,14 +65,24 @@ export function ReleaseTab({ demandaId, demandaTipo, incluirRelease }: ReleaseTa
       setTitulo(release.titulo);
       setResumo(release.resumo);
     } else {
-      setTitulo("");
-      setResumo("");
+      setTitulo(tituloInicial ?? "");
+      setResumo(resumoInicial ?? "");
       setTipoRelease(demandaTipo as TipoRelease);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [release, demandaTipo]);
 
+  // Aplica valores iniciais (vindos do dialog) quando ainda não há release
+  React.useEffect(() => {
+    if (!release && (tituloInicial || resumoInicial)) {
+      if (tituloInicial) setTitulo(tituloInicial);
+      if (resumoInicial) setResumo(resumoInicial);
+      onConsumeInicial?.();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tituloInicial, resumoInicial, release]);
+
   const incluido = incluirRelease;
-  const temReleaseRascunho = !!release && !release.published_at;
   const publicada = !!release?.published_at;
   const podeEditar = podeGerenciar && !publicada;
 
@@ -95,43 +117,28 @@ export function ReleaseTab({ demandaId, demandaTipo, incluirRelease }: ReleaseTa
       const res = await gerarIA.mutateAsync({ demandaId });
       setTitulo(res.titulo);
       setResumo(res.resumo);
-      await salvar.mutateAsync({
-        demandaId,
-        tipoRelease,
-        titulo: res.titulo,
-        resumo: res.resumo,
-      });
     } catch {
       /* erro tratado no hook */
     }
   };
 
-  const handleSalvarRascunho = async () => {
+  const handleSalvarEPublicar = async () => {
     if (!titulo.trim() || !resumo.trim()) {
       toast.error("Preencha título e resumo");
       return;
     }
-    await salvar.mutateAsync({ demandaId, tipoRelease, titulo, resumo });
-  };
-
-  const handlePublicar = async () => {
-    if (!titulo.trim() || !resumo.trim()) {
-      toast.error("Preencha título e resumo antes de publicar");
-      return;
+    try {
+      const releaseSalva = await salvar.mutateAsync({
+        demandaId,
+        tipoRelease,
+        titulo,
+        resumo,
+      });
+      await publicar.mutateAsync(releaseSalva.id);
+      void navigate({ to: "/releases" });
+    } catch {
+      /* erro tratado no hook */
     }
-    const releaseSalva = await salvar.mutateAsync({
-      demandaId,
-      tipoRelease,
-      titulo,
-      resumo,
-    });
-    if (
-      !confirm(
-        "Publicar release? Após publicada, ela não pode ser editada (só despublicada).",
-      )
-    )
-      return;
-    publicar.mutate(releaseSalva.id);
   };
 
   return (
@@ -164,7 +171,7 @@ export function ReleaseTab({ demandaId, demandaTipo, incluirRelease }: ReleaseTa
             ) : (
               <span className="inline-flex items-center gap-1.5 rounded-md border border-border bg-muted px-2 py-1 text-xs text-muted-foreground">
                 <FileText className="h-3.5 w-3.5" />
-                Rascunho — não aparece no feed
+                Pronto para publicar
               </span>
             )}
           </div>
@@ -243,18 +250,16 @@ export function ReleaseTab({ demandaId, demandaTipo, incluirRelease }: ReleaseTa
           {podeEditar && (
             <div className="flex justify-end gap-2 border-t border-border pt-3">
               <Button
-                variant="outline"
-                onClick={handleSalvarRascunho}
-                disabled={salvar.isPending}
+                onClick={handleSalvarEPublicar}
+                disabled={salvar.isPending || publicar.isPending}
+                className="gap-1.5"
               >
-                Salvar rascunho
-              </Button>
-              <Button
-                onClick={handlePublicar}
-                disabled={publicar.isPending || !temReleaseRascunho}
-                title={!temReleaseRascunho ? "Salve um rascunho antes de publicar" : undefined}
-              >
-                Publicar
+                {(salvar.isPending || publicar.isPending) ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Rocket className="h-3.5 w-3.5" />
+                )}
+                Salvar e Publicar
               </Button>
             </div>
           )}
