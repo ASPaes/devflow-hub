@@ -254,6 +254,25 @@ function DemandaDetalhe() {
             incluirRelease={!!demanda.incluir_release}
             podeAdicionarVinculo={canEditAny || canEditOwnTriagem}
             podeRemoverVinculo={canEditAny}
+            activeTab={search.tab ?? "comentarios"}
+            onTabChange={(tab) =>
+              navigate({
+                to: "/demandas/$codigo",
+                params: { codigo },
+                search: (prev) => ({ ...prev, tab }),
+                replace: true,
+              })
+            }
+            tituloIA={search.tituloIA}
+            resumoIA={search.resumoIA}
+            onConsumeIA={() =>
+              navigate({
+                to: "/demandas/$codigo",
+                params: { codigo },
+                search: (prev) => ({ ...prev, tituloIA: undefined, resumoIA: undefined }),
+                replace: true,
+              })
+            }
           />
         </div>
 
