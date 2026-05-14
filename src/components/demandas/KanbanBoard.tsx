@@ -405,6 +405,16 @@ export function KanbanBoard({ rows, isLoading, onCardClick }: KanbanBoardProps) 
         open={!!releaseDialog}
         onOpenChange={(o) => !o && setReleaseDialog(null)}
         demanda={releaseDialog}
+        onConcluido={({ tituloIA, resumoIA }) => {
+          const codigo = releaseDialog?.codigo;
+          console.log("[ReleaseFlow] 5. navegando pra aba Releases", { codigo, tituloIA, resumoIA });
+          if (!codigo) return;
+          void navigate({
+            to: "/demandas/$codigo",
+            params: { codigo },
+            search: { tab: "releases", tituloIA, resumoIA },
+          });
+        }}
       />
     </DndContext>
   );
