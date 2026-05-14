@@ -459,7 +459,7 @@ function DetalheTabs({
           podeRemover={podeRemoverVinculo}
         />
       </TabsContent>
-      <TabsContent value="releases" className="mt-4">
+      <TabsContent value="releases" className="mt-4" id="release-tab-section">
         <ReleaseTab
           demandaId={demandaId}
           demandaTipo={demandaTipo}
