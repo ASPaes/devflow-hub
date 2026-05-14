@@ -33,12 +33,13 @@ export function IncluirReleaseDialog({
     console.log("[ReleaseFlow] 1. user clicou Sim", { demandaId: demanda.id });
     try {
       const r1 = await marcar.mutateAsync({ demandaId: demanda.id, incluir: true });
-      console.log("[ReleaseFlow] 2. marcar incluir_release OK", r1);
+      console.log("[ReleaseFlow] 2. marcar OK", r1);
       console.log("[ReleaseFlow] 3. chamando IA");
       const ia = await gerarIA.mutateAsync({ demandaId: demanda.id });
       console.log("[ReleaseFlow] 4. IA retornou", ia);
-      onOpenChange(false);
+      // CHAMA onConcluido PRIMEIRO (com dados ainda válidos), DEPOIS fecha modal
       onConcluido?.({ tituloIA: ia.titulo, resumoIA: ia.resumo });
+      onOpenChange(false);
     } catch (err) {
       console.error("[ReleaseFlow] ERRO:", err);
     }
