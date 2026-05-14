@@ -315,6 +315,14 @@ function DemandaDetalhe() {
             titulo: demanda.titulo,
             tipo: demanda.tipo,
           }}
+          onConcluido={({ tituloIA, resumoIA }) => {
+            void navigate({
+              to: "/demandas/$codigo",
+              params: { codigo },
+              search: (prev) => ({ ...prev, tab: "releases", tituloIA, resumoIA }),
+              replace: true,
+            });
+          }}
         />
       )}
     </div>
