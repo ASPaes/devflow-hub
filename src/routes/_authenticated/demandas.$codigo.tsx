@@ -114,6 +114,17 @@ function DemandaDetalhe() {
     statusAnteriorRef.current = statusAtual;
   }, [statusAtual, incluirRelease, canEditAny, releaseDaDemanda]);
 
+  // Auto-scroll até a aba Releases quando chega via fluxo do Kanban (com IA preenchida)
+  React.useEffect(() => {
+    if (search.tab === "releases" && (search.tituloIA || search.resumoIA)) {
+      const timer = setTimeout(() => {
+        const el = document.getElementById("release-tab-section");
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [search.tab, search.tituloIA, search.resumoIA]);
+
   if (isLoading) return <DetalheSkeleton />;
   if (error) {
     return (
