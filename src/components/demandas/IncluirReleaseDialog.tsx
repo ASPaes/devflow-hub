@@ -7,33 +7,34 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Sparkles } from "lucide-react";
-import { useMarcarIncluirRelease } from "@/hooks/useReleases";
+import { Loader2, Sparkles } from "lucide-react";
+import { useMarcarIncluirRelease, useGerarResumoReleaseIA } from "@/hooks/useReleases";
 
 interface Props {
   open: boolean;
   onOpenChange: (o: boolean) => void;
   demanda: { id: string; codigo: string; titulo: string; tipo: string } | null;
-  onIncluir?: () => void;
+  onConcluido?: (args: { tituloIA: string; resumoIA: string }) => void;
 }
 
 export function IncluirReleaseDialog({
   open,
   onOpenChange,
   demanda,
-  onIncluir,
+  onConcluido,
 }: Props) {
   const marcar = useMarcarIncluirRelease();
+  const gerarIA = useGerarResumoReleaseIA();
 
   if (!demanda) return null;
+  const loading = marcar.isPending || gerarIA.isPending;
 
   const handleIncluir = async () => {
-    console.log("[IncluirRelease] CHAMANDO RPC", demanda.id);
     try {
       await marcar.mutateAsync({ demandaId: demanda.id, incluir: true });
-      console.log("[IncluirRelease] SUCESSO");
+      const ia = await gerarIA.mutateAsync({ demandaId: demanda.id });
       onOpenChange(false);
-      onIncluir?.();
+      onConcluido?.({ tituloIA: ia.titulo, resumoIA: ia.resumo });
     } catch (err) {
       console.error("[IncluirRelease] ERRO:", err);
     }
@@ -58,17 +59,20 @@ export function IncluirReleaseDialog({
         </div>
 
         <p className="text-xs text-muted-foreground">
-          Você poderá editar título, tipo e resumo antes de publicar. Nenhuma
-          informação aparece pro cliente até você clicar em &quot;Publicar&quot;.
+          Vamos gerar um resumo com IA e abrir a aba Releases pra você revisar e publicar.
         </p>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
             Agora não
           </Button>
-          <Button onClick={handleIncluir} disabled={marcar.isPending}>
-            <Sparkles className="mr-2 h-3.5 w-3.5" />
-            Incluir nas Releases
+          <Button onClick={handleIncluir} disabled={loading}>
+            {loading ? (
+              <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Sparkles className="mr-2 h-3.5 w-3.5" />
+            )}
+            {gerarIA.isPending ? "Gerando resumo..." : "Incluir e gerar resumo"}
           </Button>
         </DialogFooter>
       </DialogContent>
