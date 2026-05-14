@@ -185,7 +185,7 @@ function ColunaDroppable({
         className={cn(
           "flex flex-1 flex-col gap-2 overflow-y-auto p-2 transition-colors",
           isOver && "border-2 border-dashed border-primary/60 bg-primary/5",
-          items.length === 0 && !isLoading && "justify-center",
+          itemsExibidos.length === 0 && !isLoading && "justify-center",
         )}
       >
         {isLoading ? (
@@ -194,12 +194,14 @@ function ColunaDroppable({
               <Skeleton key={i} className="h-28 w-full rounded-lg" />
             ))}
           </>
-        ) : items.length === 0 ? (
+        ) : itemsExibidos.length === 0 ? (
           <div className="py-12 text-center text-xs text-muted-foreground">
-            Sem demandas
+            {isEntregue && !mostrarTodosEntregues
+              ? "Nenhuma demanda entregue hoje"
+              : "Sem demandas"}
           </div>
         ) : (
-          items.map((row) => (
+          itemsExibidos.map((row) => (
             <DraggableCard
               key={row.id ?? row.codigo}
               row={row}
