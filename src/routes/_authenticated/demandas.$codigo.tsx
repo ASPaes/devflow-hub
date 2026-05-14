@@ -116,13 +116,33 @@ function DemandaDetalhe() {
 
   // Auto-scroll até a aba Releases quando chega via fluxo do Kanban (com IA preenchida)
   React.useEffect(() => {
-    if (search.tab === "releases" && (search.tituloIA || search.resumoIA)) {
-      const timer = setTimeout(() => {
-        const el = document.getElementById("release-tab-section");
-        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 150);
-      return () => clearTimeout(timer);
-    }
+    if (search.tab !== "releases") return;
+    if (!search.tituloIA && !search.resumoIA) return;
+
+    let tries = 0;
+    const maxTries = 20;
+    let cancelled = false;
+
+    const tryScroll = () => {
+      if (cancelled) return;
+      const el = document.getElementById("release-tab-section");
+      if (el) {
+        console.log("[ReleaseFlow] 7. scrollando até aba Releases");
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+      tries++;
+      if (tries < maxTries) {
+        requestAnimationFrame(tryScroll);
+      } else {
+        console.warn("[ReleaseFlow] release-tab-section não encontrado após 20 tentativas");
+      }
+    };
+
+    requestAnimationFrame(() => requestAnimationFrame(tryScroll));
+    return () => {
+      cancelled = true;
+    };
   }, [search.tab, search.tituloIA, search.resumoIA]);
 
   if (isLoading) return <DetalheSkeleton />;
