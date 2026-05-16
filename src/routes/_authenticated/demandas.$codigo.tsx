@@ -313,13 +313,15 @@ function DemandaDetalhe() {
           />
         </div>
 
-        <MetadataSidebar
-          demanda={demanda}
-          canEdit={canEditMetadata}
-          canChangeStatus={canChangeStatus}
-          onPatch={handlePatch}
-          saving={updateMutation.isPending}
-        />
+        <div className="lg:sticky lg:top-0 lg:self-start lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto lg:overscroll-contain lg:pr-1">
+          <MetadataSidebar
+            demanda={demanda}
+            canEdit={canEditMetadata}
+            canChangeStatus={canChangeStatus}
+            onPatch={handlePatch}
+            saving={updateMutation.isPending}
+          />
+        </div>
       </div>
 
       {podeExcluir && (
