@@ -338,6 +338,12 @@ function UsuariosPage() {
             <Pencil className="mr-2 h-4 w-4" />
             Editar
           </DropdownMenuItem>
+          {row.perfil_acesso_nome === "Desenvolvedor" && (
+            <DropdownMenuItem onClick={() => setRateTarget(row)}>
+              <DollarSign className="mr-2 h-4 w-4" />
+              Definir tarifa
+            </DropdownMenuItem>
+          )}
           {showResend && (
             <DropdownMenuItem
               onClick={() => resendMutation.mutate(row.id)}
