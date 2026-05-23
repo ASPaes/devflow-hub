@@ -156,6 +156,9 @@ export function Sidebar() {
               {temPermissao("gerenciar_usuarios") && (
                 <NavItem to="/admin/usuarios" icon={Users} label="Usuários" />
               )}
+              {temPermissao("gerenciar_usuarios") && (
+                <NavItem to="/admin/horas" icon={Clock} label="Horas Dev" />
+              )}
               {temPermissao("gerenciar_perfis_acesso") && (
                 <NavItem
                   to="/admin/perfis-acesso"
