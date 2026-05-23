@@ -95,6 +95,7 @@ type DetalheRow = {
   demanda_id: string;
   demanda_codigo: string;
   demanda_titulo: string;
+  demanda_status: string;
   total_segundos: number;
   total_horas: number;
   dias: DetalheDia[];
