@@ -126,8 +126,9 @@ function HorasDevPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, nome")
+        .select("id, nome, perfil_acesso:perfis_acesso!inner(nome)")
         .eq("ativo", true)
+        .eq("perfil_acesso.nome", "Desenvolvedor")
         .order("nome");
       if (error) throw error;
       return (data ?? []) as ProfileLite[];
