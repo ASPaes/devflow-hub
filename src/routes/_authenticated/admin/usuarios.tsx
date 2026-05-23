@@ -787,3 +787,116 @@ function DisabledTooltipItem({
     </Tooltip>
   );
 }
+
+interface DefinirTarifaDialogProps {
+  target: UsuarioAdmin;
+  onOpenChange: (open: boolean) => void;
+  onSaved: () => void;
+}
+
+function DefinirTarifaDialog({
+  target,
+  onOpenChange,
+  onSaved,
+}: DefinirTarifaDialogProps) {
+  const today = React.useMemo(() => {
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  }, []);
+
+  const [valorHora, setValorHora] = React.useState("");
+  const [vigenciaInicio, setVigenciaInicio] = React.useState(today);
+  const [observacao, setObservacao] = React.useState("");
+  const [saving, setSaving] = React.useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const valor = Number(valorHora);
+    if (!Number.isFinite(valor) || valor < 0) {
+      toast.error("Informe um valor válido");
+      return;
+    }
+    if (!vigenciaInicio) {
+      toast.error("Informe a data de vigência");
+      return;
+    }
+    setSaving(true);
+    try {
+      const { error } = await (supabase.rpc as any)("upsert_developer_rate", {
+        p_profile_id: target.id,
+        p_valor_hora: valor,
+        p_vigencia_inicio: vigenciaInicio,
+        p_observacao: observacao.trim() ? observacao.trim() : null,
+      });
+      if (error) throw error;
+      toast.success("Tarifa definida com sucesso");
+      onSaved();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Erro ao salvar tarifa";
+      toast.error(msg);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Dialog open onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Definir tarifa — {target.nome}</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="valor_hora">Valor por hora (R$)</Label>
+            <Input
+              id="valor_hora"
+              type="number"
+              step="0.01"
+              min="0"
+              value={valorHora}
+              onChange={(e) => setValorHora(e.target.value)}
+              required
+              autoFocus
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="vigencia_inicio">Vigência a partir de</Label>
+            <Input
+              id="vigencia_inicio"
+              type="date"
+              value={vigenciaInicio}
+              onChange={(e) => setVigenciaInicio(e.target.value)}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="observacao">Observação</Label>
+            <Input
+              id="observacao"
+              type="text"
+              value={observacao}
+              onChange={(e) => setObservacao(e.target.value)}
+              placeholder="Ex: reajuste anual"
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={saving}
+            >
+              Cancelar
+            </Button>
+            <Button type="submit" disabled={saving}>
+              {saving ? "Salvando..." : "Salvar"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
