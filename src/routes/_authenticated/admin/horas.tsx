@@ -135,6 +135,9 @@ function HorasDevPage() {
   const [dataInicio, setDataInicio] = React.useState(firstDayOfMonth());
   const [dataFim, setDataFim] = React.useState(todayISO());
   const [selectedIds, setSelectedIds] = React.useState<string[]>([]);
+  const [selectedStatuses, setSelectedStatuses] = React.useState<string[]>([
+    "entregue",
+  ]);
 
   const profilesQuery = useQuery<ProfileLite[]>({
     queryKey: ["profiles-ativos-horas"],
