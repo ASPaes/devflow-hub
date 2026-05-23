@@ -122,6 +122,25 @@ function UsuariosPage() {
   const [deleteTarget, setDeleteTarget] =
     React.useState<UsuarioAdmin | null>(null);
   const [inviteOpen, setInviteOpen] = React.useState(false);
+  const [rateTarget, setRateTarget] = React.useState<UsuarioAdmin | null>(null);
+  const queryClient = useQueryClient();
+
+  const { data: ratesVigentes } = useQuery({
+    queryKey: ["developer-rates-vigentes"],
+    queryFn: async () => {
+      const { data, error } = await (supabase.from("developer_rates" as any) as any)
+        .select("profile_id, valor_hora")
+        .is("vigencia_fim", null);
+      if (error) throw error;
+      return (data ?? []) as Array<{ profile_id: string; valor_hora: number }>;
+    },
+  });
+
+  const ratesMap = React.useMemo(() => {
+    const m = new Map<string, number>();
+    (ratesVigentes ?? []).forEach((r) => m.set(r.profile_id, Number(r.valor_hora)));
+    return m;
+  }, [ratesVigentes]);
 
   const lista = usuarios ?? [];
   const perfisAtivos = React.useMemo(
@@ -132,6 +151,7 @@ function UsuariosPage() {
     () => (tenants ?? []).filter((t) => t.ativo),
     [tenants],
   );
+
 
   const editValues = React.useMemo<EditValues>(() => {
     if (!editTarget) {
