@@ -1,6 +1,9 @@
 import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import {
+  DollarSign,
   Mail,
   MoreHorizontal,
   Pencil,
@@ -11,6 +14,16 @@ import {
   Users,
 } from "lucide-react";
 import { z } from "zod";
+import { supabase } from "@/lib/supabase";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+
 
 import { PageHeader } from "@/components/common/PageHeader";
 import { EmptyState } from "@/components/common/EmptyState";
@@ -109,6 +122,25 @@ function UsuariosPage() {
   const [deleteTarget, setDeleteTarget] =
     React.useState<UsuarioAdmin | null>(null);
   const [inviteOpen, setInviteOpen] = React.useState(false);
+  const [rateTarget, setRateTarget] = React.useState<UsuarioAdmin | null>(null);
+  const queryClient = useQueryClient();
+
+  const { data: ratesVigentes } = useQuery({
+    queryKey: ["developer-rates-vigentes"],
+    queryFn: async () => {
+      const { data, error } = await (supabase.from("developer_rates" as any) as any)
+        .select("profile_id, valor_hora")
+        .is("vigencia_fim", null);
+      if (error) throw error;
+      return (data ?? []) as Array<{ profile_id: string; valor_hora: number }>;
+    },
+  });
+
+  const ratesMap = React.useMemo(() => {
+    const m = new Map<string, number>();
+    (ratesVigentes ?? []).forEach((r) => m.set(r.profile_id, Number(r.valor_hora)));
+    return m;
+  }, [ratesVigentes]);
 
   const lista = usuarios ?? [];
   const perfisAtivos = React.useMemo(
@@ -119,6 +151,7 @@ function UsuariosPage() {
     () => (tenants ?? []).filter((t) => t.ativo),
     [tenants],
   );
+
 
   const editValues = React.useMemo<EditValues>(() => {
     if (!editTarget) {
@@ -229,6 +262,34 @@ function UsuariosPage() {
       },
     },
     {
+      key: "valor_hora",
+      header: "Valor/Hora",
+      render: (row) => {
+        if (row.perfil_acesso_nome !== "Desenvolvedor") {
+          return <span className="text-sm text-muted-foreground">—</span>;
+        }
+        const rate = ratesMap.get(row.id);
+        if (rate === undefined) {
+          return (
+            <Badge
+              variant="outline"
+              className="border-yellow-500/40 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400"
+            >
+              Sem tarifa
+            </Badge>
+          );
+        }
+        return (
+          <span className="text-sm text-foreground">
+            {rate.toLocaleString("pt-BR", {
+              style: "currency",
+              currency: "BRL",
+            })}
+          </span>
+        );
+      },
+    },
+    {
       key: "last_sign_in_at",
       header: "Último acesso",
       render: (row) =>
@@ -277,6 +338,12 @@ function UsuariosPage() {
             <Pencil className="mr-2 h-4 w-4" />
             Editar
           </DropdownMenuItem>
+          {row.perfil_acesso_nome === "Desenvolvedor" && (
+            <DropdownMenuItem onClick={() => setRateTarget(row)}>
+              <DollarSign className="mr-2 h-4 w-4" />
+              Definir tarifa
+            </DropdownMenuItem>
+          )}
           {showResend && (
             <DropdownMenuItem
               onClick={() => resendMutation.mutate(row.id)}
@@ -496,6 +563,18 @@ function UsuariosPage() {
             }}
           />
         )}
+
+        {rateTarget && (
+          <DefinirTarifaDialog
+            target={rateTarget}
+            onOpenChange={(o) => !o && setRateTarget(null)}
+            onSaved={() => {
+              queryClient.invalidateQueries({ queryKey: ["developer-rates-vigentes"] });
+              queryClient.invalidateQueries({ queryKey: ["relatorio-horas-dev"] });
+              setRateTarget(null);
+            }}
+          />
+        )}
       </div>
     </TooltipProvider>
   );
@@ -706,5 +785,118 @@ function DisabledTooltipItem({
       </TooltipTrigger>
       <TooltipContent side="left">{reason}</TooltipContent>
     </Tooltip>
+  );
+}
+
+interface DefinirTarifaDialogProps {
+  target: UsuarioAdmin;
+  onOpenChange: (open: boolean) => void;
+  onSaved: () => void;
+}
+
+function DefinirTarifaDialog({
+  target,
+  onOpenChange,
+  onSaved,
+}: DefinirTarifaDialogProps) {
+  const today = React.useMemo(() => {
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  }, []);
+
+  const [valorHora, setValorHora] = React.useState("");
+  const [vigenciaInicio, setVigenciaInicio] = React.useState(today);
+  const [observacao, setObservacao] = React.useState("");
+  const [saving, setSaving] = React.useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const valor = Number(valorHora);
+    if (!Number.isFinite(valor) || valor < 0) {
+      toast.error("Informe um valor válido");
+      return;
+    }
+    if (!vigenciaInicio) {
+      toast.error("Informe a data de vigência");
+      return;
+    }
+    setSaving(true);
+    try {
+      const { error } = await (supabase.rpc as any)("upsert_developer_rate", {
+        p_profile_id: target.id,
+        p_valor_hora: valor,
+        p_vigencia_inicio: vigenciaInicio,
+        p_observacao: observacao.trim() ? observacao.trim() : null,
+      });
+      if (error) throw error;
+      toast.success("Tarifa definida com sucesso");
+      onSaved();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Erro ao salvar tarifa";
+      toast.error(msg);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Dialog open onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Definir tarifa — {target.nome}</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="valor_hora">Valor por hora (R$)</Label>
+            <Input
+              id="valor_hora"
+              type="number"
+              step="0.01"
+              min="0"
+              value={valorHora}
+              onChange={(e) => setValorHora(e.target.value)}
+              required
+              autoFocus
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="vigencia_inicio">Vigência a partir de</Label>
+            <Input
+              id="vigencia_inicio"
+              type="date"
+              value={vigenciaInicio}
+              onChange={(e) => setVigenciaInicio(e.target.value)}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="observacao">Observação</Label>
+            <Input
+              id="observacao"
+              type="text"
+              value={observacao}
+              onChange={(e) => setObservacao(e.target.value)}
+              placeholder="Ex: reajuste anual"
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={saving}
+            >
+              Cancelar
+            </Button>
+            <Button type="submit" disabled={saving}>
+              {saving ? "Salvando..." : "Salvar"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
