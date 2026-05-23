@@ -262,6 +262,34 @@ function UsuariosPage() {
       },
     },
     {
+      key: "valor_hora",
+      header: "Valor/Hora",
+      render: (row) => {
+        if (row.perfil_acesso_nome !== "Desenvolvedor") {
+          return <span className="text-sm text-muted-foreground">—</span>;
+        }
+        const rate = ratesMap.get(row.id);
+        if (rate === undefined) {
+          return (
+            <Badge
+              variant="outline"
+              className="border-yellow-500/40 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400"
+            >
+              Sem tarifa
+            </Badge>
+          );
+        }
+        return (
+          <span className="text-sm text-foreground">
+            {rate.toLocaleString("pt-BR", {
+              style: "currency",
+              currency: "BRL",
+            })}
+          </span>
+        );
+      },
+    },
+    {
       key: "last_sign_in_at",
       header: "Último acesso",
       render: (row) =>
