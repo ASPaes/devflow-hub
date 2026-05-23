@@ -437,6 +437,11 @@ function HorasDevPage() {
                             profileId={row.profile_id}
                             dataInicio={dataInicio}
                             dataFim={dataFim}
+                            statusFilter={
+                              selectedStatuses.length > 0
+                                ? selectedStatuses
+                                : null
+                            }
                           />
                         </TableCell>
                       </TableRow>
