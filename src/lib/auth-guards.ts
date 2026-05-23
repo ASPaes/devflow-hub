@@ -17,7 +17,11 @@ type BeforeLoadCtx = {
  */
 export function requirePermission(permissao: AppPermissao) {
   return async ({ context, location }: BeforeLoadCtx) => {
-    const userId = context.auth.session?.user.id;
+    let userId = context.auth.session?.user.id;
+    if (!userId) {
+      const { data } = await supabase.auth.getSession();
+      userId = data.session?.user.id;
+    }
     if (!userId) {
       throw redirect({ to: "/login", search: { redirect: location.href } });
     }
