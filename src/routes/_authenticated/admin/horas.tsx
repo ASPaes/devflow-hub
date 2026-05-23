@@ -477,13 +477,21 @@ function DetalheDesenvolvedor({
   profileId,
   dataInicio,
   dataFim,
+  statusFilter,
 }: {
   profileId: string;
   dataInicio: string;
   dataFim: string;
+  statusFilter: string[] | null;
 }) {
   const detalheQuery = useQuery<DetalheRow[]>({
-    queryKey: ["detalhe-horas-dev", profileId, dataInicio, dataFim],
+    queryKey: [
+      "detalhe-horas-dev",
+      profileId,
+      dataInicio,
+      dataFim,
+      statusFilter,
+    ],
     queryFn: async () => {
       const { data, error } = await (supabase.rpc as any)(
         "detalhe_horas_desenvolvedor",
@@ -491,6 +499,7 @@ function DetalheDesenvolvedor({
           p_profile_id: profileId,
           p_data_inicio: dataInicio,
           p_data_fim: dataFim,
+          p_status: statusFilter,
         },
       );
       if (error) throw error;
