@@ -2,7 +2,7 @@ import * as React from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
   Building,
-  
+  Clock,
   Columns3,
   Inbox,
   Layers,
@@ -155,6 +155,9 @@ export function Sidebar() {
               )}
               {temPermissao("gerenciar_usuarios") && (
                 <NavItem to="/admin/usuarios" icon={Users} label="Usuários" />
+              )}
+              {temPermissao("gerenciar_usuarios") && (
+                <NavItem to="/admin/horas" icon={Clock} label="Horas Dev" />
               )}
               {temPermissao("gerenciar_perfis_acesso") && (
                 <NavItem

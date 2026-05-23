@@ -586,6 +586,7 @@ export type Database = {
           demanda_id: string
           id: string
           origem: Database["public"]["Enums"]["tempo_origem"]
+          profile_id: string
           segundos: number
           updated_at: string
         }
@@ -596,6 +597,7 @@ export type Database = {
           demanda_id: string
           id?: string
           origem?: Database["public"]["Enums"]["tempo_origem"]
+          profile_id: string
           segundos?: number
           updated_at?: string
         }
@@ -606,6 +608,7 @@ export type Database = {
           demanda_id?: string
           id?: string
           origem?: Database["public"]["Enums"]["tempo_origem"]
+          profile_id?: string
           segundos?: number
           updated_at?: string
         }
@@ -650,6 +653,27 @@ export type Database = {
             columns: ["demanda_id"]
             isOneToOne: false
             referencedRelation: "vw_demandas_lista"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demanda_timer_log_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demanda_timer_log_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "vw_potenciais_responsaveis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demanda_timer_log_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "vw_solicitantes_por_empresa"
             referencedColumns: ["id"]
           },
         ]
@@ -955,6 +979,82 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "vw_tenants_com_usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      developer_rates: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          observacao: string | null
+          profile_id: string
+          valor_hora: number
+          vigencia_fim: string | null
+          vigencia_inicio: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          observacao?: string | null
+          profile_id: string
+          valor_hora: number
+          vigencia_fim?: string | null
+          vigencia_inicio: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          observacao?: string | null
+          profile_id?: string
+          valor_hora?: number
+          vigencia_fim?: string | null
+          vigencia_inicio?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "developer_rates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "developer_rates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "vw_potenciais_responsaveis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "developer_rates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "vw_solicitantes_por_empresa"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "developer_rates_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "developer_rates_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "vw_potenciais_responsaveis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "developer_rates_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "vw_solicitantes_por_empresa"
             referencedColumns: ["id"]
           },
         ]
@@ -1910,6 +2010,7 @@ export type Database = {
           demanda_id: string
           id: string
           origem: Database["public"]["Enums"]["tempo_origem"]
+          profile_id: string
           segundos: number
           updated_at: string
         }
@@ -1976,6 +2077,21 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      detalhe_horas_desenvolvedor: {
+        Args: {
+          p_data_fim: string
+          p_data_inicio: string
+          p_profile_id: string
+        }
+        Returns: {
+          demanda_codigo: string
+          demanda_id: string
+          demanda_titulo: string
+          dias: Json
+          total_horas: number
+          total_segundos: number
+        }[]
       }
       duplicar_rascunho: {
         Args: { p_rascunho_id: string }
@@ -2134,6 +2250,7 @@ export type Database = {
           demanda_id: string
           id: string
           origem: Database["public"]["Enums"]["tempo_origem"]
+          profile_id: string
           segundos: number
           updated_at: string
         }
@@ -2390,6 +2507,23 @@ export type Database = {
         }
         Returns: string
       }
+      relatorio_horas_desenvolvedor: {
+        Args: {
+          p_data_fim: string
+          p_data_inicio: string
+          p_profile_ids?: string[]
+        }
+        Returns: {
+          dias_trabalhados: number
+          profile_id: string
+          profile_nome: string
+          qtd_demandas: number
+          total_horas: number
+          total_segundos: number
+          valor_hora: number
+          valor_total: number
+        }[]
+      }
       restaurar_demanda: {
         Args: { p_demanda_id: string }
         Returns: {
@@ -2495,6 +2629,30 @@ export type Database = {
       tem_permissao: {
         Args: { p_permissao: Database["public"]["Enums"]["app_permissao"] }
         Returns: boolean
+      }
+      upsert_developer_rate: {
+        Args: {
+          p_observacao?: string
+          p_profile_id: string
+          p_valor_hora: number
+          p_vigencia_inicio: string
+        }
+        Returns: {
+          created_at: string
+          created_by: string | null
+          id: string
+          observacao: string | null
+          profile_id: string
+          valor_hora: number
+          vigencia_fim: string | null
+          vigencia_inicio: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "developer_rates"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
     }
     Enums: {
