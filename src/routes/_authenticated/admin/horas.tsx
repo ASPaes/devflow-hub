@@ -156,7 +156,13 @@ function HorasDevPage() {
   });
 
   const relatorioQuery = useQuery<RelatorioRow[]>({
-    queryKey: ["relatorio-horas-dev", dataInicio, dataFim, selectedIds],
+    queryKey: [
+      "relatorio-horas-dev",
+      dataInicio,
+      dataFim,
+      selectedIds,
+      selectedStatuses,
+    ],
     queryFn: async () => {
       const { data, error } = await (supabase.rpc as any)(
         "relatorio_horas_desenvolvedor",
@@ -164,6 +170,7 @@ function HorasDevPage() {
           p_data_inicio: dataInicio,
           p_data_fim: dataFim,
           p_profile_ids: selectedIds.length > 0 ? selectedIds : null,
+          p_status: selectedStatuses.length > 0 ? selectedStatuses : null,
         },
       );
       if (error) throw error;
