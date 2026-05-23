@@ -14,7 +14,11 @@ const PERMISSOES_ADMIN: AppPermissao[] = [
 
 export const Route = createFileRoute("/_authenticated/admin")({
   beforeLoad: async ({ context }) => {
-    const userId = context.auth.user?.id;
+    let userId = context.auth.user?.id;
+    if (!userId) {
+      const { data } = await supabase.auth.getSession();
+      userId = data.session?.user.id;
+    }
     if (!userId) {
       throw redirect({ to: "/login" });
     }
