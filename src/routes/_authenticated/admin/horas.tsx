@@ -137,6 +137,7 @@ function HorasDevPage() {
   const [selectedIds, setSelectedIds] = React.useState<string[]>([]);
   const [selectedStatuses, setSelectedStatuses] = React.useState<string[]>([
     "entregue",
+    "encerrada",
   ]);
 
   const profilesQuery = useQuery<ProfileLite[]>({
@@ -569,7 +570,7 @@ function DetalheDemanda({ demanda }: { demanda: DetalheRow }) {
             {demanda.demanda_codigo}
           </Link>
           <span className="font-medium">{demanda.demanda_titulo}</span>
-          <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+          <Badge variant="secondary" className="text-[10px] px-1.5 py-0 shrink-0">
             {statusLabel}
           </Badge>
         </div>
