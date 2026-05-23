@@ -1,5 +1,5 @@
 import * as React from "react";
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown, ChevronRight, Filter } from "lucide-react";
 
@@ -27,8 +27,22 @@ import { supabase } from "@/lib/supabase";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useProfile } from "@/hooks/useProfile";
 import type { AppPermissao } from "@/hooks/useProfile";
+import { STATUS_DEMANDA_LABEL } from "@/hooks/useDemandas";
 import { formatDataLogPT } from "@/lib/format";
 import { cn } from "@/lib/utils";
+
+const STATUS_OPCOES: Array<keyof typeof STATUS_DEMANDA_LABEL> = [
+  "triagem",
+  "analise",
+  "desenvolvimento",
+  "aguardando_cliente",
+  "teste",
+  "para_publicar",
+  "entregue",
+  "reaberta",
+  "encerrada",
+  "cancelada",
+];
 
 export const Route = createFileRoute("/_authenticated/admin/horas")({
   beforeLoad: async ({ context }) => {
