@@ -2078,21 +2078,39 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      detalhe_horas_desenvolvedor: {
-        Args: {
-          p_data_fim: string
-          p_data_inicio: string
-          p_profile_id: string
-        }
-        Returns: {
-          demanda_codigo: string
-          demanda_id: string
-          demanda_titulo: string
-          dias: Json
-          total_horas: number
-          total_segundos: number
-        }[]
-      }
+      detalhe_horas_desenvolvedor:
+        | {
+            Args: {
+              p_data_fim: string
+              p_data_inicio: string
+              p_profile_id: string
+            }
+            Returns: {
+              demanda_codigo: string
+              demanda_id: string
+              demanda_titulo: string
+              dias: Json
+              total_horas: number
+              total_segundos: number
+            }[]
+          }
+        | {
+            Args: {
+              p_data_fim: string
+              p_data_inicio: string
+              p_profile_id: string
+              p_status?: string[]
+            }
+            Returns: {
+              demanda_codigo: string
+              demanda_id: string
+              demanda_status: string
+              demanda_titulo: string
+              dias: Json
+              total_horas: number
+              total_segundos: number
+            }[]
+          }
       duplicar_rascunho: {
         Args: { p_rascunho_id: string }
         Returns: {
@@ -2507,23 +2525,42 @@ export type Database = {
         }
         Returns: string
       }
-      relatorio_horas_desenvolvedor: {
-        Args: {
-          p_data_fim: string
-          p_data_inicio: string
-          p_profile_ids?: string[]
-        }
-        Returns: {
-          dias_trabalhados: number
-          profile_id: string
-          profile_nome: string
-          qtd_demandas: number
-          total_horas: number
-          total_segundos: number
-          valor_hora: number
-          valor_total: number
-        }[]
-      }
+      relatorio_horas_desenvolvedor:
+        | {
+            Args: {
+              p_data_fim: string
+              p_data_inicio: string
+              p_profile_ids?: string[]
+            }
+            Returns: {
+              dias_trabalhados: number
+              profile_id: string
+              profile_nome: string
+              qtd_demandas: number
+              total_horas: number
+              total_segundos: number
+              valor_hora: number
+              valor_total: number
+            }[]
+          }
+        | {
+            Args: {
+              p_data_fim: string
+              p_data_inicio: string
+              p_profile_ids?: string[]
+              p_status?: string[]
+            }
+            Returns: {
+              dias_trabalhados: number
+              profile_id: string
+              profile_nome: string
+              qtd_demandas: number
+              total_horas: number
+              total_segundos: number
+              valor_hora: number
+              valor_total: number
+            }[]
+          }
       restaurar_demanda: {
         Args: { p_demanda_id: string }
         Returns: {
