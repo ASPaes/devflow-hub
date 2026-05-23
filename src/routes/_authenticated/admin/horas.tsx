@@ -1,5 +1,5 @@
 import * as React from "react";
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown, ChevronRight, Filter } from "lucide-react";
 
@@ -27,8 +27,22 @@ import { supabase } from "@/lib/supabase";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useProfile } from "@/hooks/useProfile";
 import type { AppPermissao } from "@/hooks/useProfile";
+import { STATUS_DEMANDA_LABEL } from "@/hooks/useDemandas";
 import { formatDataLogPT } from "@/lib/format";
 import { cn } from "@/lib/utils";
+
+const STATUS_OPCOES: Array<keyof typeof STATUS_DEMANDA_LABEL> = [
+  "triagem",
+  "analise",
+  "desenvolvimento",
+  "aguardando_cliente",
+  "teste",
+  "para_publicar",
+  "entregue",
+  "reaberta",
+  "encerrada",
+  "cancelada",
+];
 
 export const Route = createFileRoute("/_authenticated/admin/horas")({
   beforeLoad: async ({ context }) => {
@@ -81,6 +95,7 @@ type DetalheRow = {
   demanda_id: string;
   demanda_codigo: string;
   demanda_titulo: string;
+  demanda_status: string;
   total_segundos: number;
   total_horas: number;
   dias: DetalheDia[];
@@ -120,6 +135,9 @@ function HorasDevPage() {
   const [dataInicio, setDataInicio] = React.useState(firstDayOfMonth());
   const [dataFim, setDataFim] = React.useState(todayISO());
   const [selectedIds, setSelectedIds] = React.useState<string[]>([]);
+  const [selectedStatuses, setSelectedStatuses] = React.useState<string[]>([
+    "entregue",
+  ]);
 
   const profilesQuery = useQuery<ProfileLite[]>({
     queryKey: ["profiles-ativos-horas"],
@@ -138,7 +156,13 @@ function HorasDevPage() {
   });
 
   const relatorioQuery = useQuery<RelatorioRow[]>({
-    queryKey: ["relatorio-horas-dev", dataInicio, dataFim, selectedIds],
+    queryKey: [
+      "relatorio-horas-dev",
+      dataInicio,
+      dataFim,
+      selectedIds,
+      selectedStatuses,
+    ],
     queryFn: async () => {
       const { data, error } = await (supabase.rpc as any)(
         "relatorio_horas_desenvolvedor",
@@ -146,6 +170,7 @@ function HorasDevPage() {
           p_data_inicio: dataInicio,
           p_data_fim: dataFim,
           p_profile_ids: selectedIds.length > 0 ? selectedIds : null,
+          p_status: selectedStatuses.length > 0 ? selectedStatuses : null,
         },
       );
       if (error) throw error;
@@ -174,6 +199,12 @@ function HorasDevPage() {
     );
   };
 
+  const toggleStatus = (s: string) => {
+    setSelectedStatuses((prev) =>
+      prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s],
+    );
+  };
+
   const selectedLabel =
     selectedIds.length === 0
       ? "Todos os desenvolvedores"
@@ -181,6 +212,15 @@ function HorasDevPage() {
         ? (profilesQuery.data?.find((p) => p.id === selectedIds[0])?.nome ??
           "1 selecionado")
         : `${selectedIds.length} selecionados`;
+
+  const statusLabel =
+    selectedStatuses.length === 0
+      ? "Todos os status"
+      : selectedStatuses.length === 1
+        ? (STATUS_DEMANDA_LABEL[
+            selectedStatuses[0] as keyof typeof STATUS_DEMANDA_LABEL
+          ] ?? "1 selecionado")
+        : `${selectedStatuses.length} selecionados`;
 
   return (
     <div className="space-y-6">
@@ -252,6 +292,51 @@ function HorasDevPage() {
                         onCheckedChange={() => toggleProfile(p.id)}
                       />
                       <span className="text-sm">{p.nome}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
+        <div className="flex flex-col gap-1">
+          <Label className="text-xs text-muted-foreground">Status</Label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="h-9 min-w-[200px] justify-start">
+                <Filter className="mr-2 h-4 w-4" />
+                {statusLabel}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-64 p-0" align="start">
+              <div className="max-h-80 overflow-y-auto p-2">
+                <div className="flex items-center justify-between px-2 py-1.5">
+                  <span className="text-xs text-muted-foreground">
+                    {selectedStatuses.length} selecionado(s)
+                  </span>
+                  {selectedStatuses.length > 0 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 px-2 text-xs"
+                      onClick={() => setSelectedStatuses([])}
+                    >
+                      Limpar
+                    </Button>
+                  )}
+                </div>
+                {STATUS_OPCOES.map((s) => {
+                  const checked = selectedStatuses.includes(s);
+                  return (
+                    <label
+                      key={s}
+                      className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 hover:bg-secondary/50"
+                    >
+                      <Checkbox
+                        checked={checked}
+                        onCheckedChange={() => toggleStatus(s)}
+                      />
+                      <span className="text-sm">{STATUS_DEMANDA_LABEL[s]}</span>
                     </label>
                   );
                 })}
@@ -352,6 +437,11 @@ function HorasDevPage() {
                             profileId={row.profile_id}
                             dataInicio={dataInicio}
                             dataFim={dataFim}
+                            statusFilter={
+                              selectedStatuses.length > 0
+                                ? selectedStatuses
+                                : null
+                            }
                           />
                         </TableCell>
                       </TableRow>
@@ -387,13 +477,21 @@ function DetalheDesenvolvedor({
   profileId,
   dataInicio,
   dataFim,
+  statusFilter,
 }: {
   profileId: string;
   dataInicio: string;
   dataFim: string;
+  statusFilter: string[] | null;
 }) {
   const detalheQuery = useQuery<DetalheRow[]>({
-    queryKey: ["detalhe-horas-dev", profileId, dataInicio, dataFim],
+    queryKey: [
+      "detalhe-horas-dev",
+      profileId,
+      dataInicio,
+      dataFim,
+      statusFilter,
+    ],
     queryFn: async () => {
       const { data, error } = await (supabase.rpc as any)(
         "detalhe_horas_desenvolvedor",
@@ -401,6 +499,7 @@ function DetalheDesenvolvedor({
           p_profile_id: profileId,
           p_data_inicio: dataInicio,
           p_data_fim: dataFim,
+          p_status: statusFilter,
         },
       );
       if (error) throw error;
@@ -438,8 +537,18 @@ function DetalheDesenvolvedor({
 
 function DetalheDemanda({ demanda }: { demanda: DetalheRow }) {
   const [open, setOpen] = React.useState(false);
+  const semHoras = Number(demanda.total_horas) === 0;
+  const statusLabel =
+    STATUS_DEMANDA_LABEL[
+      demanda.demanda_status as keyof typeof STATUS_DEMANDA_LABEL
+    ] ?? demanda.demanda_status;
   return (
-    <div className="rounded-md border border-border bg-background">
+    <div
+      className={cn(
+        "rounded-md border border-border bg-background",
+        semHoras && "opacity-60",
+      )}
+    >
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -451,10 +560,18 @@ function DetalheDemanda({ demanda }: { demanda: DetalheRow }) {
           ) : (
             <ChevronRight className="h-4 w-4" />
           )}
-          <span className="font-mono text-xs text-muted-foreground">
+          <Link
+            to={"/demandas/$codigo"}
+            params={{ codigo: demanda.demanda_codigo }}
+            onClick={(e) => e.stopPropagation()}
+            className="font-mono text-xs text-primary underline-offset-2 hover:underline"
+          >
             {demanda.demanda_codigo}
-          </span>
+          </Link>
           <span className="font-medium">{demanda.demanda_titulo}</span>
+          <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+            {statusLabel}
+          </Badge>
         </div>
         <span className="text-sm tabular-nums">
           {formatHoras(Number(demanda.total_horas))} h
