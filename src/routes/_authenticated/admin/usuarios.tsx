@@ -563,6 +563,18 @@ function UsuariosPage() {
             }}
           />
         )}
+
+        {rateTarget && (
+          <DefinirTarifaDialog
+            target={rateTarget}
+            onOpenChange={(o) => !o && setRateTarget(null)}
+            onSaved={() => {
+              queryClient.invalidateQueries({ queryKey: ["developer-rates-vigentes"] });
+              queryClient.invalidateQueries({ queryKey: ["relatorio-horas-dev"] });
+              setRateTarget(null);
+            }}
+          />
+        )}
       </div>
     </TooltipProvider>
   );
