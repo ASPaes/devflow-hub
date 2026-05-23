@@ -537,8 +537,18 @@ function DetalheDesenvolvedor({
 
 function DetalheDemanda({ demanda }: { demanda: DetalheRow }) {
   const [open, setOpen] = React.useState(false);
+  const semHoras = Number(demanda.total_horas) === 0;
+  const statusLabel =
+    STATUS_DEMANDA_LABEL[
+      demanda.demanda_status as keyof typeof STATUS_DEMANDA_LABEL
+    ] ?? demanda.demanda_status;
   return (
-    <div className="rounded-md border border-border bg-background">
+    <div
+      className={cn(
+        "rounded-md border border-border bg-background",
+        semHoras && "opacity-60",
+      )}
+    >
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -550,10 +560,18 @@ function DetalheDemanda({ demanda }: { demanda: DetalheRow }) {
           ) : (
             <ChevronRight className="h-4 w-4" />
           )}
-          <span className="font-mono text-xs text-muted-foreground">
+          <Link
+            to={"/demandas/$codigo"}
+            params={{ codigo: demanda.demanda_codigo }}
+            onClick={(e) => e.stopPropagation()}
+            className="font-mono text-xs text-primary underline-offset-2 hover:underline"
+          >
             {demanda.demanda_codigo}
-          </span>
+          </Link>
           <span className="font-medium">{demanda.demanda_titulo}</span>
+          <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+            {statusLabel}
+          </Badge>
         </div>
         <span className="text-sm tabular-nums">
           {formatHoras(Number(demanda.total_horas))} h
