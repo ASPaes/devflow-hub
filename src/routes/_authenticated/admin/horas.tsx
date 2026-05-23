@@ -199,6 +199,12 @@ function HorasDevPage() {
     );
   };
 
+  const toggleStatus = (s: string) => {
+    setSelectedStatuses((prev) =>
+      prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s],
+    );
+  };
+
   const selectedLabel =
     selectedIds.length === 0
       ? "Todos os desenvolvedores"
@@ -206,6 +212,15 @@ function HorasDevPage() {
         ? (profilesQuery.data?.find((p) => p.id === selectedIds[0])?.nome ??
           "1 selecionado")
         : `${selectedIds.length} selecionados`;
+
+  const statusLabel =
+    selectedStatuses.length === 0
+      ? "Todos os status"
+      : selectedStatuses.length === 1
+        ? (STATUS_DEMANDA_LABEL[
+            selectedStatuses[0] as keyof typeof STATUS_DEMANDA_LABEL
+          ] ?? "1 selecionado")
+        : `${selectedStatuses.length} selecionados`;
 
   return (
     <div className="space-y-6">
