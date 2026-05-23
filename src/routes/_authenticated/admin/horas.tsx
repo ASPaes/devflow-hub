@@ -299,6 +299,51 @@ function HorasDevPage() {
             </PopoverContent>
           </Popover>
         </div>
+        <div className="flex flex-col gap-1">
+          <Label className="text-xs text-muted-foreground">Status</Label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="h-9 min-w-[200px] justify-start">
+                <Filter className="mr-2 h-4 w-4" />
+                {statusLabel}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-64 p-0" align="start">
+              <div className="max-h-80 overflow-y-auto p-2">
+                <div className="flex items-center justify-between px-2 py-1.5">
+                  <span className="text-xs text-muted-foreground">
+                    {selectedStatuses.length} selecionado(s)
+                  </span>
+                  {selectedStatuses.length > 0 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 px-2 text-xs"
+                      onClick={() => setSelectedStatuses([])}
+                    >
+                      Limpar
+                    </Button>
+                  )}
+                </div>
+                {STATUS_OPCOES.map((s) => {
+                  const checked = selectedStatuses.includes(s);
+                  return (
+                    <label
+                      key={s}
+                      className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 hover:bg-secondary/50"
+                    >
+                      <Checkbox
+                        checked={checked}
+                        onCheckedChange={() => toggleStatus(s)}
+                      />
+                      <span className="text-sm">{STATUS_DEMANDA_LABEL[s]}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
       </div>
 
       <ScrollableTable className="rounded-lg border border-border bg-card">
