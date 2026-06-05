@@ -9,9 +9,6 @@ import {
 import {
   Loader2,
   MessageSquare,
-  Image as ImageIcon,
-  Mic,
-  Video,
   Paperclip,
   User,
 } from "lucide-react";
@@ -27,11 +24,6 @@ interface Props {
   releaseTitulo: string | null;
 }
 
-const ICONE_MIDIA: Record<string, React.ReactNode> = {
-  imagem: <ImageIcon className="h-3.5 w-3.5" />,
-  audio: <Mic className="h-3.5 w-3.5" />,
-  video: <Video className="h-3.5 w-3.5" />,
-};
 
 export function ReleaseDetalhesSheet({
   open,
@@ -93,14 +85,48 @@ export function ReleaseDetalhesSheet({
                   </p>
                 )}
 
-                {r.midia_tipo && (
-                  <div className="mt-2 inline-flex items-center gap-1.5 rounded border border-border bg-background px-2 py-1 text-xs text-muted-foreground">
-                    {ICONE_MIDIA[r.midia_tipo] ?? (
-                      <Paperclip className="h-3.5 w-3.5" />
-                    )}
-                    <span className="capitalize">{r.midia_tipo}</span>
-                    <span className="opacity-70">— disponível na demanda</span>
+                {r.midia_url && r.midia_tipo === "imagem" && (
+                  <div className="mt-3">
+                    <img
+                      src={r.midia_url}
+                      alt={r.midia_nome_original ?? "Imagem"}
+                      className="max-w-full rounded-md border border-border"
+                    />
                   </div>
+                )}
+
+                {r.midia_url && r.midia_tipo === "audio" && (
+                  <div className="mt-3">
+                    <audio controls className="w-full">
+                      <source src={r.midia_url} />
+                      Seu navegador não suporta áudio.
+                    </audio>
+                  </div>
+                )}
+
+                {r.midia_url && r.midia_tipo === "video" && (
+                  <div className="mt-3">
+                    <video
+                      controls
+                      className="max-w-full rounded-md border border-border"
+                      preload="metadata"
+                    >
+                      <source src={r.midia_url} />
+                      Seu navegador não suporta vídeo.
+                    </video>
+                  </div>
+                )}
+
+                {r.midia_url && !["imagem", "audio", "video"].includes(r.midia_tipo ?? "") && (
+                  <a
+                    href={r.midia_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-3 inline-flex items-center gap-1.5 text-xs px-2 py-1 rounded-md bg-muted hover:bg-muted/70 text-muted-foreground"
+                  >
+                    <Paperclip className="h-3 w-3" />
+                    {r.midia_nome_original ?? "Anexo"}
+                  </a>
                 )}
               </div>
             ))}

@@ -44,10 +44,13 @@ export interface RetornoRelease {
   id: string;
   texto: string | null;
   midia_tipo: string | null;
-  storage_path: string | null;
+  midia_url: string | null;
+  midia_nome_original: string | null;
+  midia_tamanho_bytes: number | null;
   autor_id: string | null;
   autor_nome: string | null;
   autor_avatar: string | null;
   created_at: string;
   ordem: number;
 }
+
