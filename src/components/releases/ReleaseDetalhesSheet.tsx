@@ -162,43 +162,39 @@ export function ReleaseDetalhesSheet({
       </SheetContent>
     </Sheet>
 
-    {imagemExpandida && typeof document !== "undefined"
-      ? createPortal(
-          <div
-            role="dialog"
-            aria-modal="true"
-            ref={overlayRef}
-            onClick={() => setImagemExpandida(null)}
-            onKeyDown={(e) => e.key === "Escape" && setImagemExpandida(null)}
-            tabIndex={-1}
-            className="fixed inset-0 z-[120] flex items-center justify-center bg-black/80 p-4 outline-none"
-          >
-            <div
-              ref={imagemConteudoRef}
-              className="relative"
-              onClick={(e) => e.stopPropagation()}
+    <DialogPrimitive.Root
+      open={!!imagemExpandida}
+      onOpenChange={(o) => {
+        if (!o) setImagemExpandida(null);
+      }}
+    >
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay className="fixed inset-0 z-[120] bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+        <DialogPrimitive.Content
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          className="fixed inset-0 z-[121] flex items-center justify-center p-4 outline-none"
+        >
+          <DialogPrimitive.Title className="sr-only">
+            {imagemExpandida?.alt ?? "Imagem"}
+          </DialogPrimitive.Title>
+          <div className="relative">
+            <DialogPrimitive.Close
+              aria-label="Fechar"
+              className="absolute top-4 right-4 rounded-md p-2 text-white/80 hover:bg-white/10 hover:text-white"
             >
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setImagemExpandida(null);
-                }}
-                aria-label="Fechar"
-                className="absolute top-4 right-4 rounded-md p-2 text-white/80 hover:bg-white/10 hover:text-white"
-              >
-                <X className="h-5 w-5" />
-              </button>
+              <X className="h-5 w-5" />
+            </DialogPrimitive.Close>
+            {imagemExpandida && (
               <img
                 src={imagemExpandida.url}
                 alt={imagemExpandida.alt}
                 className="max-w-[90vw] max-h-[85vh] object-contain rounded-md"
               />
-            </div>
-          </div>,
-          document.body,
-        )
-      : null}
+            )}
+          </div>
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
     </>
   );
 }
