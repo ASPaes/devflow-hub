@@ -1463,7 +1463,7 @@ export type Database = {
           published_by: string | null
           resumo: string
           tipo_id: string | null
-          tipo_release: Database["public"]["Enums"]["tipo_release"]
+          tipo_release: Database["public"]["Enums"]["tipo_release"] | null
           titulo: string
           updated_at: string
         }
@@ -1477,7 +1477,7 @@ export type Database = {
           published_by?: string | null
           resumo: string
           tipo_id?: string | null
-          tipo_release: Database["public"]["Enums"]["tipo_release"]
+          tipo_release?: Database["public"]["Enums"]["tipo_release"] | null
           titulo: string
           updated_at?: string
         }
@@ -1491,7 +1491,7 @@ export type Database = {
           published_by?: string | null
           resumo?: string
           tipo_id?: string | null
-          tipo_release?: Database["public"]["Enums"]["tipo_release"]
+          tipo_release?: Database["public"]["Enums"]["tipo_release"] | null
           titulo?: string
           updated_at?: string
         }
@@ -1988,6 +1988,11 @@ export type Database = {
           published_at: string | null
           published_by_nome: string | null
           resumo: string | null
+          tipo_codigo: string | null
+          tipo_cor: string | null
+          tipo_icone: string | null
+          tipo_id: string | null
+          tipo_label: string | null
           tipo_release: Database["public"]["Enums"]["tipo_release"] | null
           titulo: string | null
         }
@@ -2011,6 +2016,13 @@ export type Database = {
             columns: ["demanda_id"]
             isOneToOne: true
             referencedRelation: "vw_demandas_lista"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "releases_tipo_id_fkey"
+            columns: ["tipo_id"]
+            isOneToOne: false
+            referencedRelation: "tipos_demanda"
             referencedColumns: ["id"]
           },
         ]
@@ -2127,7 +2139,7 @@ export type Database = {
           published_by: string | null
           resumo: string
           tipo_id: string | null
-          tipo_release: Database["public"]["Enums"]["tipo_release"]
+          tipo_release: Database["public"]["Enums"]["tipo_release"] | null
           titulo: string
           updated_at: string
         }
@@ -2549,7 +2561,7 @@ export type Database = {
           published_by: string | null
           resumo: string
           tipo_id: string | null
-          tipo_release: Database["public"]["Enums"]["tipo_release"]
+          tipo_release: Database["public"]["Enums"]["tipo_release"] | null
           titulo: string
           updated_at: string
         }
@@ -2748,7 +2760,35 @@ export type Database = {
           published_by: string | null
           resumo: string
           tipo_id: string | null
-          tipo_release: Database["public"]["Enums"]["tipo_release"]
+          tipo_release: Database["public"]["Enums"]["tipo_release"] | null
+          titulo: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "releases"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      salvar_rascunho_release_v2: {
+        Args: {
+          p_demanda_id: string
+          p_resumo: string
+          p_tipo_id: string
+          p_titulo: string
+        }
+        Returns: {
+          created_at: string
+          created_by: string | null
+          data_publicacao: string | null
+          demanda_id: string
+          id: string
+          published_at: string | null
+          published_by: string | null
+          resumo: string
+          tipo_id: string | null
+          tipo_release: Database["public"]["Enums"]["tipo_release"] | null
           titulo: string
           updated_at: string
         }
