@@ -24,7 +24,7 @@ import {
   useDespublicarRelease,
   useGerarResumoReleaseIA,
 } from "@/hooks/useReleases";
-import { TIPO_RELEASE_LABEL, type TipoRelease } from "@/types/release";
+import { useTiposDemanda } from "@/hooks/useTiposDemanda";
 
 interface ReleaseTabProps {
   demandaId: string;
@@ -52,25 +52,25 @@ export function ReleaseTab({
   const publicar = usePublicarRelease();
   const despublicar = useDespublicarRelease();
   const gerarIA = useGerarResumoReleaseIA();
+  const { data: tipos = [] } = useTiposDemanda();
 
-  const [tipoRelease, setTipoRelease] = React.useState<TipoRelease>(
-    (release?.tipo_release ?? demandaTipo) as TipoRelease,
-  );
+  const [tipoId, setTipoId] = React.useState<string>("");
   const [titulo, setTitulo] = React.useState(release?.titulo ?? tituloInicial ?? "");
   const [resumo, setResumo] = React.useState(release?.resumo ?? resumoInicial ?? "");
 
   React.useEffect(() => {
     if (release) {
-      setTipoRelease(release.tipo_release);
+      setTipoId(release.tipo_id ?? "");
       setTitulo(release.titulo);
       setResumo(release.resumo);
     } else {
       setTitulo(tituloInicial ?? "");
       setResumo(resumoInicial ?? "");
-      setTipoRelease(demandaTipo as TipoRelease);
+      const tipoMatch = tipos.find((t) => t.codigo === demandaTipo);
+      setTipoId(tipoMatch?.id ?? tipos[0]?.id ?? "");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [release, demandaTipo]);
+  }, [release, demandaTipo, tipos]);
 
   // Aplica valores iniciais (vindos do dialog) quando ainda não há release
   React.useEffect(() => {
@@ -134,10 +134,14 @@ export function ReleaseTab({
       toast.error("Preencha título e resumo");
       return;
     }
+    if (!tipoId) {
+      toast.error("Selecione um tipo");
+      return;
+    }
     try {
       const releaseSalva = await salvar.mutateAsync({
         demandaId,
-        tipoRelease,
+        tipoId,
         titulo,
         resumo,
       });
@@ -186,17 +190,20 @@ export function ReleaseTab({
           <div>
             <Label htmlFor="release-tipo">Tipo</Label>
             <Select
-              value={tipoRelease}
-              onValueChange={(v) => setTipoRelease(v as TipoRelease)}
+              value={tipoId}
+              onValueChange={setTipoId}
               disabled={!podeEditar}
             >
               <SelectTrigger id="release-tipo" className="mt-1">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {Object.entries(TIPO_RELEASE_LABEL).map(([v, label]) => (
-                  <SelectItem key={v} value={v}>
-                    {label}
+                {tipos.map((t) => (
+                  <SelectItem key={t.id} value={t.id}>
+                    <span className="inline-flex items-center gap-2">
+                      {t.icone && <span>{t.icone}</span>}
+                      {t.label}
+                    </span>
                   </SelectItem>
                 ))}
               </SelectContent>

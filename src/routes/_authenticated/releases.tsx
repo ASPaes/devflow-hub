@@ -5,12 +5,8 @@ import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 import { useReleasesPublicadas } from "@/hooks/useReleases";
-import {
-  TIPO_RELEASE_ICONE,
-  TIPO_RELEASE_LABEL,
-  type ReleasePublicada,
-  type TipoRelease,
-} from "@/types/release";
+import { useTiposDemanda } from "@/hooks/useTiposDemanda";
+import type { ReleasePublicada } from "@/types/release";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { ReleaseDetalhesSheet } from "@/components/releases/ReleaseDetalhesSheet";
 
@@ -18,18 +14,27 @@ export const Route = createFileRoute("/_authenticated/releases")({
   component: ReleasesPage,
 });
 
-const TIPO_RELEASE_BADGE: Record<TipoRelease, string> = {
-  erro: "bg-amber-500/10 text-amber-300 border-amber-500/20",
-  melhoria: "bg-blue-500/10 text-blue-300 border-blue-500/20",
-  nova_funcionalidade: "bg-emerald-500/10 text-emerald-300 border-emerald-500/20",
-  duvida: "bg-purple-500/10 text-purple-300 border-purple-500/20",
-  tarefa: "bg-zinc-500/10 text-zinc-300 border-zinc-500/20",
-};
+interface GrupoTipo {
+  chave: string; // tipo_id quando existir, senão tipo_release legado, senão "outros"
+  tipo_id: string | null;
+  tipo_label: string;
+  tipo_icone: string;
+  tipo_cor: string | null;
+  releases: ReleasePublicada[];
+}
 
 interface DiaAgrupado {
   data: string;
   totalItens: number;
-  tipos: Array<{ tipo: TipoRelease; releases: ReleasePublicada[] }>;
+  tipos: GrupoTipo[];
+}
+
+function metaDoRelease(r: ReleasePublicada) {
+  const chave = r.tipo_id ?? r.tipo_release ?? "outros";
+  const label = r.tipo_label ?? r.tipo_release ?? "Outros";
+  const icone = r.tipo_icone ?? "📌";
+  const cor = r.tipo_cor ?? null;
+  return { chave, label, icone, cor };
 }
 
 function groupByDateAndType(releases: ReleasePublicada[]): DiaAgrupado[] {
@@ -41,27 +46,29 @@ function groupByDateAndType(releases: ReleasePublicada[]): DiaAgrupado[] {
     porData.set(r.data_publicacao, arr);
   }
   const datas = Array.from(porData.keys()).sort((a, b) => b.localeCompare(a));
-  const ordem: TipoRelease[] = [
-    "nova_funcionalidade",
-    "melhoria",
-    "erro",
-    "tarefa",
-    "duvida",
-  ];
   return datas.map((data) => {
     const items = porData.get(data)!;
-    const porTipo = new Map<TipoRelease, ReleasePublicada[]>();
+    const porTipo = new Map<string, GrupoTipo>();
     for (const r of items) {
-      const arr = porTipo.get(r.tipo_release) ?? [];
-      arr.push(r);
-      porTipo.set(r.tipo_release, arr);
+      const meta = metaDoRelease(r);
+      const existente = porTipo.get(meta.chave);
+      if (existente) {
+        existente.releases.push(r);
+      } else {
+        porTipo.set(meta.chave, {
+          chave: meta.chave,
+          tipo_id: r.tipo_id,
+          tipo_label: meta.label,
+          tipo_icone: meta.icone,
+          tipo_cor: meta.cor,
+          releases: [r],
+        });
+      }
     }
     return {
       data,
       totalItens: items.length,
-      tipos: ordem
-        .filter((t) => porTipo.has(t))
-        .map((t) => ({ tipo: t, releases: porTipo.get(t)! })),
+      tipos: Array.from(porTipo.values()),
     };
   });
 }
@@ -69,10 +76,11 @@ function groupByDateAndType(releases: ReleasePublicada[]): DiaAgrupado[] {
 function ReleasesPage() {
   useDocumentTitle("Releases");
   const { data: releases = [], isLoading } = useReleasesPublicadas();
+  const { data: tiposDisponiveis = [] } = useTiposDemanda();
   const agrupado = React.useMemo(() => groupByDateAndType(releases), [releases]);
 
-  const [tiposSelecionados, setTiposSelecionados] = React.useState<Set<TipoRelease>>(
-    new Set()
+  const [tiposSelecionados, setTiposSelecionados] = React.useState<Set<string>>(
+    new Set(),
   );
   const [sheetData, setSheetData] = React.useState<{
     demandaId: string | null;
@@ -80,19 +88,19 @@ function ReleasesPage() {
     releaseTitulo: string | null;
   }>({ demandaId: null, demandaCodigo: null, releaseTitulo: null });
 
-  const TIPOS_ORDEM: TipoRelease[] = ["nova_funcionalidade", "melhoria", "erro", "tarefa", "duvida"];
-
   const agrupadoFiltrado = React.useMemo(() => {
     if (tiposSelecionados.size === 0) return agrupado;
     return agrupado
-      .map((dia) => ({
-        ...dia,
-        tipos: dia.tipos.filter((grupo) => tiposSelecionados.has(grupo.tipo)),
-      }))
-      .map((dia) => ({
-        ...dia,
-        totalItens: dia.tipos.reduce((acc, g) => acc + g.releases.length, 0),
-      }))
+      .map((dia) => {
+        const tipos = dia.tipos.filter(
+          (grupo) => grupo.tipo_id !== null && tiposSelecionados.has(grupo.tipo_id),
+        );
+        return {
+          ...dia,
+          tipos,
+          totalItens: tipos.reduce((acc, g) => acc + g.releases.length, 0),
+        };
+      })
       .filter((dia) => dia.tipos.length > 0);
   }, [agrupado, tiposSelecionados]);
 
@@ -120,25 +128,29 @@ function ReleasesPage() {
           >
             Todos
           </button>
-          {TIPOS_ORDEM.map((tipo) => {
-            const ativo = tiposSelecionados.has(tipo);
+          {tiposDisponiveis.map((tipo) => {
+            const ativo = tiposSelecionados.has(tipo.id);
             return (
               <button
-                key={tipo}
+                key={tipo.id}
                 onClick={() => {
                   const newSet = new Set(tiposSelecionados);
-                  if (ativo) newSet.delete(tipo);
-                  else newSet.add(tipo);
+                  if (ativo) newSet.delete(tipo.id);
+                  else newSet.add(tipo.id);
                   setTiposSelecionados(newSet);
+                }}
+                style={{
+                  borderColor: ativo ? tipo.cor ?? undefined : undefined,
+                  color: ativo ? tipo.cor ?? undefined : undefined,
                 }}
                 className={`text-xs px-3 py-1.5 rounded-full border transition-colors flex items-center gap-1.5 cursor-pointer ${
                   ativo
-                    ? "bg-purple-500/20 text-purple-200 border-purple-500/40"
+                    ? "bg-purple-500/10"
                     : "bg-transparent text-muted-foreground border-border hover:bg-muted/50"
                 }`}
               >
-                {TIPO_RELEASE_ICONE[tipo]}
-                {TIPO_RELEASE_LABEL[tipo]}
+                {tipo.icone && <span>{tipo.icone}</span>}
+                {tipo.label}
               </button>
             );
           })}
@@ -181,12 +193,19 @@ function ReleasesPage() {
 
               <div className="space-y-5">
                 {dia.tipos.map((grupo) => (
-                  <div key={grupo.tipo}>
+                  <div key={grupo.chave}>
                     <div
-                      className={`mb-2 inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-xs ${TIPO_RELEASE_BADGE[grupo.tipo]}`}
+                      className="mb-2 inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-xs"
+                      style={{
+                        borderColor: grupo.tipo_cor ?? undefined,
+                        color: grupo.tipo_cor ?? undefined,
+                        backgroundColor: grupo.tipo_cor
+                          ? `${grupo.tipo_cor}1a`
+                          : undefined,
+                      }}
                     >
-                      <span>{TIPO_RELEASE_ICONE[grupo.tipo]}</span>
-                      <span>{TIPO_RELEASE_LABEL[grupo.tipo]}</span>
+                      <span>{grupo.tipo_icone}</span>
+                      <span>{grupo.tipo_label}</span>
                       <span className="opacity-70">
                         ({grupo.releases.length})
                       </span>
