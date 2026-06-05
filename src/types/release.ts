@@ -8,7 +8,8 @@ export type TipoRelease =
 export interface Release {
   id: string;
   demanda_id: string;
-  tipo_release: TipoRelease;
+  tipo_release: string | null;
+  tipo_id: string | null;
   titulo: string;
   resumo: string;
   data_publicacao: string | null;
@@ -19,8 +20,20 @@ export interface Release {
   updated_at: string;
 }
 
-export interface ReleasePublicada extends Release {
+export interface ReleasePublicada {
+  id: string;
+  demanda_id: string;
   demanda_codigo: string;
+  tipo_release: string | null;
+  tipo_id: string | null;
+  tipo_codigo: string | null;
+  tipo_label: string | null;
+  tipo_icone: string | null;
+  tipo_cor: string | null;
+  titulo: string;
+  resumo: string;
+  data_publicacao: string;
+  published_at: string;
   published_by_nome: string | null;
 }
 
@@ -53,4 +66,3 @@ export interface RetornoRelease {
   created_at: string;
   ordem: number;
 }
-
