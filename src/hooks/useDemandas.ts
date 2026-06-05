@@ -63,6 +63,7 @@ export type UpdateDemandaPatch = Partial<
     | "produto_id"
     | "tipo"
     | "tipo_id"
+    | "versao"
   >
 >;
 
