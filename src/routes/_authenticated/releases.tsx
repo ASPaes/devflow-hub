@@ -226,6 +226,21 @@ function ReleasesPage() {
           ))}
         </div>
       )}
+
+      <ReleaseDetalhesSheet
+        open={sheetData.demandaId !== null}
+        onOpenChange={(o) => {
+          if (!o)
+            setSheetData({
+              demandaId: null,
+              demandaCodigo: null,
+              releaseTitulo: null,
+            });
+        }}
+        demandaId={sheetData.demandaId}
+        demandaCodigo={sheetData.demandaCodigo}
+        releaseTitulo={sheetData.releaseTitulo}
+      />
     </div>
   );
 }
