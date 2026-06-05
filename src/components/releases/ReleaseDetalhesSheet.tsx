@@ -164,7 +164,11 @@ export function ReleaseDetalhesSheet({
       <div
         role="dialog"
         aria-modal="true"
-        onClick={() => setImagemExpandida(null)}
+        onPointerDown={(e) => {
+          e.stopPropagation();
+          setImagemExpandida(null);
+        }}
+        onClick={(e) => e.stopPropagation()}
         onKeyDown={(e) => e.key === "Escape" && setImagemExpandida(null)}
         tabIndex={-1}
         ref={(el) => el?.focus()}
@@ -172,7 +176,11 @@ export function ReleaseDetalhesSheet({
       >
         <button
           type="button"
-          onClick={() => setImagemExpandida(null)}
+          onPointerDown={(e) => {
+            e.stopPropagation();
+            setImagemExpandida(null);
+          }}
+          onClick={(e) => e.stopPropagation()}
           aria-label="Fechar"
           className="absolute top-4 right-4 rounded-md p-2 text-white/80 hover:bg-white/10 hover:text-white"
         >
@@ -181,6 +189,7 @@ export function ReleaseDetalhesSheet({
         <img
           src={imagemExpandida.url}
           alt={imagemExpandida.alt}
+          onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => e.stopPropagation()}
           className="max-w-[90vw] max-h-[85vh] object-contain rounded-md"
         />
