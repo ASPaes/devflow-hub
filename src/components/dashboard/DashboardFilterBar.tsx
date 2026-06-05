@@ -7,9 +7,8 @@ import {
   PRIORIDADE_LABEL_CURTA,
   STATUS_DEMANDA_LABEL,
   STATUS_DEMANDA_VALUES,
-  TIPO_DEMANDA_LABEL,
-  TIPO_DEMANDA_VALUES,
 } from "@/hooks/useDemandas";
+import { useTiposDemanda } from "@/hooks/useTiposDemanda";
 import {
   FILTROS_VAZIOS,
   type DashboardFiltros,
@@ -34,9 +33,10 @@ export function DashboardFilterBar({
     label: `${v} — ${PRIORIDADE_LABEL_CURTA[v]}`,
   }));
 
-  const tipoOptions: FilterOption<string>[] = TIPO_DEMANDA_VALUES.map((v) => ({
-    value: v,
-    label: TIPO_DEMANDA_LABEL[v],
+  const { data: tipos = [] } = useTiposDemanda();
+  const tipoOptions: FilterOption<string>[] = tipos.map((t) => ({
+    value: t.id,
+    label: `${t.icone ? `${t.icone} ` : ""}${t.label}`,
   }));
 
   const { data: modulos = [], isLoading: loadingModulos } = useQuery({
