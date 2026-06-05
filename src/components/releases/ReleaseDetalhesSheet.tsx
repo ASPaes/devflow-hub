@@ -167,7 +167,10 @@ export function ReleaseDetalhesSheet({
       open={!!imagemExpandida}
       onOpenChange={(o) => !o && setImagemExpandida(null)}
     >
-      <DialogContent className="max-w-[90vw] max-h-[90vh] p-0 border-none bg-transparent shadow-none">
+      <DialogContent
+        className="max-w-[90vw] max-h-[90vh] p-0 border-none bg-transparent shadow-none"
+        onInteractOutside={() => setImagemExpandida(null)}
+      >
         {imagemExpandida && (
           <img
             src={imagemExpandida.url}
