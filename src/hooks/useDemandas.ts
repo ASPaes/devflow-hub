@@ -288,6 +288,9 @@ export type FiltrosDemanda = {
   periodo?: DateRange | null;
   tipoData?: TipoData;
   apenasSemData?: boolean;
+
+  /** Versão de planejamento: "atual" | "proxima" | "futura". Undefined ou ausente = todas. */
+  versao?: "atual" | "proxima" | "futura";
 };
 
 export interface UseDemandasListaOptions {
