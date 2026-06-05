@@ -680,6 +680,31 @@ function ClassificacaoEditor({
         </Select>
       </div>
 
+      <div className="space-y-1">
+        <label className="text-xs text-muted-foreground">
+          Versão de Planejamento
+        </label>
+        <Select
+          value={demanda.versao ?? "__none__"}
+          onValueChange={(v) => {
+            const next = v === "__none__" ? null : (v as "atual" | "proxima" | "futura");
+            if (next === demanda.versao) return;
+            void onPatch({ versao: next });
+          }}
+          disabled={disabled}
+        >
+          <SelectTrigger className="h-8 text-sm">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__none__">Sem versão</SelectItem>
+            <SelectItem value="atual">Atual</SelectItem>
+            <SelectItem value="proxima">Próxima</SelectItem>
+            <SelectItem value="futura">Futura</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
     </div>
   );
 }
