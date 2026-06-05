@@ -1,6 +1,6 @@
 import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Rocket, Calendar, Loader2 } from "lucide-react";
+import { Rocket, Calendar, Loader2, ChevronRight } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -12,6 +12,7 @@ import {
   type TipoRelease,
 } from "@/types/release";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
+import { ReleaseDetalhesSheet } from "@/components/releases/ReleaseDetalhesSheet";
 
 export const Route = createFileRoute("/_authenticated/releases")({
   component: ReleasesPage,
@@ -73,6 +74,11 @@ function ReleasesPage() {
   const [tiposSelecionados, setTiposSelecionados] = React.useState<Set<TipoRelease>>(
     new Set()
   );
+  const [sheetData, setSheetData] = React.useState<{
+    demandaId: string | null;
+    demandaCodigo: string | null;
+    releaseTitulo: string | null;
+  }>({ demandaId: null, demandaCodigo: null, releaseTitulo: null });
 
   const TIPOS_ORDEM: TipoRelease[] = ["nova_funcionalidade", "melhoria", "erro", "tarefa", "duvida"];
 
@@ -197,6 +203,19 @@ function ReleasesPage() {
                           <p className="mt-1 whitespace-pre-wrap text-sm text-muted-foreground">
                             {r.resumo}
                           </p>
+                          <button
+                            onClick={() =>
+                              setSheetData({
+                                demandaId: r.demanda_id,
+                                demandaCodigo: r.demanda_codigo,
+                                releaseTitulo: r.titulo,
+                              })
+                            }
+                            className="mt-2 inline-flex items-center gap-1 text-xs text-purple-400 hover:text-purple-300 hover:underline"
+                          >
+                            Exibir mais detalhes
+                            <ChevronRight className="h-3 w-3" />
+                          </button>
                         </li>
                       ))}
                     </ul>
@@ -207,6 +226,21 @@ function ReleasesPage() {
           ))}
         </div>
       )}
+
+      <ReleaseDetalhesSheet
+        open={sheetData.demandaId !== null}
+        onOpenChange={(o) => {
+          if (!o)
+            setSheetData({
+              demandaId: null,
+              demandaCodigo: null,
+              releaseTitulo: null,
+            });
+        }}
+        demandaId={sheetData.demandaId}
+        demandaCodigo={sheetData.demandaCodigo}
+        releaseTitulo={sheetData.releaseTitulo}
+      />
     </div>
   );
 }

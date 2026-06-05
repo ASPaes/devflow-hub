@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
-import type { Release, ReleasePublicada, TipoRelease } from "@/types/release";
+import type { Release, ReleasePublicada, RetornoRelease, TipoRelease } from "@/types/release";
 
 /** Carrega release de uma demanda específica (rascunho ou publicada) */
 export function useReleaseDaDemanda(demandaId: string | undefined) {
@@ -150,6 +150,23 @@ export function useReleasesPublicadas() {
       if (error) throw error;
       return (data ?? []) as unknown as ReleasePublicada[];
     },
+    staleTime: 30_000,
+  });
+}
+
+/** Lista retornos (mídia/texto) de uma demanda publicada */
+export function useRetornosReleasePublica(demandaId: string | null) {
+  return useQuery<RetornoRelease[]>({
+    queryKey: ["retornos-release-publica", demandaId],
+    queryFn: async () => {
+      if (!demandaId) return [];
+      const { data, error } = await supabase.rpc("obter_retornos_release_publica", {
+        p_demanda_id: demandaId,
+      });
+      if (error) throw error;
+      return (data as unknown as RetornoRelease[]) ?? [];
+    },
+    enabled: !!demandaId,
     staleTime: 30_000,
   });
 }
