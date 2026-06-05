@@ -7,15 +7,12 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet";
 import {
-  Dialog,
-  DialogContent,
-} from "@/components/ui/dialog";
-import {
   Loader2,
   Maximize2,
   MessageSquare,
   Paperclip,
   User,
+  X,
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -163,23 +160,32 @@ export function ReleaseDetalhesSheet({
       </SheetContent>
     </Sheet>
 
-    <Dialog
-      open={!!imagemExpandida}
-      onOpenChange={(o) => !o && setImagemExpandida(null)}
-    >
-      <DialogContent
-        className="max-w-[90vw] max-h-[90vh] p-0 border-none bg-transparent shadow-none"
-        onInteractOutside={() => setImagemExpandida(null)}
+    {imagemExpandida && (
+      <div
+        role="dialog"
+        aria-modal="true"
+        onClick={() => setImagemExpandida(null)}
+        onKeyDown={(e) => e.key === "Escape" && setImagemExpandida(null)}
+        tabIndex={-1}
+        ref={(el) => el?.focus()}
+        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 outline-none"
       >
-        {imagemExpandida && (
-          <img
-            src={imagemExpandida.url}
-            alt={imagemExpandida.alt}
-            className="max-w-full max-h-[85vh] object-contain rounded-md"
-          />
-        )}
-      </DialogContent>
-    </Dialog>
+        <button
+          type="button"
+          onClick={() => setImagemExpandida(null)}
+          aria-label="Fechar"
+          className="absolute top-4 right-4 rounded-md p-2 text-white/80 hover:bg-white/10 hover:text-white"
+        >
+          <X className="h-5 w-5" />
+        </button>
+        <img
+          src={imagemExpandida.url}
+          alt={imagemExpandida.alt}
+          onClick={(e) => e.stopPropagation()}
+          className="max-w-[90vw] max-h-[85vh] object-contain rounded-md"
+        />
+      </div>
+    )}
     </>
   );
 }
