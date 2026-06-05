@@ -201,12 +201,13 @@ function DemandasListagem() {
         </div>
       </div>
 
-      {/* Linha 2: filtros multi-select */}
-      <div className="mb-4">
+      {/* Linha 2: filtros multi-select + Versão */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
         <DashboardFilterBar
           filtros={filtrosCompartilhados}
           onChange={setFiltrosCompartilhados}
         />
+        <VersaoSwitcher value={versao} onChange={setVersao} />
       </div>
 
       {!isLoading && rows.length === 0 ? (
