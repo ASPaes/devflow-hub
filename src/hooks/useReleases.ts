@@ -44,7 +44,7 @@ export function useMarcarIncluirRelease() {
   });
 }
 
-/** Salva rascunho (upsert) */
+/** Salva rascunho (upsert) — usa tipo_id (uuid) via RPC v2 */
 export function useSalvarRascunhoRelease() {
   const qc = useQueryClient();
   return useMutation<
@@ -52,15 +52,15 @@ export function useSalvarRascunhoRelease() {
     Error,
     {
       demandaId: string;
-      tipoRelease: TipoRelease;
+      tipoId: string;
       titulo: string;
       resumo: string;
     }
   >({
-    mutationFn: async ({ demandaId, tipoRelease, titulo, resumo }) => {
-      const { data, error } = await supabase.rpc("salvar_rascunho_release", {
+    mutationFn: async ({ demandaId, tipoId, titulo, resumo }) => {
+      const { data, error } = await supabase.rpc("salvar_rascunho_release_v2", {
         p_demanda_id: demandaId,
-        p_tipo_release: tipoRelease,
+        p_tipo_id: tipoId,
         p_titulo: titulo,
         p_resumo: resumo,
       });
