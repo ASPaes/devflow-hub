@@ -195,11 +195,15 @@ Deno.serve(async (req) => {
       }
     }
 
-    // 4) Magic link com redirect para /sso-callback
+    // 4) Magic link com redirect para /sso-callback (com redirect interno opcional)
+    const magicLinkUrl = new URL(redirectTo);
+    if (safeRedirect) {
+      magicLinkUrl.searchParams.set("redirect", safeRedirect);
+    }
     const { data: linkData, error: linkErr } = await supabase.auth.admin.generateLink({
       type: "magiclink",
       email,
-      options: { redirectTo },
+      options: { redirectTo: magicLinkUrl.toString() },
     });
     if (linkErr || !linkData?.properties?.action_link) {
       console.error("[sso-login] generateLink", linkErr);
