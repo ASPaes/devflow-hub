@@ -7,7 +7,12 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet";
 import {
+  Dialog,
+  DialogContent,
+} from "@/components/ui/dialog";
+import {
   Loader2,
+  Maximize2,
   MessageSquare,
   Paperclip,
   User,
@@ -34,8 +39,14 @@ export function ReleaseDetalhesSheet({
 }: Props) {
   const { data: retornos = [], isLoading } = useRetornosReleasePublica(demandaId);
 
+  const [imagemExpandida, setImagemExpandida] = React.useState<{
+    url: string;
+    alt: string;
+  } | null>(null);
+
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <>
+      <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full overflow-y-auto sm:max-w-lg">
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
@@ -86,12 +97,30 @@ export function ReleaseDetalhesSheet({
                 )}
 
                 {r.midia_url && r.midia_tipo === "imagem" && (
-                  <div className="mt-3">
+                  <div className="group relative mt-3 cursor-pointer">
                     <img
                       src={r.midia_url}
                       alt={r.midia_nome_original ?? "Imagem"}
                       className="max-w-full rounded-md border border-border"
+                      onClick={() =>
+                        setImagemExpandida({
+                          url: r.midia_url!,
+                          alt: r.midia_nome_original ?? "Imagem",
+                        })
+                      }
                     />
+                    <button
+                      onClick={() =>
+                        setImagemExpandida({
+                          url: r.midia_url!,
+                          alt: r.midia_nome_original ?? "Imagem",
+                        })
+                      }
+                      className="absolute top-2 right-2 p-1.5 rounded-md bg-black/60 hover:bg-black/80 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                      title="Expandir imagem"
+                    >
+                      <Maximize2 className="h-4 w-4" />
+                    </button>
                   </div>
                 )}
 
@@ -133,5 +162,21 @@ export function ReleaseDetalhesSheet({
         </div>
       </SheetContent>
     </Sheet>
+
+    <Dialog
+      open={!!imagemExpandida}
+      onOpenChange={(o) => !o && setImagemExpandida(null)}
+    >
+      <DialogContent className="max-w-[90vw] max-h-[90vh] p-0 border-none bg-transparent shadow-none">
+        {imagemExpandida && (
+          <img
+            src={imagemExpandida.url}
+            alt={imagemExpandida.alt}
+            className="max-w-full max-h-[85vh] object-contain rounded-md"
+          />
+        )}
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }
