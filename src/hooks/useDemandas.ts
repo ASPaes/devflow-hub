@@ -265,6 +265,8 @@ export type FiltrosDemanda = {
   status?: StatusDemanda[];
   prioridade?: number[];
   tipo?: TipoDemanda[];
+  /** UUIDs de tipos_demanda (multi-select). Tem prioridade sobre `tipo`. */
+  tipo_ids?: string[];
   modulo_id?: string;
   area_id?: string;
   /** null = "sem responsável" */
