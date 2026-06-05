@@ -14,6 +14,7 @@ import {
   PlusCircle,
   Rocket,
   ShieldCheck,
+  Tags,
   UserCircle,
   Users,
   type LucideIcon,
@@ -152,6 +153,13 @@ export function Sidebar() {
               )}
               {temPermissao("deletar_demanda") && (
                 <NavItem to="/admin/produtos" icon={Package2} label="Produtos" />
+              )}
+              {temPermissao("gerenciar_tipos") && (
+                <NavItem
+                  to="/configuracoes/tipos"
+                  icon={Tags}
+                  label="Tipos"
+                />
               )}
               {temPermissao("gerenciar_usuarios") && (
                 <NavItem to="/admin/usuarios" icon={Users} label="Usuários" />
