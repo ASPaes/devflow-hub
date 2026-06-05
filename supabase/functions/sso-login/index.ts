@@ -41,7 +41,7 @@ Deno.serve(async (req) => {
       return json({ error: "SSO secret não configurado" }, 500);
     }
 
-    let body: { token?: string };
+    let body: { token?: string; redirect?: string };
     try {
       body = await req.json();
     } catch {
@@ -50,6 +50,11 @@ Deno.serve(async (req) => {
 
     const token = body.token;
     if (!token || typeof token !== "string") return json({ error: "Token ausente" }, 400);
+
+    let safeRedirect = "";
+    if (typeof body.redirect === "string" && body.redirect.startsWith("/") && !body.redirect.startsWith("//")) {
+      safeRedirect = body.redirect;
+    }
 
     const [payloadB64, signature] = token.split(".");
     if (!payloadB64 || !signature) return json({ error: "Token malformado" }, 400);
