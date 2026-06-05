@@ -86,6 +86,7 @@ function NovaDemandaPage() {
 
       solicitante_id: undefined,
       tenant_id: undefined,
+      versao: "atual",
     },
   });
 
