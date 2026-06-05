@@ -52,25 +52,25 @@ export function ReleaseTab({
   const publicar = usePublicarRelease();
   const despublicar = useDespublicarRelease();
   const gerarIA = useGerarResumoReleaseIA();
+  const { data: tipos = [] } = useTiposDemanda();
 
-  const [tipoRelease, setTipoRelease] = React.useState<TipoRelease>(
-    (release?.tipo_release ?? demandaTipo) as TipoRelease,
-  );
+  const [tipoId, setTipoId] = React.useState<string>("");
   const [titulo, setTitulo] = React.useState(release?.titulo ?? tituloInicial ?? "");
   const [resumo, setResumo] = React.useState(release?.resumo ?? resumoInicial ?? "");
 
   React.useEffect(() => {
     if (release) {
-      setTipoRelease(release.tipo_release);
+      setTipoId(release.tipo_id ?? "");
       setTitulo(release.titulo);
       setResumo(release.resumo);
     } else {
       setTitulo(tituloInicial ?? "");
       setResumo(resumoInicial ?? "");
-      setTipoRelease(demandaTipo as TipoRelease);
+      const tipoMatch = tipos.find((t) => t.codigo === demandaTipo);
+      setTipoId(tipoMatch?.id ?? tipos[0]?.id ?? "");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [release, demandaTipo]);
+  }, [release, demandaTipo, tipos]);
 
   // Aplica valores iniciais (vindos do dialog) quando ainda não há release
   React.useEffect(() => {
