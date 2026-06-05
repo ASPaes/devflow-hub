@@ -74,6 +74,11 @@ function ReleasesPage() {
   const [tiposSelecionados, setTiposSelecionados] = React.useState<Set<TipoRelease>>(
     new Set()
   );
+  const [sheetData, setSheetData] = React.useState<{
+    demandaId: string | null;
+    demandaCodigo: string | null;
+    releaseTitulo: string | null;
+  }>({ demandaId: null, demandaCodigo: null, releaseTitulo: null });
 
   const TIPOS_ORDEM: TipoRelease[] = ["nova_funcionalidade", "melhoria", "erro", "tarefa", "duvida"];
 
