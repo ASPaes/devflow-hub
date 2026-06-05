@@ -3,18 +3,26 @@ import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router"
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
-type SsoCallbackSearch = { token?: string };
+type SsoCallbackSearch = {
+  token?: string;
+  redirect?: string;
+};
+
+function isInternalPath(value: unknown): value is string {
+  return typeof value === "string" && value.startsWith("/") && !value.startsWith("//");
+}
 
 export const Route = createFileRoute("/sso-callback")({
   validateSearch: (search: Record<string, unknown>): SsoCallbackSearch => ({
     token: typeof search.token === "string" ? search.token : undefined,
+    redirect: isInternalPath(search.redirect) ? search.redirect : undefined,
   }),
   component: SsoCallback,
 });
 
 function SsoCallback() {
   const navigate = useNavigate();
-  const { token } = useSearch({ from: "/sso-callback" });
+  const { token, redirect } = useSearch({ from: "/sso-callback" });
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -25,8 +33,11 @@ function SsoCallback() {
       // Caso 1: chegou com ?token= → primeira passada (troca por magic link)
       if (token) {
         try {
+          const body: { token: string; redirect?: string } = { token };
+          if (redirect) body.redirect = redirect;
+
           const { data, error: invokeError } = await supabase.functions.invoke("sso-login", {
-            body: { token },
+            body,
           });
           if (invokeError) throw invokeError;
           if (!data?.magic_link) throw new Error("Link de acesso não retornado");
@@ -42,13 +53,13 @@ function SsoCallback() {
       // Caso 2: chegou via magic link (hash com tokens) → aguarda SIGNED_IN
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        navigate({ to: "/" });
+        navigate({ to: (redirect || "/") as any });
         return;
       }
 
       const { data: sub } = supabase.auth.onAuthStateChange((event) => {
         if (event === "SIGNED_IN") {
-          navigate({ to: "/" });
+          navigate({ to: (redirect || "/") as any });
         }
       });
       unsub = () => sub?.subscription.unsubscribe();
@@ -63,7 +74,7 @@ function SsoCallback() {
       unsub?.();
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [token, navigate]);
+  }, [token, redirect, navigate]);
 
   if (error) {
     return (
