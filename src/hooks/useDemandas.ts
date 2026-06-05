@@ -166,6 +166,7 @@ export const novaDemandaSchema = z.object({
   area_id: z.string().uuid().optional(),
   solicitante_id: z.string().uuid().optional(),
   tenant_id: z.string().uuid().optional(),
+  versao: z.enum(["atual", "proxima", "futura"]).nullable().optional(),
 });
 
 export type NovaDemandaInput = z.infer<typeof novaDemandaSchema>;
