@@ -24,7 +24,7 @@ import {
   useDespublicarRelease,
   useGerarResumoReleaseIA,
 } from "@/hooks/useReleases";
-import { TIPO_RELEASE_LABEL, type TipoRelease } from "@/types/release";
+import { useTiposDemanda } from "@/hooks/useTiposDemanda";
 
 interface ReleaseTabProps {
   demandaId: string;
