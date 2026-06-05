@@ -45,7 +45,8 @@ export function ReleaseDetalhesSheet({
   } | null>(null);
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <>
+      <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full overflow-y-auto sm:max-w-lg">
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
@@ -176,5 +177,6 @@ export function ReleaseDetalhesSheet({
         )}
       </DialogContent>
     </Dialog>
+    </>
   );
 }
