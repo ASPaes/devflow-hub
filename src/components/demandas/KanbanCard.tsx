@@ -6,11 +6,11 @@ import { TenantLogo } from "@/components/ui/TenantLogo";
 import { cn, initials } from "@/lib/utils";
 import {
   PRIORIDADE_LABEL_CURTA,
-  TIPO_DEMANDA_LABEL,
   type DemandaListaRow,
 } from "@/hooks/useDemandas";
 import { useTenants } from "@/hooks/useTenants";
 import { PRIORIDADE_BADGE_STYLES } from "@/components/demandas/MetadataSidebar";
+import { TipoBadge } from "@/components/demandas/TipoBadge";
 
 interface KanbanCardProps {
   row: DemandaListaRow;
@@ -36,7 +36,6 @@ export function KanbanCard({ row, onClick }: KanbanCardProps) {
   );
 
   const prioridade = (row.prioridade ?? 3) as 1 | 2 | 3 | 4 | 5;
-  const tipo = row.tipo ?? "tarefa";
   const totalC = row.total_comentarios ?? 0;
   const totalA = row.total_anexos ?? 0;
   const totalV = row.total_vinculos ?? 0;
@@ -72,9 +71,13 @@ export function KanbanCard({ row, onClick }: KanbanCardProps) {
           >
             P{prioridade}
           </span>
-          <span className="text-xs" title={TIPO_DEMANDA_LABEL[tipo]} aria-hidden>
-            {TIPO_DEMANDA_LABEL[tipo].split(" ")[0]}
-          </span>
+          <TipoBadge
+            codigo={row.tipo_codigo ?? row.tipo}
+            label={row.tipo_label}
+            icone={row.tipo_icone}
+            cor={row.tipo_cor}
+            size="sm"
+          />
           {row.foi_reaberta && (
             <span
               className="inline-flex items-center gap-1 rounded border border-amber-500/30 bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-medium text-amber-300"

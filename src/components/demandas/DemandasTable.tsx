@@ -4,7 +4,6 @@ import { Link2, MessageSquare, Paperclip, Undo2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { TenantLogo } from "@/components/ui/TenantLogo";
 import { useTenants } from "@/hooks/useTenants";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn, initials } from "@/lib/utils";
 import { formatDateSP } from "@/lib/format";
@@ -13,7 +12,6 @@ import { SortableHeader } from "@/components/ui/SortableHeader";
 import {
   PRIORIDADE_LABEL_CURTA,
   STATUS_DEMANDA_LABEL,
-  TIPO_DEMANDA_LABEL,
   type DemandaListaRow,
   type SortConfig,
 } from "@/hooks/useDemandas";
@@ -21,6 +19,7 @@ import {
   PRIORIDADE_BADGE_STYLES,
   STATUS_BADGE_STYLES,
 } from "@/components/demandas/MetadataSidebar";
+import { TipoBadge } from "@/components/demandas/TipoBadge";
 
 interface DemandasTableProps {
   rows: DemandaListaRow[];
@@ -108,7 +107,6 @@ function DemandaRow({ row, onClick }: DemandaRowProps) {
 
   const status = row.status ?? "triagem";
   const prioridade = row.prioridade ?? 3;
-  const tipo = row.tipo ?? "tarefa";
 
   return (
     <tr
@@ -152,9 +150,13 @@ function DemandaRow({ row, onClick }: DemandaRowProps) {
         </div>
       </td>
       <td className="px-4 py-3 align-middle">
-        <Badge variant="outline" className="font-normal">
-          {TIPO_DEMANDA_LABEL[tipo]}
-        </Badge>
+        <TipoBadge
+          codigo={row.tipo_codigo ?? row.tipo}
+          label={row.tipo_label}
+          icone={row.tipo_icone}
+          cor={row.tipo_cor}
+          size="sm"
+        />
       </td>
       <td className="whitespace-nowrap px-4 py-3 align-middle text-xs text-muted-foreground">
         {formatDateSP(row.created_at)}
