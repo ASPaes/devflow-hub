@@ -182,12 +182,15 @@ function KanbanPage() {
         onClear={limpar}
         hideStatus
         extraFilters={
-          <MultiSelectFilter
-            label="Empresa"
-            options={tenantOptions}
-            selected={filtrosCompartilhados.tenant_id}
-            onChange={setTenantIds}
-          />
+          <>
+            <MultiSelectFilter
+              label="Empresa"
+              options={tenantOptions}
+              selected={filtrosCompartilhados.tenant_id}
+              onChange={setTenantIds}
+            />
+            <VersaoSwitcher value={versao} onChange={setVersao} />
+          </>
         }
       />
 
