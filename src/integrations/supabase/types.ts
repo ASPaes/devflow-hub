@@ -801,6 +801,7 @@ export type Database = {
           tenant_id: string
           timer_iniciado_em: string | null
           tipo: Database["public"]["Enums"]["tipo_demanda"]
+          tipo_id: string | null
           titulo: string
           total_reaberturas: number
           updated_at: string
@@ -836,6 +837,7 @@ export type Database = {
           tenant_id: string
           timer_iniciado_em?: string | null
           tipo: Database["public"]["Enums"]["tipo_demanda"]
+          tipo_id?: string | null
           titulo: string
           total_reaberturas?: number
           updated_at?: string
@@ -871,6 +873,7 @@ export type Database = {
           tenant_id?: string
           timer_iniciado_em?: string | null
           tipo?: Database["public"]["Enums"]["tipo_demanda"]
+          tipo_id?: string | null
           titulo?: string
           total_reaberturas?: number
           updated_at?: string
@@ -979,6 +982,13 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "vw_tenants_com_usuarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demandas_tipo_id_fkey"
+            columns: ["tipo_id"]
+            isOneToOne: false
+            referencedRelation: "tipos_demanda"
             referencedColumns: ["id"]
           },
         ]
@@ -1452,6 +1462,7 @@ export type Database = {
           published_at: string | null
           published_by: string | null
           resumo: string
+          tipo_id: string | null
           tipo_release: Database["public"]["Enums"]["tipo_release"]
           titulo: string
           updated_at: string
@@ -1465,6 +1476,7 @@ export type Database = {
           published_at?: string | null
           published_by?: string | null
           resumo: string
+          tipo_id?: string | null
           tipo_release: Database["public"]["Enums"]["tipo_release"]
           titulo: string
           updated_at?: string
@@ -1478,6 +1490,7 @@ export type Database = {
           published_at?: string | null
           published_by?: string | null
           resumo?: string
+          tipo_id?: string | null
           tipo_release?: Database["public"]["Enums"]["tipo_release"]
           titulo?: string
           updated_at?: string
@@ -1544,6 +1557,13 @@ export type Database = {
             columns: ["published_by"]
             isOneToOne: false
             referencedRelation: "vw_solicitantes_por_empresa"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "releases_tipo_id_fkey"
+            columns: ["tipo_id"]
+            isOneToOne: false
+            referencedRelation: "tipos_demanda"
             referencedColumns: ["id"]
           },
         ]
@@ -1615,6 +1635,45 @@ export type Database = {
           id?: string
           logo_url?: string | null
           nome?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      tipos_demanda: {
+        Row: {
+          ativo: boolean | null
+          codigo: string
+          cor: string | null
+          created_at: string
+          icone: string | null
+          id: string
+          label: string
+          ordem: number | null
+          sistema: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean | null
+          codigo: string
+          cor?: string | null
+          created_at?: string
+          icone?: string | null
+          id?: string
+          label: string
+          ordem?: number | null
+          sistema?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean | null
+          codigo?: string
+          cor?: string | null
+          created_at?: string
+          icone?: string | null
+          id?: string
+          label?: string
+          ordem?: number | null
+          sistema?: boolean | null
           updated_at?: string
         }
         Relationships: []
@@ -2067,6 +2126,7 @@ export type Database = {
           published_at: string | null
           published_by: string | null
           resumo: string
+          tipo_id: string | null
           tipo_release: Database["public"]["Enums"]["tipo_release"]
           titulo: string
           updated_at: string
@@ -2134,6 +2194,34 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      editar_tipo_demanda: {
+        Args: {
+          p_ativo: boolean
+          p_cor: string
+          p_icone: string
+          p_id: string
+          p_label: string
+          p_ordem: number
+        }
+        Returns: {
+          ativo: boolean | null
+          codigo: string
+          cor: string | null
+          created_at: string
+          icone: string | null
+          id: string
+          label: string
+          ordem: number | null
+          sistema: boolean | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "tipos_demanda"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       enqueue_cobranca: {
         Args: {
           p_condicao: number
@@ -2188,6 +2276,7 @@ export type Database = {
           tenant_id: string
           timer_iniciado_em: string | null
           tipo: Database["public"]["Enums"]["tipo_demanda"]
+          tipo_id: string | null
           titulo: string
           total_reaberturas: number
           updated_at: string
@@ -2248,6 +2337,7 @@ export type Database = {
           tenant_id: string
           timer_iniciado_em: string | null
           tipo: Database["public"]["Enums"]["tipo_demanda"]
+          tipo_id: string | null
           titulo: string
           total_reaberturas: number
           updated_at: string
@@ -2390,6 +2480,7 @@ export type Database = {
           tenant_id: string
           timer_iniciado_em: string | null
           tipo: Database["public"]["Enums"]["tipo_demanda"]
+          tipo_id: string | null
           titulo: string
           total_reaberturas: number
           updated_at: string
@@ -2434,6 +2525,7 @@ export type Database = {
           tenant_id: string
           timer_iniciado_em: string | null
           tipo: Database["public"]["Enums"]["tipo_demanda"]
+          tipo_id: string | null
           titulo: string
           total_reaberturas: number
           updated_at: string
@@ -2456,6 +2548,7 @@ export type Database = {
           published_at: string | null
           published_by: string | null
           resumo: string
+          tipo_id: string | null
           tipo_release: Database["public"]["Enums"]["tipo_release"]
           titulo: string
           updated_at: string
@@ -2502,6 +2595,7 @@ export type Database = {
           tenant_id: string
           timer_iniciado_em: string | null
           tipo: Database["public"]["Enums"]["tipo_demanda"]
+          tipo_id: string | null
           titulo: string
           total_reaberturas: number
           updated_at: string
@@ -2598,6 +2692,7 @@ export type Database = {
           tenant_id: string
           timer_iniciado_em: string | null
           tipo: Database["public"]["Enums"]["tipo_demanda"]
+          tipo_id: string | null
           titulo: string
           total_reaberturas: number
           updated_at: string
@@ -2652,6 +2747,7 @@ export type Database = {
           published_at: string | null
           published_by: string | null
           resumo: string
+          tipo_id: string | null
           tipo_release: Database["public"]["Enums"]["tipo_release"]
           titulo: string
           updated_at: string
@@ -2716,6 +2812,7 @@ export type Database = {
         | "inserir_tempo_manual"
         | "criar_retorno_demanda"
         | "gerenciar_releases"
+        | "gerenciar_tipos"
       cor_rascunho: "cinza" | "verde" | "azul" | "amarelo" | "vermelho"
       status_demanda:
         | "triagem"
@@ -2890,6 +2987,7 @@ export const Constants = {
         "inserir_tempo_manual",
         "criar_retorno_demanda",
         "gerenciar_releases",
+        "gerenciar_tipos",
       ],
       cor_rascunho: ["cinza", "verde", "azul", "amarelo", "vermelho"],
       status_demanda: [
