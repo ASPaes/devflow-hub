@@ -9,9 +9,6 @@ import {
 import {
   Loader2,
   MessageSquare,
-  Image as ImageIcon,
-  Mic,
-  Video,
   Paperclip,
   User,
 } from "lucide-react";
