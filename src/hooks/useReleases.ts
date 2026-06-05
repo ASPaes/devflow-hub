@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
-import type { Release, ReleasePublicada, RetornoRelease, TipoRelease } from "@/types/release";
+import type { Release, ReleasePublicada, RetornoRelease } from "@/types/release";
 
 /** Carrega release de uma demanda específica (rascunho ou publicada) */
 export function useReleaseDaDemanda(demandaId: string | undefined) {
