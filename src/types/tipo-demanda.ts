@@ -1,4 +1,4 @@
-export interface TipoDemanda {
+export type TipoDemanda = {
   id: string;
   codigo: string;
   label: string;
@@ -9,4 +9,4 @@ export interface TipoDemanda {
   sistema: boolean;
   created_at: string;
   updated_at: string;
-}
+};

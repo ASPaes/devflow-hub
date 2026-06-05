@@ -21,7 +21,8 @@ export type AppPermissao =
   | "alterar_produto_demanda"
   | "inserir_tempo_manual"
   | "criar_retorno_demanda"
-  | "gerenciar_releases";
+  | "gerenciar_releases"
+  | "gerenciar_tipos";
 
 export type ProfileWithPerfil = {
   id: string;
