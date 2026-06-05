@@ -27,11 +27,6 @@ interface Props {
   releaseTitulo: string | null;
 }
 
-const ICONE_MIDIA: Record<string, React.ReactNode> = {
-  imagem: <ImageIcon className="h-3.5 w-3.5" />,
-  audio: <Mic className="h-3.5 w-3.5" />,
-  video: <Video className="h-3.5 w-3.5" />,
-};
 
 export function ReleaseDetalhesSheet({
   open,
