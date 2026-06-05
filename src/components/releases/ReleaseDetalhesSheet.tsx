@@ -7,10 +7,6 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet";
 import {
-  Dialog,
-  DialogContent,
-} from "@/components/ui/dialog";
-import {
   Loader2,
   Maximize2,
   MessageSquare,
