@@ -22,9 +22,11 @@ export const Route = createFileRoute("/_authenticated")({
 function AuthenticatedLayout() {
   return (
     <DashboardFiltersProvider>
-      <AppShell>
-        <Outlet />
-      </AppShell>
+      <VersaoProvider>
+        <AppShell>
+          <Outlet />
+        </AppShell>
+      </VersaoProvider>
     </DashboardFiltersProvider>
   );
 }
