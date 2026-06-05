@@ -78,7 +78,7 @@ export function useDashboardMetrics(
         p_status: filtros.status.length > 0 ? filtros.status : undefined,
         p_prioridade:
           filtros.prioridade.length > 0 ? filtros.prioridade : undefined,
-        p_tipo: filtros.tipo.length > 0 ? filtros.tipo : undefined,
+        p_tipo: undefined,
         p_modulo_id:
           filtros.modulo_id.length > 0 ? filtros.modulo_id : undefined,
         p_area_id: filtros.area_id.length > 0 ? filtros.area_id : undefined,

@@ -28,7 +28,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { formatRelativeSP } from "@/lib/format";
 import {
-  TIPO_DEMANDA_LABEL,
   useDemanda,
   useUpdateDemanda,
   type UpdateDemandaPatch,
@@ -50,8 +49,9 @@ import {
   MetadataSidebar,
   SolicitanteSummary,
   StatusBadge,
-  TipoBadge,
 } from "@/components/demandas/MetadataSidebar";
+import { TipoBadge } from "@/components/demandas/TipoBadge";
+import { useTiposDemanda } from "@/hooks/useTiposDemanda";
 import { ExcluirDemandaDialog } from "@/components/demandas/ExcluirDemandaDialog";
 import { GerarPromptIADialog } from "@/components/demandas/GerarPromptIADialog";
 import { IncluirReleaseDialog } from "@/components/demandas/IncluirReleaseDialog";
@@ -81,6 +81,11 @@ function DemandaDetalhe() {
   const { user } = useAuth();
   const { temPermissao } = useProfile();
   const { data: demanda, isLoading, error } = useDemanda(codigo);
+  const { data: tipos = [] } = useTiposDemanda();
+  const tipoInfo = React.useMemo(
+    () => tipos.find((t) => t.id === demanda?.tipo_id) ?? null,
+    [tipos, demanda?.tipo_id],
+  );
   const updateMutation = useUpdateDemanda();
   const [excluirOpen, setExcluirOpen] = React.useState(false);
   const [iaDialogOpen, setIaDialogOpen] = React.useState(false);
@@ -200,7 +205,12 @@ function DemandaDetalhe() {
               <span className="font-mono text-sm text-muted-foreground">
                 {demanda.codigo}
               </span>
-              <TipoBadge>{TIPO_DEMANDA_LABEL[demanda.tipo]}</TipoBadge>
+              <TipoBadge
+                codigo={tipoInfo?.codigo ?? demanda.tipo}
+                label={tipoInfo?.label}
+                icone={tipoInfo?.icone}
+                cor={tipoInfo?.cor}
+              />
               <StatusBadge status={demanda.status} />
               <div className="ml-auto flex items-center gap-2">
                 <ReabrirDemandaButton demanda={demanda} isOwner={isOwner} />
@@ -434,7 +444,7 @@ function DemandaNaoEncontrada() {
 
 interface DetalheTabsProps {
   demandaId: string;
-  demandaTipo: string;
+  demandaTipo: string | null;
   incluirRelease: boolean;
   podeAdicionarVinculo: boolean;
   podeRemoverVinculo: boolean;

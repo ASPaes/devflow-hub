@@ -15,7 +15,6 @@ import {
   type FiltrosDemanda,
   type SortConfig,
   type StatusDemanda,
-  type TipoDemanda,
 } from "@/hooks/useDemandas";
 import { DemandasTable } from "@/components/demandas/DemandasTable";
 import { ViewToggle } from "@/components/demandas/ViewToggle";
@@ -65,7 +64,7 @@ function DemandasListagem() {
       f.prioridade = filtrosCompartilhados.prioridade;
     }
     if (filtrosCompartilhados.tipo.length > 0) {
-      f.tipo = filtrosCompartilhados.tipo as TipoDemanda[];
+      f.tipo_ids = filtrosCompartilhados.tipo;
     }
     if (filtrosCompartilhados.modulo_id.length > 0) {
       f.modulo_ids = filtrosCompartilhados.modulo_id;

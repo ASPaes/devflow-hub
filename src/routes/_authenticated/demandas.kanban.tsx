@@ -10,7 +10,6 @@ import { useProfile } from "@/hooks/useProfile";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import {
   STATUS_DEMANDA_VALUES,
-  TIPO_DEMANDA_VALUES,
   useDemandasLista,
   type FiltrosDemanda,
 } from "@/hooks/useDemandas";
@@ -38,7 +37,7 @@ const kanbanSearchSchema = z.object({
     z.array(z.coerce.number().int().min(1).max(5)),
     [],
   ).default([]),
-  tipo: fallback(z.array(z.enum(TIPO_DEMANDA_VALUES)), []).default([]),
+  tipo_ids: fallback(z.array(z.string().uuid()), []).default([]),
   modulo_id: fallback(z.string().uuid().optional(), undefined),
   area_id: fallback(z.string().uuid().optional(), undefined),
   responsavel_id: fallback(
@@ -78,7 +77,7 @@ function KanbanPage() {
       busca: search.busca,
       status: search.status,
       prioridade: search.prioridade,
-      tipo: search.tipo,
+      tipo_ids: search.tipo_ids,
       modulo_id: search.modulo_id,
       area_id: search.area_id,
       responsavel_id: search.responsavel_id,
@@ -93,7 +92,7 @@ function KanbanPage() {
       status: STATUS_NO_BOARD,
     };
     if (filtrosState.prioridade.length) f.prioridade = filtrosState.prioridade;
-    if (filtrosState.tipo.length) f.tipo = filtrosState.tipo;
+    if (filtrosState.tipo_ids.length) f.tipo_ids = filtrosState.tipo_ids;
     if (filtrosState.modulo_id) f.modulo_id = filtrosState.modulo_id;
     if (filtrosState.area_id) f.area_id = filtrosState.area_id;
     if (filtrosState.responsavel_id === RESPONSAVEL_SEM) {
@@ -126,7 +125,7 @@ function KanbanPage() {
         busca: "",
         status: [],
         prioridade: [],
-        tipo: [],
+        tipo_ids: [],
         modulo_id: undefined,
         area_id: undefined,
         responsavel_id: undefined,

@@ -28,7 +28,7 @@ import { useTiposDemanda } from "@/hooks/useTiposDemanda";
 
 interface ReleaseTabProps {
   demandaId: string;
-  demandaTipo: string;
+  demandaTipo: string | null;
   incluirRelease: boolean;
   tituloInicial?: string;
   resumoInicial?: string;

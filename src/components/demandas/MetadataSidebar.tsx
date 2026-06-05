@@ -44,13 +44,13 @@ import {
   PRIORIDADE_LABEL_CURTA,
   PROXIMOS_STATUS,
   STATUS_DEMANDA_LABEL,
-  TIPO_DEMANDA_LABEL,
-  TIPO_DEMANDA_VALUES,
   TRANSICAO_LABEL,
+  mapCodigoToEnumLegacy,
   type DemandaCompleta,
   type StatusDemanda,
   type UpdateDemandaPatch,
 } from "@/hooks/useDemandas";
+import { useTiposDemanda } from "@/hooks/useTiposDemanda";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useUsuariosComPermissao } from "@/hooks/useUsuarios";
@@ -58,6 +58,7 @@ import { useModulos } from "@/hooks/useModulos";
 import { useSubmodulos } from "@/hooks/useSubmodulos";
 
 import { useProdutosAtivos } from "@/hooks/useProdutos";
+import { TipoBadge } from "@/components/demandas/TipoBadge";
 import { TimerCard } from "./TimerCard";
 
 const PRIORIDADES = [1, 2, 3, 4, 5] as const;
@@ -520,7 +521,8 @@ function ClassificacaoEditor({
 }: ClassificacaoEditorProps) {
   const { data: modulos = [] } = useModulos();
   const { data: submodulos = [] } = useSubmodulos();
-  
+  const { data: tipos = [] } = useTiposDemanda();
+
   const { data: produtos = [] } = useProdutosAtivos();
   const { temPermissao } = useProfile();
   const podeAlterarProduto = temPermissao("alterar_produto_demanda");
@@ -555,28 +557,41 @@ function ClassificacaoEditor({
         <label className="text-xs text-muted-foreground">Tipo</label>
         {canEdit ? (
           <Select
-            value={demanda.tipo}
+            value={demanda.tipo_id ?? ""}
             onValueChange={(v) => {
-              if (v === demanda.tipo) return;
-              void onPatch({ tipo: v as (typeof TIPO_DEMANDA_VALUES)[number] });
+              if (v === demanda.tipo_id) return;
+              const tipoSel = tipos.find((t) => t.id === v);
+              const tipoLegacy = mapCodigoToEnumLegacy(tipoSel?.codigo);
+              void onPatch({ tipo_id: v, tipo: tipoLegacy });
             }}
             disabled={disabled}
           >
             <SelectTrigger className="h-8 text-sm">
-              <SelectValue />
+              <SelectValue placeholder="Selecione o tipo" />
             </SelectTrigger>
             <SelectContent>
-              {TIPO_DEMANDA_VALUES.map((t) => (
-                <SelectItem key={t} value={t}>
-                  {TIPO_DEMANDA_LABEL[t]}
+              {tipos.map((t) => (
+                <SelectItem key={t.id} value={t.id}>
+                  <span className="inline-flex items-center gap-2">
+                    {t.icone && <span>{t.icone}</span>}
+                    {t.label}
+                  </span>
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         ) : (
-          <Badge variant="outline" className="font-normal">
-            {TIPO_DEMANDA_LABEL[demanda.tipo]}
-          </Badge>
+          (() => {
+            const t = tipos.find((x) => x.id === demanda.tipo_id);
+            return (
+              <TipoBadge
+                codigo={t?.codigo ?? demanda.tipo}
+                label={t?.label}
+                icone={t?.icone}
+                cor={t?.cor}
+              />
+            );
+          })()
         )}
       </div>
 
@@ -699,10 +714,3 @@ export function SolicitanteSummary({ solicitante }: SolicitanteSummaryProps) {
   );
 }
 
-export function TipoBadge({ children }: { children: React.ReactNode }) {
-  return (
-    <Badge variant="outline" className="font-normal">
-      {children}
-    </Badge>
-  );
-}

@@ -23,14 +23,12 @@ import { cn } from "@/lib/utils";
 
 import { useModulos } from "@/hooks/useModulos";
 import { useUsuarios } from "@/hooks/useUsuarios";
+import { useTiposDemanda } from "@/hooks/useTiposDemanda";
 import {
   PRIORIDADE_LABEL_CURTA,
   STATUS_DEMANDA_LABEL,
   STATUS_DEMANDA_VALUES,
-  TIPO_DEMANDA_LABEL,
-  TIPO_DEMANDA_VALUES,
   type StatusDemanda,
-  type TipoDemanda,
 } from "@/hooks/useDemandas";
 
 const PRIORIDADES = [1, 2, 3, 4, 5] as const;
@@ -41,7 +39,8 @@ export interface FiltrosState {
   busca: string;
   status: StatusDemanda[];
   prioridade: number[];
-  tipo: TipoDemanda[];
+  /** UUIDs de tipos_demanda. */
+  tipo_ids: string[];
   modulo_id?: string;
   area_id?: string;
   /** uuid | "_sem_" | undefined */
@@ -66,13 +65,14 @@ export function FiltrosPanel({
   extraFilters,
 }: FiltrosPanelProps) {
   const modulosQuery = useModulos();
-  
   const usuariosQuery = useUsuarios();
+  const tiposQuery = useTiposDemanda();
 
   const modulos = React.useMemo(
     () => (modulosQuery.data ?? []).filter((m) => m.ativo),
     [modulosQuery.data],
   );
+  const tipos = React.useMemo(() => tiposQuery.data ?? [], [tiposQuery.data]);
   // Responsáveis: usuários ativos com permissão pode_ser_responsavel
   const responsaveis = React.useMemo(
     () =>
@@ -86,7 +86,7 @@ export function FiltrosPanel({
     !!value.busca?.trim() ||
     value.status.length > 0 ||
     value.prioridade.length > 0 ||
-    value.tipo.length > 0 ||
+    value.tipo_ids.length > 0 ||
     !!value.modulo_id ||
     !!value.area_id ||
     !!value.responsavel_id;
@@ -169,21 +169,24 @@ export function FiltrosPanel({
         }
       />
 
-      {/* Tipo (multi) */}
+      {/* Tipo (multi — dinâmico via tipos_demanda) */}
       <MultiDropdown
         label="Tipo"
-        count={value.tipo.length}
+        count={value.tipo_ids.length}
         renderItems={() =>
-          TIPO_DEMANDA_VALUES.map((t) => (
+          tipos.map((t) => (
             <DropdownMenuCheckboxItem
-              key={t}
-              checked={value.tipo.includes(t)}
+              key={t.id}
+              checked={value.tipo_ids.includes(t.id)}
               onCheckedChange={() =>
-                onChange({ tipo: toggleArray(value.tipo, t) })
+                onChange({ tipo_ids: toggleArray(value.tipo_ids, t.id) })
               }
               onSelect={(e) => e.preventDefault()}
             >
-              {TIPO_DEMANDA_LABEL[t]}
+              <span className="inline-flex items-center gap-2">
+                {t.icone && <span>{t.icone}</span>}
+                {t.label}
+              </span>
             </DropdownMenuCheckboxItem>
           ))
         }

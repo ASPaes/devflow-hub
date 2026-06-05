@@ -13,7 +13,7 @@ import { useMarcarIncluirRelease, useGerarResumoReleaseIA } from "@/hooks/useRel
 interface Props {
   open: boolean;
   onOpenChange: (o: boolean) => void;
-  demanda: { id: string; codigo: string; titulo: string; tipo: string } | null;
+  demanda: { id: string; codigo: string; titulo: string; tipo: string | null } | null;
   onConcluido?: (args: { tituloIA: string; resumoIA: string }) => void;
 }
 

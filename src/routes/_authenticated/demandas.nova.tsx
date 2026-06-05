@@ -43,11 +43,10 @@ import { toast } from "sonner";
 import {
   novaDemandaSchema,
   PRIORIDADE_LABEL,
-  TIPO_DEMANDA_LABEL,
-  TIPO_DEMANDA_VALUES,
   useCreateDemanda,
   type NovaDemandaInput,
 } from "@/hooks/useDemandas";
+import { useTiposDemanda } from "@/hooks/useTiposDemanda";
 import { AnexosUpload } from "@/components/demandas/AnexosUpload";
 
 export const Route = createFileRoute("/_authenticated/demandas/nova")({
@@ -71,17 +70,20 @@ function NovaDemandaPage() {
   
   const produtosQuery = useProdutosAtivos();
 
+  const tiposQuery = useTiposDemanda();
+  const tipos = React.useMemo(() => tiposQuery.data ?? [], [tiposQuery.data]);
+
   const form = useForm<NovaDemandaInput>({
     resolver: zodResolver(novaDemandaSchema),
     defaultValues: {
       titulo: "",
       descricao: "",
-      tipo: "tarefa",
+      tipo_id: "",
       prioridade: 3,
       produto_id: "",
       modulo_id: "",
       submodulo_id: "",
-      
+
       solicitante_id: undefined,
       tenant_id: undefined,
     },
@@ -125,7 +127,8 @@ function NovaDemandaPage() {
       }
     }
     try {
-      await createDemanda.mutateAsync({ input, anexos, userId: user.id });
+      const tipoCodigo = tipos.find((t) => t.id === input.tipo_id)?.codigo ?? "";
+      await createDemanda.mutateAsync({ input, tipoCodigo, anexos, userId: user.id });
       navigate({ to: "/" });
     } catch (err) {
       const msg = (err as { message?: string })?.message ?? "";
@@ -300,24 +303,33 @@ function NovaDemandaPage() {
 
                     <FormField
                       control={form.control}
-                      name="tipo"
+                      name="tipo_id"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Tipo</FormLabel>
                           <Select
                             value={field.value}
                             onValueChange={field.onChange}
-                            disabled={isSubmitting}
+                            disabled={isSubmitting || tiposQuery.isLoading}
                           >
                             <FormControl>
                               <SelectTrigger>
-                                <SelectValue placeholder="Selecione" />
+                                <SelectValue
+                                  placeholder={
+                                    tiposQuery.isLoading
+                                      ? "Carregando..."
+                                      : "Selecione o tipo"
+                                  }
+                                />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {TIPO_DEMANDA_VALUES.map((t) => (
-                                <SelectItem key={t} value={t}>
-                                  {TIPO_DEMANDA_LABEL[t]}
+                              {tipos.map((t) => (
+                                <SelectItem key={t.id} value={t.id}>
+                                  <span className="inline-flex items-center gap-2">
+                                    {t.icone && <span>{t.icone}</span>}
+                                    {t.label}
+                                  </span>
                                 </SelectItem>
                               ))}
                             </SelectContent>
