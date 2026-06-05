@@ -91,10 +91,12 @@ function DemandasListagem() {
     f.tipoData = tipoData;
     f.apenasSemData = apenasSemData;
 
+    if (versao !== "todas") f.versao = versao;
+
     if (buscaDebounced.trim()) f.busca = buscaDebounced.trim();
     if (sort) f.sort = sort;
     return f;
-  }, [filtrosCompartilhados, periodo, tipoData, apenasSemData, buscaDebounced, sort]);
+  }, [filtrosCompartilhados, periodo, tipoData, apenasSemData, versao, buscaDebounced, sort]);
 
   const { data: rows = [], isLoading } = useDemandasLista(filtrosQuery);
 
