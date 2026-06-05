@@ -62,8 +62,28 @@ export type UpdateDemandaPatch = Partial<
     | "area_id"
     | "produto_id"
     | "tipo"
+    | "tipo_id"
   >
 >;
+
+/** Códigos do enum legacy `tipo_demanda` (compat com queries antigas). */
+export const TIPOS_ENUM_LEGACY = [
+  "erro",
+  "melhoria",
+  "nova_funcionalidade",
+  "duvida",
+  "tarefa",
+] as const;
+
+/** Converte um codigo de tipo (tabela tipos_demanda) no enum legacy, ou null se não corresponder. */
+export function mapCodigoToEnumLegacy(
+  codigo: string | null | undefined,
+): TipoDemanda | null {
+  if (!codigo) return null;
+  return (TIPOS_ENUM_LEGACY as readonly string[]).includes(codigo)
+    ? (codigo as TipoDemanda)
+    : null;
+}
 
 export const TIPO_DEMANDA_VALUES = [
   "erro",
@@ -137,7 +157,7 @@ export const novaDemandaSchema = z.object({
     .string()
     .trim()
     .min(10, "Descreva com mais detalhes (mínimo 10 caracteres)"),
-  tipo: z.enum(TIPO_DEMANDA_VALUES),
+  tipo_id: z.string().uuid("Selecione um tipo"),
   prioridade: z.coerce.number().int().min(1).max(5),
   produto_id: z.string().uuid("Selecione um produto"),
   modulo_id: z.string().uuid("Selecione um módulo"),
@@ -151,6 +171,8 @@ export type NovaDemandaInput = z.infer<typeof novaDemandaSchema>;
 
 interface CreateDemandaArgs {
   input: NovaDemandaInput;
+  /** Codigo do tipo selecionado — usado pra derivar o enum legacy `tipo` (compat). */
+  tipoCodigo: string;
   anexos: File[];
   userId: string;
 }
@@ -163,13 +185,15 @@ interface CreateDemandaResult {
 export function useCreateDemanda() {
   const qc = useQueryClient();
   return useMutation<CreateDemandaResult, unknown, CreateDemandaArgs>({
-    mutationFn: async ({ input, anexos, userId }) => {
+    mutationFn: async ({ input, tipoCodigo, anexos, userId }) => {
+      const tipoLegacy = mapCodigoToEnumLegacy(tipoCodigo);
       const { data: demanda, error } = await supabase
         .from("demandas")
         .insert({
           titulo: input.titulo.trim(),
           descricao: input.descricao.trim(),
-          tipo: input.tipo,
+          tipo_id: input.tipo_id,
+          tipo: tipoLegacy,
           prioridade: input.prioridade,
           produto_id: input.produto_id,
           modulo_id: input.modulo_id,
@@ -278,7 +302,8 @@ export function useDemandasLista(
       if (filtros.status?.length) q = q.in("status", filtros.status);
       if (filtros.prioridade?.length)
         q = q.in("prioridade", filtros.prioridade);
-      if (filtros.tipo?.length) q = q.in("tipo", filtros.tipo);
+      if (filtros.tipo_ids?.length) q = q.in("tipo_id", filtros.tipo_ids);
+      else if (filtros.tipo?.length) q = q.in("tipo", filtros.tipo);
       if (filtros.modulo_id) q = q.eq("modulo_id", filtros.modulo_id);
       if (filtros.area_id) q = q.eq("area_id", filtros.area_id);
       if (filtros.responsavel_id === null) {
