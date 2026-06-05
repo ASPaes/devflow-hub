@@ -1,4 +1,5 @@
 import * as React from "react";
+import { createPortal } from "react-dom";
 import {
   Sheet,
   SheetContent,
@@ -189,40 +190,43 @@ export function ReleaseDetalhesSheet({
       </SheetContent>
     </Sheet>
 
-    {imagemExpandida && (
-      <div
-        role="dialog"
-        aria-modal="true"
-        ref={overlayRef}
-        onClick={() => setImagemExpandida(null)}
-        onKeyDown={(e) => e.key === "Escape" && setImagemExpandida(null)}
-        tabIndex={-1}
-        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 outline-none"
-      >
-        <div
-          ref={imagemConteudoRef}
-          className="relative"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setImagemExpandida(null);
-            }}
-            aria-label="Fechar"
-            className="absolute top-4 right-4 rounded-md p-2 text-white/80 hover:bg-white/10 hover:text-white"
+    {imagemExpandida && typeof document !== "undefined"
+      ? createPortal(
+          <div
+            role="dialog"
+            aria-modal="true"
+            ref={overlayRef}
+            onClick={() => setImagemExpandida(null)}
+            onKeyDown={(e) => e.key === "Escape" && setImagemExpandida(null)}
+            tabIndex={-1}
+            className="fixed inset-0 z-[120] flex items-center justify-center bg-black/80 p-4 outline-none"
           >
-            <X className="h-5 w-5" />
-          </button>
-          <img
-            src={imagemExpandida.url}
-            alt={imagemExpandida.alt}
-            className="max-w-[90vw] max-h-[85vh] object-contain rounded-md"
-          />
-        </div>
-      </div>
-    )}
+            <div
+              ref={imagemConteudoRef}
+              className="relative"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setImagemExpandida(null);
+                }}
+                aria-label="Fechar"
+                className="absolute top-4 right-4 rounded-md p-2 text-white/80 hover:bg-white/10 hover:text-white"
+              >
+                <X className="h-5 w-5" />
+              </button>
+              <img
+                src={imagemExpandida.url}
+                alt={imagemExpandida.alt}
+                className="max-w-[90vw] max-h-[85vh] object-contain rounded-md"
+              />
+            </div>
+          </div>,
+          document.body,
+        )
+      : null}
     </>
   );
 }
