@@ -22,6 +22,8 @@ import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useDashboardFilters } from "@/contexts/DashboardFiltersContext";
 import { PeriodoPicker } from "@/components/dashboard/PeriodoPicker";
 import { DashboardFilterBar } from "@/components/dashboard/DashboardFilterBar";
+import { VersaoSwitcher } from "@/components/demandas/VersaoSwitcher";
+import { useVersao } from "@/contexts/VersaoContext";
 
 const demandasSearchSchema = z.object({
   busca: fallback(z.string(), "").default(""),
