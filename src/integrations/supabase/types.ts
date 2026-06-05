@@ -2353,6 +2353,10 @@ export type Database = {
         Args: { p_demanda_id: string }
         Returns: Json
       }
+      obter_retornos_release_publica: {
+        Args: { p_demanda_id: string }
+        Returns: Json
+      }
       pausar_timer_com_ajuste: {
         Args: { p_ajustes: Json; p_demanda_id: string }
         Returns: {
