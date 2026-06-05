@@ -30,6 +30,8 @@ import {
   MultiSelectFilter,
   type FilterOption,
 } from "@/components/dashboard/MultiSelectFilter";
+import { VersaoSwitcher } from "@/components/demandas/VersaoSwitcher";
+import { useVersao } from "@/contexts/VersaoContext";
 
 const kanbanSearchSchema = z.object({
   status: fallback(z.array(z.enum(STATUS_DEMANDA_VALUES)), []).default([]),
