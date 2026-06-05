@@ -12,6 +12,7 @@ import {
   type TipoRelease,
 } from "@/types/release";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
+import { ReleaseDetalhesSheet } from "@/components/releases/ReleaseDetalhesSheet";
 
 export const Route = createFileRoute("/_authenticated/releases")({
   component: ReleasesPage,
