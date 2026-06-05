@@ -805,6 +805,7 @@ export type Database = {
           titulo: string
           total_reaberturas: number
           updated_at: string
+          versao: Database["public"]["Enums"]["versao_demanda"] | null
         }
         Insert: {
           area_id?: string | null
@@ -841,6 +842,7 @@ export type Database = {
           titulo: string
           total_reaberturas?: number
           updated_at?: string
+          versao?: Database["public"]["Enums"]["versao_demanda"] | null
         }
         Update: {
           area_id?: string | null
@@ -877,6 +879,7 @@ export type Database = {
           titulo?: string
           total_reaberturas?: number
           updated_at?: string
+          versao?: Database["public"]["Enums"]["versao_demanda"] | null
         }
         Relationships: [
           {
@@ -1872,6 +1875,7 @@ export type Database = {
           total_reaberturas: number | null
           total_vinculos: number | null
           updated_at: string | null
+          versao: Database["public"]["Enums"]["versao_demanda"] | null
         }
         Relationships: [
           {
@@ -2304,6 +2308,7 @@ export type Database = {
           titulo: string
           total_reaberturas: number
           updated_at: string
+          versao: Database["public"]["Enums"]["versao_demanda"] | null
         }
         SetofOptions: {
           from: "*"
@@ -2365,6 +2370,7 @@ export type Database = {
           titulo: string
           total_reaberturas: number
           updated_at: string
+          versao: Database["public"]["Enums"]["versao_demanda"] | null
         }
         SetofOptions: {
           from: "*"
@@ -2508,6 +2514,7 @@ export type Database = {
           titulo: string
           total_reaberturas: number
           updated_at: string
+          versao: Database["public"]["Enums"]["versao_demanda"] | null
         }
         SetofOptions: {
           from: "*"
@@ -2553,6 +2560,7 @@ export type Database = {
           titulo: string
           total_reaberturas: number
           updated_at: string
+          versao: Database["public"]["Enums"]["versao_demanda"] | null
         }
         SetofOptions: {
           from: "*"
@@ -2623,6 +2631,7 @@ export type Database = {
           titulo: string
           total_reaberturas: number
           updated_at: string
+          versao: Database["public"]["Enums"]["versao_demanda"] | null
         }
         SetofOptions: {
           from: "*"
@@ -2720,6 +2729,7 @@ export type Database = {
           titulo: string
           total_reaberturas: number
           updated_at: string
+          versao: Database["public"]["Enums"]["versao_demanda"] | null
         }
         SetofOptions: {
           from: "*"
@@ -2893,6 +2903,7 @@ export type Database = {
         | "duvida"
         | "tarefa"
       tipo_vinculo: "depende_de" | "bloqueia" | "relacionada" | "duplicada"
+      versao_demanda: "atual" | "proxima" | "futura"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -3072,6 +3083,7 @@ export const Constants = {
         "tarefa",
       ],
       tipo_vinculo: ["depende_de", "bloqueia", "relacionada", "duplicada"],
+      versao_demanda: ["atual", "proxima", "futura"],
     },
   },
 } as const
