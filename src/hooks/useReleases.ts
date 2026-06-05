@@ -160,13 +160,15 @@ export function useRetornosReleasePublica(demandaId: string | null) {
     queryKey: ["retornos-release-publica", demandaId],
     queryFn: async () => {
       if (!demandaId) return [];
-      const { data, error } = await supabase.rpc("obter_retornos_release_publica", {
-        p_demanda_id: demandaId,
-      });
-      if (error) throw error;
-      return (data as unknown as RetornoRelease[]) ?? [];
+      const { data, error } = await supabase.functions.invoke(
+        "obter-retornos-release",
+        { body: { demanda_id: demandaId } }
+      );
+      if (error) throw new Error(error.message || "Erro ao buscar retornos");
+      if (data?.error) throw new Error(data.error);
+      return (data?.retornos as RetornoRelease[]) ?? [];
     },
     enabled: !!demandaId,
-    staleTime: 30_000,
+    staleTime: 60_000 * 5,  // 5 min, próximo do TTL do signed URL
   });
 }
