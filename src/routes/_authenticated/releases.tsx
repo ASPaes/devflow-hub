@@ -203,6 +203,19 @@ function ReleasesPage() {
                           <p className="mt-1 whitespace-pre-wrap text-sm text-muted-foreground">
                             {r.resumo}
                           </p>
+                          <button
+                            onClick={() =>
+                              setSheetData({
+                                demandaId: r.demanda_id,
+                                demandaCodigo: r.demanda_codigo,
+                                releaseTitulo: r.titulo,
+                              })
+                            }
+                            className="mt-2 inline-flex items-center gap-1 text-xs text-purple-400 hover:text-purple-300 hover:underline"
+                          >
+                            Exibir mais detalhes
+                            <ChevronRight className="h-3 w-3" />
+                          </button>
                         </li>
                       ))}
                     </ul>
