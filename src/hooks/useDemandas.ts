@@ -203,6 +203,7 @@ export function useCreateDemanda() {
           ...(input.area_id ? { area_id: input.area_id } : {}),
           solicitante_id: input.solicitante_id ?? userId,
           ...(input.tenant_id ? { tenant_id: input.tenant_id } : {}),
+          ...(input.versao !== undefined ? { versao: input.versao } : {}),
         } as never)
         .select()
         .single();
