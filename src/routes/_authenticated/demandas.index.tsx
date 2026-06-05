@@ -51,6 +51,9 @@ function DemandasListagem() {
     setFiltros: setFiltrosCompartilhados,
   } = useDashboardFilters();
 
+  const { versao, setVersao } = useVersao();
+
+
   const busca = search.busca;
   const buscaDebounced = useDebouncedValue(busca, 300);
 
