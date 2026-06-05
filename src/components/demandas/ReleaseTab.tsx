@@ -190,17 +190,20 @@ export function ReleaseTab({
           <div>
             <Label htmlFor="release-tipo">Tipo</Label>
             <Select
-              value={tipoRelease}
-              onValueChange={(v) => setTipoRelease(v as TipoRelease)}
+              value={tipoId}
+              onValueChange={setTipoId}
               disabled={!podeEditar}
             >
               <SelectTrigger id="release-tipo" className="mt-1">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {Object.entries(TIPO_RELEASE_LABEL).map(([v, label]) => (
-                  <SelectItem key={v} value={v}>
-                    {label}
+                {tipos.map((t) => (
+                  <SelectItem key={t.id} value={t.id}>
+                    <span className="inline-flex items-center gap-2">
+                      {t.icone && <span>{t.icone}</span>}
+                      {t.label}
+                    </span>
                   </SelectItem>
                 ))}
               </SelectContent>
