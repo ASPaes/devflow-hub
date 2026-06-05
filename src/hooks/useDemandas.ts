@@ -63,6 +63,7 @@ export type UpdateDemandaPatch = Partial<
     | "produto_id"
     | "tipo"
     | "tipo_id"
+    | "versao"
   >
 >;
 
@@ -165,6 +166,7 @@ export const novaDemandaSchema = z.object({
   area_id: z.string().uuid().optional(),
   solicitante_id: z.string().uuid().optional(),
   tenant_id: z.string().uuid().optional(),
+  versao: z.enum(["atual", "proxima", "futura"]).nullable().optional(),
 });
 
 export type NovaDemandaInput = z.infer<typeof novaDemandaSchema>;
@@ -201,6 +203,7 @@ export function useCreateDemanda() {
           ...(input.area_id ? { area_id: input.area_id } : {}),
           solicitante_id: input.solicitante_id ?? userId,
           ...(input.tenant_id ? { tenant_id: input.tenant_id } : {}),
+          ...(input.versao !== undefined ? { versao: input.versao } : {}),
         } as never)
         .select()
         .single();
@@ -285,6 +288,9 @@ export type FiltrosDemanda = {
   periodo?: DateRange | null;
   tipoData?: TipoData;
   apenasSemData?: boolean;
+
+  /** Versão de planejamento: "atual" | "proxima" | "futura". Undefined ou ausente = todas. */
+  versao?: "atual" | "proxima" | "futura";
 };
 
 export interface UseDemandasListaOptions {
@@ -306,6 +312,7 @@ export function useDemandasLista(
         q = q.in("prioridade", filtros.prioridade);
       if (filtros.tipo_ids?.length) q = q.in("tipo_id", filtros.tipo_ids);
       else if (filtros.tipo?.length) q = q.in("tipo", filtros.tipo);
+      if (filtros.versao) q = q.eq("versao", filtros.versao);
       if (filtros.modulo_id) q = q.eq("modulo_id", filtros.modulo_id);
       if (filtros.area_id) q = q.eq("area_id", filtros.area_id);
       if (filtros.responsavel_id === null) {

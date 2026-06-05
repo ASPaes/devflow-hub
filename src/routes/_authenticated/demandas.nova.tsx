@@ -86,6 +86,7 @@ function NovaDemandaPage() {
 
       solicitante_id: undefined,
       tenant_id: undefined,
+      versao: "atual",
     },
   });
 
@@ -332,6 +333,36 @@ function NovaDemandaPage() {
                                   </span>
                                 </SelectItem>
                               ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="versao"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Versão de Planejamento</FormLabel>
+                          <Select
+                            value={field.value ?? "__none__"}
+                            onValueChange={(v) =>
+                              field.onChange(v === "__none__" ? null : v)
+                            }
+                            disabled={isSubmitting}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="__none__">Sem versão</SelectItem>
+                              <SelectItem value="atual">Atual</SelectItem>
+                              <SelectItem value="proxima">Próxima</SelectItem>
+                              <SelectItem value="futura">Futura</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />

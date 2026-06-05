@@ -30,6 +30,8 @@ import {
   MultiSelectFilter,
   type FilterOption,
 } from "@/components/dashboard/MultiSelectFilter";
+import { VersaoSwitcher } from "@/components/demandas/VersaoSwitcher";
+import { useVersao } from "@/contexts/VersaoContext";
 
 const kanbanSearchSchema = z.object({
   status: fallback(z.array(z.enum(STATUS_DEMANDA_VALUES)), []).default([]),
@@ -62,6 +64,9 @@ function KanbanPage() {
     filtros: filtrosCompartilhados,
     setFiltros: setFiltrosCompartilhados,
   } = useDashboardFilters();
+
+  const { versao, setVersao } = useVersao();
+
 
   const { data: tenantsData = [] } = useTenants();
   const tenantOptions: FilterOption<string>[] = React.useMemo(
@@ -104,8 +109,9 @@ function KanbanPage() {
       f.tenant_ids = filtrosCompartilhados.tenant_id;
     }
     if (buscaDebounced.trim()) f.busca = buscaDebounced.trim();
+    if (versao !== "todas") f.versao = versao;
     return f;
-  }, [filtrosState, buscaDebounced, filtrosCompartilhados.tenant_id]);
+  }, [filtrosState, buscaDebounced, filtrosCompartilhados.tenant_id, versao]);
 
   const { data: rows = [], isLoading } = useDemandasLista(filtrosQuery);
 
@@ -176,12 +182,15 @@ function KanbanPage() {
         onClear={limpar}
         hideStatus
         extraFilters={
-          <MultiSelectFilter
-            label="Empresa"
-            options={tenantOptions}
-            selected={filtrosCompartilhados.tenant_id}
-            onChange={setTenantIds}
-          />
+          <>
+            <MultiSelectFilter
+              label="Empresa"
+              options={tenantOptions}
+              selected={filtrosCompartilhados.tenant_id}
+              onChange={setTenantIds}
+            />
+            <VersaoSwitcher value={versao} onChange={setVersao} />
+          </>
         }
       />
 

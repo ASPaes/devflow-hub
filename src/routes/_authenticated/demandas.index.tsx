@@ -22,6 +22,8 @@ import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useDashboardFilters } from "@/contexts/DashboardFiltersContext";
 import { PeriodoPicker } from "@/components/dashboard/PeriodoPicker";
 import { DashboardFilterBar } from "@/components/dashboard/DashboardFilterBar";
+import { VersaoSwitcher } from "@/components/demandas/VersaoSwitcher";
+import { useVersao } from "@/contexts/VersaoContext";
 
 const demandasSearchSchema = z.object({
   busca: fallback(z.string(), "").default(""),
@@ -48,6 +50,9 @@ function DemandasListagem() {
     setApenasSemData,
     setFiltros: setFiltrosCompartilhados,
   } = useDashboardFilters();
+
+  const { versao, setVersao } = useVersao();
+
 
   const busca = search.busca;
   const buscaDebounced = useDebouncedValue(busca, 300);
@@ -86,10 +91,12 @@ function DemandasListagem() {
     f.tipoData = tipoData;
     f.apenasSemData = apenasSemData;
 
+    if (versao !== "todas") f.versao = versao;
+
     if (buscaDebounced.trim()) f.busca = buscaDebounced.trim();
     if (sort) f.sort = sort;
     return f;
-  }, [filtrosCompartilhados, periodo, tipoData, apenasSemData, buscaDebounced, sort]);
+  }, [filtrosCompartilhados, periodo, tipoData, apenasSemData, versao, buscaDebounced, sort]);
 
   const { data: rows = [], isLoading } = useDemandasLista(filtrosQuery);
 
@@ -194,12 +201,13 @@ function DemandasListagem() {
         </div>
       </div>
 
-      {/* Linha 2: filtros multi-select */}
-      <div className="mb-4">
+      {/* Linha 2: filtros multi-select + Versão */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
         <DashboardFilterBar
           filtros={filtrosCompartilhados}
           onChange={setFiltrosCompartilhados}
         />
+        <VersaoSwitcher value={versao} onChange={setVersao} />
       </div>
 
       {!isLoading && rows.length === 0 ? (
