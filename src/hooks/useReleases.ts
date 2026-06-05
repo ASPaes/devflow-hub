@@ -153,3 +153,20 @@ export function useReleasesPublicadas() {
     staleTime: 30_000,
   });
 }
+
+/** Lista retornos (mídia/texto) de uma demanda publicada */
+export function useRetornosReleasePublica(demandaId: string | null) {
+  return useQuery<RetornoRelease[]>({
+    queryKey: ["retornos-release-publica", demandaId],
+    queryFn: async () => {
+      if (!demandaId) return [];
+      const { data, error } = await supabase.rpc("obter_retornos_release_publica", {
+        p_demanda_id: demandaId,
+      });
+      if (error) throw error;
+      return (data as unknown as RetornoRelease[]) ?? [];
+    },
+    enabled: !!demandaId,
+    staleTime: 30_000,
+  });
+}
