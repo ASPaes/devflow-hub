@@ -65,6 +65,9 @@ function KanbanPage() {
     setFiltros: setFiltrosCompartilhados,
   } = useDashboardFilters();
 
+  const { versao, setVersao } = useVersao();
+
+
   const { data: tenantsData = [] } = useTenants();
   const tenantOptions: FilterOption<string>[] = React.useMemo(
     () =>
