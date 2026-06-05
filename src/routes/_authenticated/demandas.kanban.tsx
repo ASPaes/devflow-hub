@@ -109,8 +109,9 @@ function KanbanPage() {
       f.tenant_ids = filtrosCompartilhados.tenant_id;
     }
     if (buscaDebounced.trim()) f.busca = buscaDebounced.trim();
+    if (versao !== "todas") f.versao = versao;
     return f;
-  }, [filtrosState, buscaDebounced, filtrosCompartilhados.tenant_id]);
+  }, [filtrosState, buscaDebounced, filtrosCompartilhados.tenant_id, versao]);
 
   const { data: rows = [], isLoading } = useDemandasLista(filtrosQuery);
 
