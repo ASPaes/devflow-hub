@@ -2,6 +2,7 @@ import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
 
 import { AppShell } from "@/components/layout/AppShell";
 import { DashboardFiltersProvider } from "@/contexts/DashboardFiltersContext";
+import { VersaoProvider } from "@/contexts/VersaoContext";
 import { supabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/_authenticated")({
