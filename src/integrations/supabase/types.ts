@@ -800,7 +800,7 @@ export type Database = {
           tempo_realizado_segundos: number
           tenant_id: string
           timer_iniciado_em: string | null
-          tipo: Database["public"]["Enums"]["tipo_demanda"]
+          tipo: Database["public"]["Enums"]["tipo_demanda"] | null
           tipo_id: string | null
           titulo: string
           total_reaberturas: number
@@ -836,7 +836,7 @@ export type Database = {
           tempo_realizado_segundos?: number
           tenant_id: string
           timer_iniciado_em?: string | null
-          tipo: Database["public"]["Enums"]["tipo_demanda"]
+          tipo?: Database["public"]["Enums"]["tipo_demanda"] | null
           tipo_id?: string | null
           titulo: string
           total_reaberturas?: number
@@ -872,7 +872,7 @@ export type Database = {
           tempo_realizado_segundos?: number
           tenant_id?: string
           timer_iniciado_em?: string | null
-          tipo?: Database["public"]["Enums"]["tipo_demanda"]
+          tipo?: Database["public"]["Enums"]["tipo_demanda"] | null
           tipo_id?: string | null
           titulo?: string
           total_reaberturas?: number
@@ -1861,6 +1861,11 @@ export type Database = {
           tenant_id: string | null
           tenant_nome: string | null
           tipo: Database["public"]["Enums"]["tipo_demanda"] | null
+          tipo_codigo: string | null
+          tipo_cor: string | null
+          tipo_icone: string | null
+          tipo_id: string | null
+          tipo_label: string | null
           titulo: string | null
           total_anexos: number | null
           total_comentarios: number | null
@@ -1951,6 +1956,13 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "vw_tenants_com_usuarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demandas_tipo_id_fkey"
+            columns: ["tipo_id"]
+            isOneToOne: false
+            referencedRelation: "tipos_demanda"
             referencedColumns: ["id"]
           },
         ]
@@ -2287,7 +2299,7 @@ export type Database = {
           tempo_realizado_segundos: number
           tenant_id: string
           timer_iniciado_em: string | null
-          tipo: Database["public"]["Enums"]["tipo_demanda"]
+          tipo: Database["public"]["Enums"]["tipo_demanda"] | null
           tipo_id: string | null
           titulo: string
           total_reaberturas: number
@@ -2348,7 +2360,7 @@ export type Database = {
           tempo_realizado_segundos: number
           tenant_id: string
           timer_iniciado_em: string | null
-          tipo: Database["public"]["Enums"]["tipo_demanda"]
+          tipo: Database["public"]["Enums"]["tipo_demanda"] | null
           tipo_id: string | null
           titulo: string
           total_reaberturas: number
@@ -2491,7 +2503,7 @@ export type Database = {
           tempo_realizado_segundos: number
           tenant_id: string
           timer_iniciado_em: string | null
-          tipo: Database["public"]["Enums"]["tipo_demanda"]
+          tipo: Database["public"]["Enums"]["tipo_demanda"] | null
           tipo_id: string | null
           titulo: string
           total_reaberturas: number
@@ -2536,7 +2548,7 @@ export type Database = {
           tempo_realizado_segundos: number
           tenant_id: string
           timer_iniciado_em: string | null
-          tipo: Database["public"]["Enums"]["tipo_demanda"]
+          tipo: Database["public"]["Enums"]["tipo_demanda"] | null
           tipo_id: string | null
           titulo: string
           total_reaberturas: number
@@ -2606,7 +2618,7 @@ export type Database = {
           tempo_realizado_segundos: number
           tenant_id: string
           timer_iniciado_em: string | null
-          tipo: Database["public"]["Enums"]["tipo_demanda"]
+          tipo: Database["public"]["Enums"]["tipo_demanda"] | null
           tipo_id: string | null
           titulo: string
           total_reaberturas: number
@@ -2703,7 +2715,7 @@ export type Database = {
           tempo_realizado_segundos: number
           tenant_id: string
           timer_iniciado_em: string | null
-          tipo: Database["public"]["Enums"]["tipo_demanda"]
+          tipo: Database["public"]["Enums"]["tipo_demanda"] | null
           tipo_id: string | null
           titulo: string
           total_reaberturas: number
