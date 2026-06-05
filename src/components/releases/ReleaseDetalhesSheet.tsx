@@ -1,5 +1,5 @@
 import * as React from "react";
-import { createPortal } from "react-dom";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
 import {
   Sheet,
   SheetContent,
@@ -36,44 +36,16 @@ export function ReleaseDetalhesSheet({
   releaseTitulo,
 }: Props) {
   const { data: retornos = [], isLoading } = useRetornosReleasePublica(demandaId);
-  const overlayRef = React.useRef<HTMLDivElement | null>(null);
-  const imagemConteudoRef = React.useRef<HTMLDivElement | null>(null);
-
   const [imagemExpandida, setImagemExpandida] = React.useState<{
     url: string;
     alt: string;
   } | null>(null);
-
-  React.useEffect(() => {
-    if (imagemExpandida) {
-      overlayRef.current?.focus();
-    }
-  }, [imagemExpandida]);
 
   return (
     <>
       <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         className="w-full overflow-y-auto sm:max-w-lg"
-        onInteractOutside={(event) => {
-          if (!imagemExpandida) return;
-
-          const alvo = event.target as Node | null;
-
-          if (alvo && imagemConteudoRef.current?.contains(alvo)) {
-            event.preventDefault();
-            return;
-          }
-
-          event.preventDefault();
-          setImagemExpandida(null);
-        }}
-        onEscapeKeyDown={(event) => {
-          if (!imagemExpandida) return;
-
-          event.preventDefault();
-          setImagemExpandida(null);
-        }}
       >
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
@@ -190,43 +162,39 @@ export function ReleaseDetalhesSheet({
       </SheetContent>
     </Sheet>
 
-    {imagemExpandida && typeof document !== "undefined"
-      ? createPortal(
-          <div
-            role="dialog"
-            aria-modal="true"
-            ref={overlayRef}
-            onClick={() => setImagemExpandida(null)}
-            onKeyDown={(e) => e.key === "Escape" && setImagemExpandida(null)}
-            tabIndex={-1}
-            className="fixed inset-0 z-[120] flex items-center justify-center bg-black/80 p-4 outline-none"
-          >
-            <div
-              ref={imagemConteudoRef}
-              className="relative"
-              onClick={(e) => e.stopPropagation()}
+    <DialogPrimitive.Root
+      open={!!imagemExpandida}
+      onOpenChange={(o) => {
+        if (!o) setImagemExpandida(null);
+      }}
+    >
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay className="fixed inset-0 z-[120] bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+        <DialogPrimitive.Content
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          className="fixed inset-0 z-[121] flex items-center justify-center p-4 outline-none"
+        >
+          <DialogPrimitive.Title className="sr-only">
+            {imagemExpandida?.alt ?? "Imagem"}
+          </DialogPrimitive.Title>
+          <div className="relative">
+            <DialogPrimitive.Close
+              aria-label="Fechar"
+              className="absolute top-4 right-4 rounded-md p-2 text-white/80 hover:bg-white/10 hover:text-white"
             >
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setImagemExpandida(null);
-                }}
-                aria-label="Fechar"
-                className="absolute top-4 right-4 rounded-md p-2 text-white/80 hover:bg-white/10 hover:text-white"
-              >
-                <X className="h-5 w-5" />
-              </button>
+              <X className="h-5 w-5" />
+            </DialogPrimitive.Close>
+            {imagemExpandida && (
               <img
                 src={imagemExpandida.url}
                 alt={imagemExpandida.alt}
                 className="max-w-[90vw] max-h-[85vh] object-contain rounded-md"
               />
-            </div>
-          </div>,
-          document.body,
-        )
-      : null}
+            )}
+          </div>
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
     </>
   );
 }
