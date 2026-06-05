@@ -134,10 +134,14 @@ export function ReleaseTab({
       toast.error("Preencha título e resumo");
       return;
     }
+    if (!tipoId) {
+      toast.error("Selecione um tipo");
+      return;
+    }
     try {
       const releaseSalva = await salvar.mutateAsync({
         demandaId,
-        tipoRelease,
+        tipoId,
         titulo,
         resumo,
       });
