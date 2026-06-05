@@ -36,44 +36,16 @@ export function ReleaseDetalhesSheet({
   releaseTitulo,
 }: Props) {
   const { data: retornos = [], isLoading } = useRetornosReleasePublica(demandaId);
-  const overlayRef = React.useRef<HTMLDivElement | null>(null);
-  const imagemConteudoRef = React.useRef<HTMLDivElement | null>(null);
-
   const [imagemExpandida, setImagemExpandida] = React.useState<{
     url: string;
     alt: string;
   } | null>(null);
-
-  React.useEffect(() => {
-    if (imagemExpandida) {
-      overlayRef.current?.focus();
-    }
-  }, [imagemExpandida]);
 
   return (
     <>
       <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         className="w-full overflow-y-auto sm:max-w-lg"
-        onInteractOutside={(event) => {
-          if (!imagemExpandida) return;
-
-          const alvo = event.target as Node | null;
-
-          if (alvo && imagemConteudoRef.current?.contains(alvo)) {
-            event.preventDefault();
-            return;
-          }
-
-          event.preventDefault();
-          setImagemExpandida(null);
-        }}
-        onEscapeKeyDown={(event) => {
-          if (!imagemExpandida) return;
-
-          event.preventDefault();
-          setImagemExpandida(null);
-        }}
       >
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
