@@ -70,6 +70,26 @@ function ReleasesPage() {
   const { data: releases = [], isLoading } = useReleasesPublicadas();
   const agrupado = React.useMemo(() => groupByDateAndType(releases), [releases]);
 
+  const [tiposSelecionados, setTiposSelecionados] = React.useState<Set<TipoRelease>>(
+    new Set()
+  );
+
+  const TIPOS_ORDEM: TipoRelease[] = ["nova_funcionalidade", "melhoria", "erro", "tarefa", "duvida"];
+
+  const agrupadoFiltrado = React.useMemo(() => {
+    if (tiposSelecionados.size === 0) return agrupado;
+    return agrupado
+      .map((dia) => ({
+        ...dia,
+        tipos: dia.tipos.filter((grupo) => tiposSelecionados.has(grupo.tipo)),
+      }))
+      .map((dia) => ({
+        ...dia,
+        totalItens: dia.tipos.reduce((acc, g) => acc + g.releases.length, 0),
+      }))
+      .filter((dia) => dia.tipos.length > 0);
+  }, [agrupado, tiposSelecionados]);
+
   return (
     <div className="space-y-6">
       <div>
@@ -82,17 +102,56 @@ function ReleasesPage() {
         </p>
       </div>
 
+      {!isLoading && (
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => setTiposSelecionados(new Set())}
+            className={`text-xs px-3 py-1.5 rounded-full border transition-colors cursor-pointer ${
+              tiposSelecionados.size === 0
+                ? "bg-purple-500/20 text-purple-200 border-purple-500/40"
+                : "bg-transparent text-muted-foreground border-border hover:bg-muted/50"
+            }`}
+          >
+            Todos
+          </button>
+          {TIPOS_ORDEM.map((tipo) => {
+            const ativo = tiposSelecionados.has(tipo);
+            return (
+              <button
+                key={tipo}
+                onClick={() => {
+                  const newSet = new Set(tiposSelecionados);
+                  if (ativo) newSet.delete(tipo);
+                  else newSet.add(tipo);
+                  setTiposSelecionados(newSet);
+                }}
+                className={`text-xs px-3 py-1.5 rounded-full border transition-colors flex items-center gap-1.5 cursor-pointer ${
+                  ativo
+                    ? "bg-purple-500/20 text-purple-200 border-purple-500/40"
+                    : "bg-transparent text-muted-foreground border-border hover:bg-muted/50"
+                }`}
+              >
+                {TIPO_RELEASE_ICONE[tipo]}
+                {TIPO_RELEASE_LABEL[tipo]}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
       {isLoading ? (
         <div className="flex justify-center py-12">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
         </div>
-      ) : agrupado.length === 0 ? (
+      ) : agrupadoFiltrado.length === 0 ? (
         <div className="rounded-lg border border-border bg-card p-12 text-center text-sm text-muted-foreground">
-          Nenhuma release publicada ainda.
+          {tiposSelecionados.size > 0
+            ? "Nenhuma release encontrada com esses filtros."
+            : "Nenhuma release publicada ainda."}
         </div>
       ) : (
         <div className="space-y-6">
-          {agrupado.map((dia) => (
+          {agrupadoFiltrado.map((dia) => (
             <div
               key={dia.data}
               className="rounded-lg border border-border bg-card p-5"
