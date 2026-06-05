@@ -35,16 +35,45 @@ export function ReleaseDetalhesSheet({
   releaseTitulo,
 }: Props) {
   const { data: retornos = [], isLoading } = useRetornosReleasePublica(demandaId);
+  const overlayRef = React.useRef<HTMLDivElement | null>(null);
+  const imagemConteudoRef = React.useRef<HTMLDivElement | null>(null);
 
   const [imagemExpandida, setImagemExpandida] = React.useState<{
     url: string;
     alt: string;
   } | null>(null);
 
+  React.useEffect(() => {
+    if (imagemExpandida) {
+      overlayRef.current?.focus();
+    }
+  }, [imagemExpandida]);
+
   return (
     <>
       <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full overflow-y-auto sm:max-w-lg">
+      <SheetContent
+        className="w-full overflow-y-auto sm:max-w-lg"
+        onInteractOutside={(event) => {
+          if (!imagemExpandida) return;
+
+          const alvo = event.target as Node | null;
+
+          if (alvo && imagemConteudoRef.current?.contains(alvo)) {
+            event.preventDefault();
+            return;
+          }
+
+          event.preventDefault();
+          setImagemExpandida(null);
+        }}
+        onEscapeKeyDown={(event) => {
+          if (!imagemExpandida) return;
+
+          event.preventDefault();
+          setImagemExpandida(null);
+        }}
+      >
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
             <MessageSquare className="h-4 w-4 text-primary" />
@@ -164,35 +193,34 @@ export function ReleaseDetalhesSheet({
       <div
         role="dialog"
         aria-modal="true"
-        onPointerDown={(e) => {
-          e.stopPropagation();
-          setImagemExpandida(null);
-        }}
-        onClick={(e) => e.stopPropagation()}
+        ref={overlayRef}
+        onClick={() => setImagemExpandida(null)}
         onKeyDown={(e) => e.key === "Escape" && setImagemExpandida(null)}
         tabIndex={-1}
-        ref={(el) => el?.focus()}
         className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 outline-none"
       >
-        <button
-          type="button"
-          onPointerDown={(e) => {
-            e.stopPropagation();
-            setImagemExpandida(null);
-          }}
+        <div
+          ref={imagemConteudoRef}
+          className="relative"
           onClick={(e) => e.stopPropagation()}
-          aria-label="Fechar"
-          className="absolute top-4 right-4 rounded-md p-2 text-white/80 hover:bg-white/10 hover:text-white"
         >
-          <X className="h-5 w-5" />
-        </button>
-        <img
-          src={imagemExpandida.url}
-          alt={imagemExpandida.alt}
-          onPointerDown={(e) => e.stopPropagation()}
-          onClick={(e) => e.stopPropagation()}
-          className="max-w-[90vw] max-h-[85vh] object-contain rounded-md"
-        />
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setImagemExpandida(null);
+            }}
+            aria-label="Fechar"
+            className="absolute top-4 right-4 rounded-md p-2 text-white/80 hover:bg-white/10 hover:text-white"
+          >
+            <X className="h-5 w-5" />
+          </button>
+          <img
+            src={imagemExpandida.url}
+            alt={imagemExpandida.alt}
+            className="max-w-[90vw] max-h-[85vh] object-contain rounded-md"
+          />
+        </div>
       </div>
     )}
     </>
