@@ -28,7 +28,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { formatRelativeSP } from "@/lib/format";
 import {
-  TIPO_DEMANDA_LABEL,
   useDemanda,
   useUpdateDemanda,
   type UpdateDemandaPatch,
@@ -50,8 +49,9 @@ import {
   MetadataSidebar,
   SolicitanteSummary,
   StatusBadge,
-  TipoBadge,
 } from "@/components/demandas/MetadataSidebar";
+import { TipoBadge } from "@/components/demandas/TipoBadge";
+import { useTiposDemanda } from "@/hooks/useTiposDemanda";
 import { ExcluirDemandaDialog } from "@/components/demandas/ExcluirDemandaDialog";
 import { GerarPromptIADialog } from "@/components/demandas/GerarPromptIADialog";
 import { IncluirReleaseDialog } from "@/components/demandas/IncluirReleaseDialog";
@@ -434,7 +434,7 @@ function DemandaNaoEncontrada() {
 
 interface DetalheTabsProps {
   demandaId: string;
-  demandaTipo: string;
+  demandaTipo: string | null;
   incluirRelease: boolean;
   podeAdicionarVinculo: boolean;
   podeRemoverVinculo: boolean;
