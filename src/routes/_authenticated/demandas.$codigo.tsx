@@ -81,6 +81,11 @@ function DemandaDetalhe() {
   const { user } = useAuth();
   const { temPermissao } = useProfile();
   const { data: demanda, isLoading, error } = useDemanda(codigo);
+  const { data: tipos = [] } = useTiposDemanda();
+  const tipoInfo = React.useMemo(
+    () => tipos.find((t) => t.id === demanda?.tipo_id) ?? null,
+    [tipos, demanda?.tipo_id],
+  );
   const updateMutation = useUpdateDemanda();
   const [excluirOpen, setExcluirOpen] = React.useState(false);
   const [iaDialogOpen, setIaDialogOpen] = React.useState(false);
@@ -200,7 +205,12 @@ function DemandaDetalhe() {
               <span className="font-mono text-sm text-muted-foreground">
                 {demanda.codigo}
               </span>
-              <TipoBadge>{TIPO_DEMANDA_LABEL[demanda.tipo]}</TipoBadge>
+              <TipoBadge
+                codigo={tipoInfo?.codigo ?? demanda.tipo}
+                label={tipoInfo?.label}
+                icone={tipoInfo?.icone}
+                cor={tipoInfo?.cor}
+              />
               <StatusBadge status={demanda.status} />
               <div className="ml-auto flex items-center gap-2">
                 <ReabrirDemandaButton demanda={demanda} isOwner={isOwner} />
