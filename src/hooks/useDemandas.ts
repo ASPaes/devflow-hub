@@ -312,6 +312,7 @@ export function useDemandasLista(
         q = q.in("prioridade", filtros.prioridade);
       if (filtros.tipo_ids?.length) q = q.in("tipo_id", filtros.tipo_ids);
       else if (filtros.tipo?.length) q = q.in("tipo", filtros.tipo);
+      if (filtros.versao) q = q.eq("versao", filtros.versao);
       if (filtros.modulo_id) q = q.eq("modulo_id", filtros.modulo_id);
       if (filtros.area_id) q = q.eq("area_id", filtros.area_id);
       if (filtros.responsavel_id === null) {
