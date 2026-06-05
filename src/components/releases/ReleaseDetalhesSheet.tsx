@@ -36,6 +36,7 @@ export function ReleaseDetalhesSheet({
 }: Props) {
   const { data: retornos = [], isLoading } = useRetornosReleasePublica(demandaId);
   const overlayRef = React.useRef<HTMLDivElement | null>(null);
+  const imagemConteudoRef = React.useRef<HTMLDivElement | null>(null);
 
   const [imagemExpandida, setImagemExpandida] = React.useState<{
     url: string;
@@ -55,6 +56,13 @@ export function ReleaseDetalhesSheet({
         className="w-full overflow-y-auto sm:max-w-lg"
         onInteractOutside={(event) => {
           if (!imagemExpandida) return;
+
+          const alvo = event.target as Node | null;
+
+          if (alvo && imagemConteudoRef.current?.contains(alvo)) {
+            event.preventDefault();
+            return;
+          }
 
           event.preventDefault();
           setImagemExpandida(null);
@@ -191,23 +199,28 @@ export function ReleaseDetalhesSheet({
         tabIndex={-1}
         className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 outline-none"
       >
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            setImagemExpandida(null);
-          }}
-          aria-label="Fechar"
-          className="absolute top-4 right-4 rounded-md p-2 text-white/80 hover:bg-white/10 hover:text-white"
-        >
-          <X className="h-5 w-5" />
-        </button>
-        <img
-          src={imagemExpandida.url}
-          alt={imagemExpandida.alt}
+        <div
+          ref={imagemConteudoRef}
+          className="relative"
           onClick={(e) => e.stopPropagation()}
-          className="max-w-[90vw] max-h-[85vh] object-contain rounded-md"
-        />
+        >
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setImagemExpandida(null);
+            }}
+            aria-label="Fechar"
+            className="absolute top-4 right-4 rounded-md p-2 text-white/80 hover:bg-white/10 hover:text-white"
+          >
+            <X className="h-5 w-5" />
+          </button>
+          <img
+            src={imagemExpandida.url}
+            alt={imagemExpandida.alt}
+            className="max-w-[90vw] max-h-[85vh] object-contain rounded-md"
+          />
+        </div>
       </div>
     )}
     </>
