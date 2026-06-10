@@ -455,7 +455,12 @@ function HorasDevPage() {
               (relatorioQuery.data ?? []).length > 0 && (
                 <TableRow className="border-t-2 font-semibold">
                   <TableCell />
-                  <TableCell>Total</TableCell>
+                  <TableCell>
+                    <span>Total geral</span>
+                    <Badge variant="outline" className="ml-2 text-[10px] px-1.5 py-0">
+                      {(relatorioQuery.data ?? []).length} desenvolvedor{(relatorioQuery.data ?? []).length !== 1 ? 'es' : ''}
+                    </Badge>
+                  </TableCell>
                   <TableCell />
                   <TableCell />
                   <TableCell className="text-right tabular-nums">
