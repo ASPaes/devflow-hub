@@ -3,13 +3,18 @@ import {
   DndContext,
   DragOverlay,
   PointerSensor,
-  useDraggable,
   useDroppable,
   useSensor,
   useSensors,
+  closestCorners,
   type DragEndEvent,
   type DragStartEvent,
 } from "@dnd-kit/core";
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
 import { Badge } from "@/components/ui/badge";
@@ -21,7 +26,7 @@ import {
   type StatusDemanda,
 } from "@/hooks/useDemandas";
 import { useProfile } from "@/hooks/useProfile";
-import { useMoverStatusDemanda } from "@/hooks/useMoverStatusDemanda";
+import { useReposicionarDemanda } from "@/hooks/useReposicionarDemanda";
 import { KanbanCard } from "@/components/demandas/KanbanCard";
 import { IncluirReleaseDialog } from "@/components/demandas/IncluirReleaseDialog";
 import { useNavigate } from "@tanstack/react-router";
@@ -68,13 +73,15 @@ export const STATUS_NO_BOARD: StatusDemanda[] = [
   "entregue",
 ];
 
+const POSICAO_STEP = 1000;
+
 interface KanbanBoardProps {
   rows: DemandaListaRow[];
   isLoading?: boolean;
   onCardClick?: (row: DemandaListaRow) => void;
 }
 
-function DraggableCard({
+function SortableCard({
   row,
   podeMover,
   onCardClick,
@@ -84,14 +91,22 @@ function DraggableCard({
   onCardClick?: (row: DemandaListaRow) => void;
 }) {
   const id = row.id ?? row.codigo ?? "";
-  const { attributes, listeners, setNodeRef, transform, isDragging } =
-    useDraggable({
-      id,
-      disabled: !podeMover,
-    });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id,
+    disabled: !podeMover,
+    data: { type: "card", row },
+  });
 
   const style: React.CSSProperties = {
-    transform: CSS.Translate.toString(transform),
+    transform: CSS.Transform.toString(transform),
+    transition,
     opacity: isDragging ? 0.4 : 1,
     cursor: podeMover ? (isDragging ? "grabbing" : "grab") : "pointer",
     touchAction: podeMover ? "none" : undefined,
@@ -134,14 +149,23 @@ function ColunaDroppable({
   podeMover: boolean;
   onCardClick?: (row: DemandaListaRow) => void;
 }) {
-  const { setNodeRef, isOver } = useDroppable({ id: col.key });
-  const [mostrarTodosEntregues, setMostrarTodosEntregues] = React.useState(false);
+  const { setNodeRef, isOver } = useDroppable({
+    id: col.key,
+    data: { type: "coluna", coluna: col.key },
+  });
+  const [mostrarTodosEntregues, setMostrarTodosEntregues] =
+    React.useState(false);
 
   const isEntregue = col.key === "entregue";
   const itemsExibidos = React.useMemo(() => {
     if (!isEntregue || mostrarTodosEntregues) return items;
     return items.filter((r) => isHoje(r.delivered_at));
   }, [isEntregue, mostrarTodosEntregues, items]);
+
+  const sortableIds = React.useMemo(
+    () => itemsExibidos.map((r) => r.id ?? r.codigo ?? ""),
+    [itemsExibidos],
+  );
 
   return (
     <div className="flex max-h-[calc(100vh-260px)] w-80 flex-shrink-0 flex-col rounded-lg border border-border bg-secondary/20">
@@ -189,38 +213,59 @@ function ColunaDroppable({
           itemsExibidos.length === 0 && !isLoading && "justify-center",
         )}
       >
-        {isLoading ? (
-          <>
-            {Array.from({ length: 2 }).map((_, i) => (
-              <Skeleton key={i} className="h-28 w-full rounded-lg" />
-            ))}
-          </>
-        ) : itemsExibidos.length === 0 ? (
-          <div className="py-12 text-center text-xs text-muted-foreground">
-            {isEntregue && !mostrarTodosEntregues
-              ? "Nenhuma demanda entregue hoje"
-              : "Sem demandas"}
-          </div>
-        ) : (
-          itemsExibidos.map((row) => (
-            <DraggableCard
-              key={row.id ?? row.codigo}
-              row={row}
-              podeMover={podeMover}
-              onCardClick={onCardClick}
-            />
-          ))
-        )}
+        <SortableContext
+          items={sortableIds}
+          strategy={verticalListSortingStrategy}
+        >
+          {isLoading ? (
+            <>
+              {Array.from({ length: 2 }).map((_, i) => (
+                <Skeleton key={i} className="h-28 w-full rounded-lg" />
+              ))}
+            </>
+          ) : itemsExibidos.length === 0 ? (
+            <div className="py-12 text-center text-xs text-muted-foreground">
+              {isEntregue && !mostrarTodosEntregues
+                ? "Nenhuma demanda entregue hoje"
+                : "Sem demandas"}
+            </div>
+          ) : (
+            itemsExibidos.map((row) => (
+              <SortableCard
+                key={row.id ?? row.codigo}
+                row={row}
+                podeMover={podeMover}
+                onCardClick={onCardClick}
+              />
+            ))
+          )}
+        </SortableContext>
       </div>
     </div>
   );
+}
+
+function statusToColuna(s: StatusDemanda): ColunaStatus | null {
+  if (s === "reaberta") return "triagem";
+  if (
+    s === "triagem" ||
+    s === "analise" ||
+    s === "desenvolvimento" ||
+    s === "aguardando_cliente" ||
+    s === "teste" ||
+    s === "para_publicar" ||
+    s === "entregue"
+  ) {
+    return s;
+  }
+  return null;
 }
 
 export function KanbanBoard({ rows, isLoading, onCardClick }: KanbanBoardProps) {
   const { temPermissao } = useProfile();
   const podeMover = temPermissao("editar_qualquer_demanda");
   const podeGerenciarReleases = temPermissao("gerenciar_releases");
-  const mover = useMoverStatusDemanda();
+  const reposicionar = useReposicionarDemanda();
   const navigate = useNavigate();
   const [activeId, setActiveId] = React.useState<string | null>(null);
   const [releaseDialog, setReleaseDialog] = React.useState<
@@ -288,27 +333,21 @@ export function KanbanBoard({ rows, isLoading, onCardClick }: KanbanBoardProps) 
       entregue: [],
     };
     for (const d of rows) {
-      const s = d.status;
-      if (!s) continue;
-      const coluna: ColunaStatus | null =
-        s === "reaberta"
-          ? "triagem"
-          : s === "triagem" ||
-              s === "analise" ||
-              s === "desenvolvimento" ||
-              s === "aguardando_cliente" ||
-              s === "teste" ||
-              s === "para_publicar" ||
-              s === "entregue"
-            ? s
-            : null;
+      if (!d.status) continue;
+      const coluna = statusToColuna(d.status);
       if (coluna) mapa[coluna].push(d);
     }
     for (const k of Object.keys(mapa) as ColunaStatus[]) {
       mapa[k].sort((a, b) => {
-        const pa = a.prioridade ?? 0;
-        const pb = b.prioridade ?? 0;
-        if (pa !== pb) return pb - pa;
+        const pa = a.posicao;
+        const pb = b.posicao;
+        if (pa != null && pb != null) return pa - pb;
+        if (pa != null) return -1;
+        if (pb != null) return 1;
+        // Fallback: legado sem posição
+        const ra = a.prioridade ?? 0;
+        const rb = b.prioridade ?? 0;
+        if (ra !== rb) return rb - ra;
         const ta = a.created_at ? new Date(a.created_at).getTime() : 0;
         const tb = b.created_at ? new Date(b.created_at).getTime() : 0;
         return tb - ta;
@@ -328,27 +367,81 @@ export function KanbanBoard({ rows, isLoading, onCardClick }: KanbanBoardProps) 
 
   const handleDragEnd = (event: DragEndEvent) => {
     setActiveId(null);
-    const demandaId = String(event.active.id);
-    const novoStatus = event.over?.id as ColunaStatus | undefined;
-    if (!novoStatus) return;
+    const { active, over } = event;
+    if (!over) return;
 
+    const demandaId = String(active.id);
     const demanda = rows.find((r) => r.id === demandaId);
     if (!demanda || !demanda.status) return;
 
-    // "reaberta" vive na coluna "triagem" — soltar lá não muda nada
-    const colunaAtual: ColunaStatus | null =
-      demanda.status === "reaberta" ? "triagem" : (demanda.status as ColunaStatus);
-    if (colunaAtual === novoStatus) return;
+    const colunaAtual = statusToColuna(demanda.status);
+    if (!colunaAtual) return;
 
-    mover.mutate(
+    // Detecta coluna alvo: over pode ser coluna ou outro card
+    const overData = over.data.current as
+      | { type?: string; coluna?: ColunaStatus; row?: DemandaListaRow }
+      | undefined;
+
+    let colunaAlvo: ColunaStatus | null = null;
+    let indexAlvo = -1;
+
+    if (overData?.type === "coluna" && overData.coluna) {
+      colunaAlvo = overData.coluna;
+      indexAlvo = porColuna[colunaAlvo].length; // final da coluna
+    } else if (overData?.type === "card" && overData.row?.status) {
+      colunaAlvo = statusToColuna(overData.row.status);
+      if (colunaAlvo) {
+        const lista = porColuna[colunaAlvo];
+        indexAlvo = lista.findIndex((r) => r.id === over.id);
+        if (indexAlvo === -1) indexAlvo = lista.length;
+      }
+    }
+
+    if (!colunaAlvo) return;
+
+    // Calcula nova posição
+    const listaAlvo = porColuna[colunaAlvo].filter((r) => r.id !== demandaId);
+    const idxClamp = Math.max(0, Math.min(indexAlvo, listaAlvo.length));
+    const anterior = idxClamp > 0 ? listaAlvo[idxClamp - 1] : null;
+    const posterior =
+      idxClamp < listaAlvo.length ? listaAlvo[idxClamp] : null;
+
+    let novaPosicao: number;
+    const pa = anterior?.posicao ?? null;
+    const pp = posterior?.posicao ?? null;
+    if (pa != null && pp != null) {
+      novaPosicao = (pa + pp) / 2;
+    } else if (pa != null) {
+      novaPosicao = pa + POSICAO_STEP;
+    } else if (pp != null) {
+      novaPosicao = pp - POSICAO_STEP;
+    } else {
+      novaPosicao = POSICAO_STEP;
+    }
+
+    const mudouColuna = colunaAtual !== colunaAlvo;
+    const mesmaPosicao =
+      !mudouColuna && demanda.posicao != null && demanda.posicao === novaPosicao;
+    if (mesmaPosicao) return;
+
+    const novoStatus: StatusDemanda = mudouColuna
+      ? (colunaAlvo as StatusDemanda)
+      : demanda.status;
+
+    reposicionar.mutate(
       {
         demandaId,
-        novoStatus: novoStatus as StatusDemanda,
+        novoStatus,
         statusAnterior: demanda.status,
+        novaPosicao,
       },
       {
         onSuccess: () => {
-          if (novoStatus === "entregue" && podeGerenciarReleases) {
+          if (
+            mudouColuna &&
+            colunaAlvo === "entregue" &&
+            podeGerenciarReleases
+          ) {
             setReleaseDialog({
               id: demandaId,
               codigo: demanda.codigo ?? "",
@@ -366,6 +459,7 @@ export function KanbanBoard({ rows, isLoading, onCardClick }: KanbanBoardProps) 
   return (
     <DndContext
       sensors={sensors}
+      collisionDetection={closestCorners}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       onDragCancel={handleDragCancel}
@@ -407,7 +501,11 @@ export function KanbanBoard({ rows, isLoading, onCardClick }: KanbanBoardProps) 
         demanda={releaseDialog}
         onConcluido={({ tituloIA, resumoIA }) => {
           const codigo = releaseDialog?.codigo;
-          console.log("[ReleaseFlow] 5. navegando pra aba Releases", { codigo, tituloIA, resumoIA });
+          console.log("[ReleaseFlow] 5. navegando pra aba Releases", {
+            codigo,
+            tituloIA,
+            resumoIA,
+          });
           if (!codigo) return;
           void navigate({
             to: "/demandas/$codigo",
