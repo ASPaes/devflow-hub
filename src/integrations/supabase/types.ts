@@ -787,6 +787,7 @@ export type Database = {
           id: string
           incluir_release: boolean
           modulo_id: string
+          posicao: number | null
           prioridade: number
           produto_id: string | null
           prompt_ia: string | null
@@ -824,6 +825,7 @@ export type Database = {
           id?: string
           incluir_release?: boolean
           modulo_id: string
+          posicao?: number | null
           prioridade: number
           produto_id?: string | null
           prompt_ia?: string | null
@@ -861,6 +863,7 @@ export type Database = {
           id?: string
           incluir_release?: boolean
           modulo_id?: string
+          posicao?: number | null
           prioridade?: number
           produto_id?: string | null
           prompt_ia?: string | null
@@ -1848,6 +1851,7 @@ export type Database = {
           modulo_cor: string | null
           modulo_id: string | null
           modulo_nome: string | null
+          posicao: number | null
           prioridade: number | null
           produto_id: string | null
           produto_nome: string | null
@@ -2290,6 +2294,7 @@ export type Database = {
           id: string
           incluir_release: boolean
           modulo_id: string
+          posicao: number | null
           prioridade: number
           produto_id: string | null
           prompt_ia: string | null
@@ -2352,6 +2357,7 @@ export type Database = {
           id: string
           incluir_release: boolean
           modulo_id: string
+          posicao: number | null
           prioridade: number
           produto_id: string | null
           prompt_ia: string | null
@@ -2496,6 +2502,7 @@ export type Database = {
           id: string
           incluir_release: boolean
           modulo_id: string
+          posicao: number | null
           prioridade: number
           produto_id: string | null
           prompt_ia: string | null
@@ -2542,6 +2549,7 @@ export type Database = {
           id: string
           incluir_release: boolean
           modulo_id: string
+          posicao: number | null
           prioridade: number
           produto_id: string | null
           prompt_ia: string | null
@@ -2613,6 +2621,7 @@ export type Database = {
           id: string
           incluir_release: boolean
           modulo_id: string
+          posicao: number | null
           prioridade: number
           produto_id: string | null
           prompt_ia: string | null
@@ -2711,6 +2720,7 @@ export type Database = {
           id: string
           incluir_release: boolean
           modulo_id: string
+          posicao: number | null
           prioridade: number
           produto_id: string | null
           prompt_ia: string | null
