@@ -1,7 +1,8 @@
 import * as React from "react";
-import { Check, ChevronDown, X } from "lucide-react";
+import { Check, ChevronDown, Search, X } from "lucide-react";
 
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import {
   Popover,
   PopoverContent,
