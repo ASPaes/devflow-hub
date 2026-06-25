@@ -110,23 +110,79 @@ export function MultiSelectFilter<T extends string | number>({
             </button>
           )}
         </div>
-        {!loading && options.length > 0 && (() => {
+        {!loading && options.length > 0 && (
+          <div className="border-b border-border p-2">
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Buscar..."
+                className="h-8 pl-7 pr-7 text-xs"
+              />
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => setSearch("")}
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+                  aria-label="Limpar busca"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+        {!loading && filteredOptions.length > 0 && (() => {
           const allSelected = selected.length === options.length;
           const someSelected = hasSelection && !allSelected;
+          const visibleValues = filteredOptions.map((o) => o.value);
+          const allVisibleSelected = visibleValues.every((v) => selected.includes(v));
+          const isFiltered = search.trim().length > 0;
           return (
             <button
               type="button"
-              onClick={() =>
-                onChange(allSelected ? [] : options.map((o) => o.value))
-              }
+              onClick={() => {
+                if (isFiltered) {
+                  if (allVisibleSelected) {
+                    onChange(selected.filter((v) => !visibleValues.includes(v)));
+                  } else {
+                    const merged = [...selected];
+                    for (const v of visibleValues) {
+                      if (!merged.includes(v)) merged.push(v);
+                    }
+                    onChange(merged);
+                  }
+                } else {
+                  onChange(allSelected ? [] : options.map((o) => o.value));
+                }
+              }}
               className="flex w-full items-center gap-2 border-b border-border px-3 py-1.5 text-left text-sm hover:bg-secondary/60"
             >
               <Checkbox
-                checked={allSelected ? true : someSelected ? "indeterminate" : false}
+                checked={
+                  isFiltered
+                    ? allVisibleSelected
+                      ? true
+                      : visibleValues.some((v) => selected.includes(v))
+                        ? "indeterminate"
+                        : false
+                    : allSelected
+                      ? true
+                      : someSelected
+                        ? "indeterminate"
+                        : false
+                }
                 className="pointer-events-none"
               />
               <span className="flex-1 truncate font-medium">
-                {allSelected ? "Desmarcar tudo" : "Selecionar tudo"}
+                {isFiltered
+                  ? allVisibleSelected
+                    ? "Desmarcar visíveis"
+                    : "Selecionar visíveis"
+                  : allSelected
+                    ? "Desmarcar tudo"
+                    : "Selecionar tudo"}
               </span>
             </button>
           );
@@ -139,10 +195,14 @@ export function MultiSelectFilter<T extends string | number>({
           <div className="px-3 py-6 text-center text-xs text-muted-foreground">
             Nenhuma opção disponível
           </div>
+        ) : filteredOptions.length === 0 ? (
+          <div className="px-3 py-6 text-center text-xs text-muted-foreground">
+            Nenhum resultado
+          </div>
         ) : (
-          <ScrollArea className="max-h-72">
+          <ScrollArea className="h-72">
             <div className="py-1">
-              {options.map((opt) => {
+              {filteredOptions.map((opt) => {
                 const isSelected = selected.includes(opt.value);
                 return (
                   <button
