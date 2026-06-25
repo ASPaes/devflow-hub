@@ -32,7 +32,18 @@ export function MultiSelectFilter<T extends string | number>({
   loading,
 }: MultiSelectFilterProps<T>) {
   const [open, setOpen] = React.useState(false);
+  const [search, setSearch] = React.useState("");
   const hasSelection = selected.length > 0;
+
+  const filteredOptions = React.useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return options;
+    return options.filter((o) => o.label.toLowerCase().includes(q));
+  }, [options, search]);
+
+  React.useEffect(() => {
+    if (!open) setSearch("");
+  }, [open]);
 
   const toggleValue = (v: T) => {
     if (selected.includes(v)) {
