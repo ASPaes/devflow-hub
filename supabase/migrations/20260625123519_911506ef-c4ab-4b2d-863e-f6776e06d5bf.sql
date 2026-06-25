@@ -1,0 +1,1 @@
+ALTER TYPE tipo_release ADD VALUE IF NOT EXISTS 'operacional';

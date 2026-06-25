@@ -2912,6 +2912,7 @@ export type Database = {
         | "nova_funcionalidade"
         | "duvida"
         | "tarefa"
+        | "operacional"
       tipo_vinculo: "depende_de" | "bloqueia" | "relacionada" | "duplicada"
       versao_demanda: "atual" | "proxima" | "futura"
     }
@@ -3091,6 +3092,7 @@ export const Constants = {
         "nova_funcionalidade",
         "duvida",
         "tarefa",
+        "operacional",
       ],
       tipo_vinculo: ["depende_de", "bloqueia", "relacionada", "duplicada"],
       versao_demanda: ["atual", "proxima", "futura"],
