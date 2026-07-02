@@ -33,9 +33,13 @@ import { cn } from "@/lib/utils";
 
 const STATUS_OPCOES: Array<keyof typeof STATUS_DEMANDA_LABEL> = [
   "triagem",
+  "aprovado",
+  "nao_aprovado",
   "analise",
-  "desenvolvimento",
+  "para_desenvolver",
+  "duvidas_dev",
   "aguardando_cliente",
+  "desenvolvimento",
   "teste",
   "para_publicar",
   "entregue",
@@ -43,6 +47,7 @@ const STATUS_OPCOES: Array<keyof typeof STATUS_DEMANDA_LABEL> = [
   "encerrada",
   "cancelada",
 ];
+
 
 export const Route = createFileRoute("/_authenticated/admin/horas")({
   beforeLoad: async ({ context }) => {
