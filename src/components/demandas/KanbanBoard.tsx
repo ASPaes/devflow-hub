@@ -250,9 +250,13 @@ function statusToColuna(s: StatusDemanda): ColunaStatus | null {
   if (s === "reaberta") return "triagem";
   if (
     s === "triagem" ||
+    s === "aprovado" ||
+    s === "nao_aprovado" ||
     s === "analise" ||
-    s === "desenvolvimento" ||
+    s === "para_desenvolver" ||
+    s === "duvidas_dev" ||
     s === "aguardando_cliente" ||
+    s === "desenvolvimento" ||
     s === "teste" ||
     s === "para_publicar" ||
     s === "entregue"
@@ -261,6 +265,7 @@ function statusToColuna(s: StatusDemanda): ColunaStatus | null {
   }
   return null;
 }
+
 
 export function KanbanBoard({ rows, isLoading, onCardClick }: KanbanBoardProps) {
   const { temPermissao } = useProfile();
