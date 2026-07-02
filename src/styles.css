@@ -45,7 +45,11 @@
   --color-chart-5: 38 92% 50%;
 
   --color-status-triagem: #f59e0b;
+  --color-status-aprovado: #10b981;
+  --color-status-nao_aprovado: #b91c1c;
   --color-status-analise: #3b82f6;
+  --color-status-para_desenvolver: #06b6d4;
+  --color-status-duvidas_dev: #f59e0b;
   --color-status-desenvolvimento: #8b5cf6;
   --color-status-aguardando_cliente: #fbbf24;
   --color-status-teste: #22d3ee;
@@ -54,6 +58,7 @@
   --color-status-reaberta: #f43f5e;
   --color-status-encerrada: #71717a;
   --color-status-cancelada: #52525b;
+
 
   --color-prioridade-1: #10b981;
   --color-prioridade-2: #84cc16;
