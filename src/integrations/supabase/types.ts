@@ -2897,6 +2897,10 @@ export type Database = {
         | "reaberta"
         | "encerrada"
         | "cancelada"
+        | "aprovado"
+        | "nao_aprovado"
+        | "para_desenvolver"
+        | "duvidas_dev"
       tempo_origem: "automatico" | "manual"
       tipo_demanda:
         | "erro"
@@ -3075,6 +3079,10 @@ export const Constants = {
         "reaberta",
         "encerrada",
         "cancelada",
+        "aprovado",
+        "nao_aprovado",
+        "para_desenvolver",
+        "duvidas_dev",
       ],
       tempo_origem: ["automatico", "manual"],
       tipo_demanda: [
