@@ -33,45 +33,46 @@ import { useNavigate } from "@tanstack/react-router";
 
 export type ColunaStatus =
   | "triagem"
+  | "aprovado"
+  | "nao_aprovado"
   | "analise"
-  | "desenvolvimento"
+  | "para_desenvolver"
+  | "duvidas_dev"
   | "aguardando_cliente"
+  | "desenvolvimento"
   | "teste"
   | "para_publicar"
   | "entregue";
 
 const COLUNAS: { key: ColunaStatus; label: string; cor: string }[] = [
-  { key: "triagem", label: "Triagem", cor: "var(--color-status-triagem)" },
-  { key: "analise", label: "Análise", cor: "var(--color-status-analise)" },
-  {
-    key: "desenvolvimento",
-    label: "Desenvolvimento",
-    cor: "var(--color-status-desenvolvimento)",
-  },
-  {
-    key: "aguardando_cliente",
-    label: "Aguardando Cliente",
-    cor: "var(--color-status-aguardando_cliente)",
-  },
-  { key: "teste", label: "Teste", cor: "var(--color-status-teste)" },
-  {
-    key: "para_publicar",
-    label: "Para Publicar",
-    cor: "var(--color-status-para_publicar)",
-  },
-  { key: "entregue", label: "Entregue", cor: "var(--color-status-entregue)" },
+  { key: "triagem", label: STATUS_DEMANDA_LABEL.triagem, cor: "var(--color-status-triagem)" },
+  { key: "aprovado", label: STATUS_DEMANDA_LABEL.aprovado, cor: "var(--color-status-aprovado)" },
+  { key: "nao_aprovado", label: STATUS_DEMANDA_LABEL.nao_aprovado, cor: "var(--color-status-nao_aprovado)" },
+  { key: "analise", label: STATUS_DEMANDA_LABEL.analise, cor: "var(--color-status-analise)" },
+  { key: "para_desenvolver", label: STATUS_DEMANDA_LABEL.para_desenvolver, cor: "var(--color-status-para_desenvolver)" },
+  { key: "duvidas_dev", label: STATUS_DEMANDA_LABEL.duvidas_dev, cor: "var(--color-status-duvidas_dev)" },
+  { key: "aguardando_cliente", label: STATUS_DEMANDA_LABEL.aguardando_cliente, cor: "var(--color-status-aguardando_cliente)" },
+  { key: "desenvolvimento", label: STATUS_DEMANDA_LABEL.desenvolvimento, cor: "var(--color-status-desenvolvimento)" },
+  { key: "teste", label: STATUS_DEMANDA_LABEL.teste, cor: "var(--color-status-teste)" },
+  { key: "para_publicar", label: STATUS_DEMANDA_LABEL.para_publicar, cor: "var(--color-status-para_publicar)" },
+  { key: "entregue", label: STATUS_DEMANDA_LABEL.entregue, cor: "var(--color-status-entregue)" },
 ];
 
 export const STATUS_NO_BOARD: StatusDemanda[] = [
   "triagem",
   "reaberta",
+  "aprovado",
+  "nao_aprovado",
   "analise",
-  "desenvolvimento",
+  "para_desenvolver",
+  "duvidas_dev",
   "aguardando_cliente",
+  "desenvolvimento",
   "teste",
   "para_publicar",
   "entregue",
 ];
+
 
 const POSICAO_STEP = 1000;
 
@@ -249,9 +250,13 @@ function statusToColuna(s: StatusDemanda): ColunaStatus | null {
   if (s === "reaberta") return "triagem";
   if (
     s === "triagem" ||
+    s === "aprovado" ||
+    s === "nao_aprovado" ||
     s === "analise" ||
-    s === "desenvolvimento" ||
+    s === "para_desenvolver" ||
+    s === "duvidas_dev" ||
     s === "aguardando_cliente" ||
+    s === "desenvolvimento" ||
     s === "teste" ||
     s === "para_publicar" ||
     s === "entregue"
@@ -260,6 +265,7 @@ function statusToColuna(s: StatusDemanda): ColunaStatus | null {
   }
   return null;
 }
+
 
 export function KanbanBoard({ rows, isLoading, onCardClick }: KanbanBoardProps) {
   const { temPermissao } = useProfile();
@@ -325,13 +331,18 @@ export function KanbanBoard({ rows, isLoading, onCardClick }: KanbanBoardProps) 
   const porColuna = React.useMemo(() => {
     const mapa: Record<ColunaStatus, DemandaListaRow[]> = {
       triagem: [],
+      aprovado: [],
+      nao_aprovado: [],
       analise: [],
-      desenvolvimento: [],
+      para_desenvolver: [],
+      duvidas_dev: [],
       aguardando_cliente: [],
+      desenvolvimento: [],
       teste: [],
       para_publicar: [],
       entregue: [],
     };
+
     for (const d of rows) {
       if (!d.status) continue;
       const coluna = statusToColuna(d.status);

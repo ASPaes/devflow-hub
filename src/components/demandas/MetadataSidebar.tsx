@@ -285,8 +285,16 @@ function Label({ children }: { children: React.ReactNode }) {
 export const STATUS_BADGE_STYLES: Record<StatusDemanda, string> = {
   triagem:
     "bg-status-triagem/15 text-status-triagem border-status-triagem/30",
+  aprovado:
+    "bg-status-aprovado/15 text-status-aprovado border-status-aprovado/30",
+  nao_aprovado:
+    "bg-status-nao_aprovado/15 text-status-nao_aprovado border-status-nao_aprovado/30",
   analise:
     "bg-status-analise/15 text-status-analise border-status-analise/30",
+  para_desenvolver:
+    "bg-status-para_desenvolver/15 text-status-para_desenvolver border-status-para_desenvolver/30",
+  duvidas_dev:
+    "bg-status-duvidas_dev/15 text-status-duvidas_dev border-status-duvidas_dev/30",
   desenvolvimento:
     "bg-status-desenvolvimento/15 text-status-desenvolvimento border-status-desenvolvimento/30",
   aguardando_cliente:
@@ -303,6 +311,7 @@ export const STATUS_BADGE_STYLES: Record<StatusDemanda, string> = {
   cancelada:
     "bg-status-cancelada/15 text-status-cancelada border-status-cancelada/30",
 };
+
 
 export const PRIORIDADE_BADGE_STYLES: Record<1 | 2 | 3 | 4 | 5, string> = {
   1: "bg-prioridade-1/15 text-prioridade-1 border-prioridade-1/30",

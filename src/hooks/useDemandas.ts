@@ -98,9 +98,13 @@ export type TipoDemanda = (typeof TIPO_DEMANDA_VALUES)[number];
 
 export const STATUS_DEMANDA_VALUES = [
   "triagem",
+  "aprovado",
+  "nao_aprovado",
   "analise",
-  "desenvolvimento",
+  "para_desenvolver",
+  "duvidas_dev",
   "aguardando_cliente",
+  "desenvolvimento",
   "teste",
   "para_publicar",
   "entregue",
@@ -121,16 +125,21 @@ export const TIPO_DEMANDA_LABEL: Record<TipoDemanda, string> = {
 
 export const STATUS_DEMANDA_LABEL: Record<StatusDemanda, string> = {
   triagem: "Triagem",
-  analise: "Análise",
-  desenvolvimento: "Desenvolvimento",
+  aprovado: "Aprovado",
+  nao_aprovado: "Não Aprovado",
+  analise: "Analisar",
+  para_desenvolver: "Para Desenvolver",
+  duvidas_dev: "Dúvidas Dev",
   aguardando_cliente: "Aguardando Cliente",
-  teste: "Teste",
-  para_publicar: "Para Publicar",
+  desenvolvimento: "Em Desenvolvimento",
+  teste: "Testar",
+  para_publicar: "Publicar",
   entregue: "Entregue",
   reaberta: "Reaberta",
   encerrada: "Encerrada",
   cancelada: "Cancelada",
 };
+
 
 export const PRIORIDADE_LABEL: Record<number, string> = {
   1: "1 — Baixa",
@@ -589,9 +598,13 @@ export function useUpdateDemanda() {
 // Status workflow ---------------------------------------------------
 
 export const PROXIMOS_STATUS: Record<StatusDemanda, StatusDemanda[]> = {
-  triagem: ["analise", "cancelada"],
-  analise: ["desenvolvimento", "triagem", "cancelada"],
-  desenvolvimento: ["aguardando_cliente", "teste", "analise", "cancelada"],
+  triagem: ["aprovado", "nao_aprovado", "analise", "cancelada"],
+  aprovado: ["para_desenvolver", "analise", "cancelada"],
+  nao_aprovado: ["triagem", "cancelada"],
+  analise: ["para_desenvolver", "duvidas_dev", "desenvolvimento", "triagem", "cancelada"],
+  para_desenvolver: ["desenvolvimento", "duvidas_dev", "analise", "cancelada"],
+  duvidas_dev: ["desenvolvimento", "analise", "aguardando_cliente", "cancelada"],
+  desenvolvimento: ["aguardando_cliente", "duvidas_dev", "teste", "analise", "cancelada"],
   aguardando_cliente: ["desenvolvimento", "teste", "cancelada"],
   teste: ["para_publicar", "entregue", "desenvolvimento", "aguardando_cliente", "cancelada"],
   para_publicar: ["entregue", "teste", "cancelada"],
@@ -603,13 +616,18 @@ export const PROXIMOS_STATUS: Record<StatusDemanda, StatusDemanda[]> = {
 
 export const TRANSICAO_LABEL: Record<StatusDemanda, string> = {
   triagem: "Voltar pra triagem",
+  aprovado: "Aprovar",
+  nao_aprovado: "Reprovar",
   analise: "Iniciar análise",
+  para_desenvolver: "Marcar para desenvolver",
+  duvidas_dev: "Marcar como dúvidas dev",
   desenvolvimento: "Enviar pra desenvolvimento",
   aguardando_cliente: "Marcar como Aguardando Cliente",
-  teste: "Enviar pra teste",
-  para_publicar: "Marcar como Para Publicar",
+  teste: "Enviar pra testar",
+  para_publicar: "Marcar como Publicar",
   entregue: "Marcar como entregue",
   reaberta: "Reabrir",
   encerrada: "Encerrar",
   cancelada: "Cancelar",
 };
+

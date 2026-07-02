@@ -115,7 +115,11 @@ function KpiCard({
 // Uses static literals so Tailwind purge picks them up.
 const STATUS_BAR_BG: Record<StatusDemanda, string> = {
   triagem: "bg-status-triagem",
+  aprovado: "bg-status-aprovado",
+  nao_aprovado: "bg-status-nao_aprovado",
   analise: "bg-status-analise",
+  para_desenvolver: "bg-status-para_desenvolver",
+  duvidas_dev: "bg-status-duvidas_dev",
   desenvolvimento: "bg-status-desenvolvimento",
   aguardando_cliente: "bg-status-aguardando_cliente",
   teste: "bg-status-teste",
@@ -125,6 +129,7 @@ const STATUS_BAR_BG: Record<StatusDemanda, string> = {
   encerrada: "bg-status-encerrada",
   cancelada: "bg-status-cancelada",
 };
+
 
 const PRIORIDADE_BAR_BG: Record<1 | 2 | 3 | 4 | 5, string> = {
   1: "bg-prioridade-1",
