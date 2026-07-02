@@ -331,13 +331,18 @@ export function KanbanBoard({ rows, isLoading, onCardClick }: KanbanBoardProps) 
   const porColuna = React.useMemo(() => {
     const mapa: Record<ColunaStatus, DemandaListaRow[]> = {
       triagem: [],
+      aprovado: [],
+      nao_aprovado: [],
       analise: [],
-      desenvolvimento: [],
+      para_desenvolver: [],
+      duvidas_dev: [],
       aguardando_cliente: [],
+      desenvolvimento: [],
       teste: [],
       para_publicar: [],
       entregue: [],
     };
+
     for (const d of rows) {
       if (!d.status) continue;
       const coluna = statusToColuna(d.status);
