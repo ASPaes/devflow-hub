@@ -98,9 +98,13 @@ export type TipoDemanda = (typeof TIPO_DEMANDA_VALUES)[number];
 
 export const STATUS_DEMANDA_VALUES = [
   "triagem",
+  "aprovado",
+  "nao_aprovado",
   "analise",
-  "desenvolvimento",
+  "para_desenvolver",
+  "duvidas_dev",
   "aguardando_cliente",
+  "desenvolvimento",
   "teste",
   "para_publicar",
   "entregue",
@@ -121,16 +125,21 @@ export const TIPO_DEMANDA_LABEL: Record<TipoDemanda, string> = {
 
 export const STATUS_DEMANDA_LABEL: Record<StatusDemanda, string> = {
   triagem: "Triagem",
-  analise: "Análise",
-  desenvolvimento: "Desenvolvimento",
+  aprovado: "Aprovado",
+  nao_aprovado: "Não Aprovado",
+  analise: "Analisar",
+  para_desenvolver: "Para Desenvolver",
+  duvidas_dev: "Dúvidas Dev",
   aguardando_cliente: "Aguardando Cliente",
-  teste: "Teste",
-  para_publicar: "Para Publicar",
+  desenvolvimento: "Em Desenvolvimento",
+  teste: "Testar",
+  para_publicar: "Publicar",
   entregue: "Entregue",
   reaberta: "Reaberta",
   encerrada: "Encerrada",
   cancelada: "Cancelada",
 };
+
 
 export const PRIORIDADE_LABEL: Record<number, string> = {
   1: "1 — Baixa",
