@@ -1447,9 +1447,11 @@ jobs:
           CALLBACK_SECRET: ${{ inputs.callback_secret }}
 
       - name: Baixar prints anexados
+        env:
+          PAYLOAD: ${{ inputs.payload }}   # via env pra evitar injeção de shell (texto da demanda é do usuário)
         run: |
           mkdir -p .agente/prints
-          echo '${{ inputs.payload }}' > .agente/payload.json
+          printf '%s' "$PAYLOAD" > .agente/payload.json
           node -e '
             const fs=require("fs");
             const p=JSON.parse(fs.readFileSync(".agente/payload.json","utf8"));
