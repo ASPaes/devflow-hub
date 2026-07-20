@@ -11,7 +11,14 @@ function StatusIcone({ e }: { e: AgenteExecucao }) {
   return <Bot className="h-4 w-4 text-muted-foreground" />;
 }
 
-export function AgenteExecucaoCard({ demandaId }: { demandaId: string }) {
+export function AgenteExecucaoCard({
+  demandaId,
+  podeVerLinks = false,
+}: {
+  demandaId: string;
+  /** Links técnicos (Run/PR/Deploy) só aparecem para quem pode acionar/editar — não pro cliente. */
+  podeVerLinks?: boolean;
+}) {
   const { data: execucoes = [] } = useAgenteExecucoes(demandaId);
   if (execucoes.length === 0) return null;
 
@@ -29,7 +36,7 @@ export function AgenteExecucaoCard({ demandaId }: { demandaId: string }) {
                 {STATUS_AGENTE_LABEL[e.status]}
               </span>
               <div className="flex items-center gap-3 text-xs">
-                {e.github_run_url && (
+                {podeVerLinks && e.github_run_url && (
                   <a
                     href={e.github_run_url}
                     target="_blank"
@@ -39,7 +46,7 @@ export function AgenteExecucaoCard({ demandaId }: { demandaId: string }) {
                     Run <ExternalLink className="h-3 w-3" />
                   </a>
                 )}
-                {e.pr_url && (
+                {podeVerLinks && e.pr_url && (
                   <a
                     href={e.pr_url}
                     target="_blank"
@@ -49,7 +56,7 @@ export function AgenteExecucaoCard({ demandaId }: { demandaId: string }) {
                     PR <ExternalLink className="h-3 w-3" />
                   </a>
                 )}
-                {e.deploy_url && (
+                {podeVerLinks && e.deploy_url && (
                   <a
                     href={e.deploy_url}
                     target="_blank"

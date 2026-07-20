@@ -94,6 +94,7 @@ function DemandaDetalhe() {
   useDocumentTitle(demanda ? `${demanda.codigo ?? codigo} · ${demanda.titulo}` : codigo);
 
   const canEditAny = temPermissao("editar_qualquer_demanda");
+  const canAcionarAgente = temPermissao("acionar_agente_correcao");
 
   // Detecta TRANSIÇÃO de status para "entregue" e abre o dialog 1x.
   // Ignora carregamento inicial (statusAnterior === undefined) — não reabre
@@ -220,7 +221,7 @@ function DemandaDetalhe() {
                     Gerar prompt IA
                   </Button>
                 )}
-                {canEditAny && (
+                {canAcionarAgente && (
                   <Button
                     variant="outline"
                     size="sm"
@@ -297,7 +298,7 @@ function DemandaDetalhe() {
           )}
 
           {/* Agente de correção */}
-          <AgenteExecucaoCard demandaId={demanda.id} />
+          <AgenteExecucaoCard demandaId={demanda.id} podeVerLinks={canEditAny} />
 
           {/* Tabs: Comentários | Retornos | Histórico | Vínculos | Releases */}
           <DetalheTabs
@@ -359,7 +360,7 @@ function DemandaDetalhe() {
         />
       )}
 
-      {canEditAny && (
+      {canAcionarAgente && (
         <AcionarAgenteDialog
           open={agenteDialogOpen}
           onOpenChange={setAgenteDialogOpen}

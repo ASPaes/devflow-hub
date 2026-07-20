@@ -38,19 +38,13 @@ const PERMISSAO_VALUES = [
   "criar_retorno_demanda",
   "gerenciar_releases",
   "gerenciar_tipos",
+  "acionar_agente_correcao",
 ] as const;
 
 export const perfilAcessoSchema = z.object({
   nome: z.string().trim().min(2, "Nome muito curto").max(80, "Nome muito longo"),
-  descricao: z
-    .string()
-    .trim()
-    .max(300, "Descrição muito longa")
-    .optional()
-    .or(z.literal("")),
-  permissoes: z
-    .array(z.enum(PERMISSAO_VALUES))
-    .min(1, "Selecione ao menos uma permissão"),
+  descricao: z.string().trim().max(300, "Descrição muito longa").optional().or(z.literal("")),
+  permissoes: z.array(z.enum(PERMISSAO_VALUES)).min(1, "Selecione ao menos uma permissão"),
   ativo: z.boolean(),
   perfil_padrao_novos_usuarios: z.boolean(),
 });
@@ -63,10 +57,7 @@ export function usePerfisAcesso() {
   return useQuery<PerfilAcesso[]>({
     queryKey: perfisKey,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("perfis_acesso")
-        .select("*")
-        .order("nome");
+      const { data, error } = await supabase.from("perfis_acesso").select("*").order("nome");
       if (error) throw error;
       return (data ?? []) as unknown as PerfilAcesso[];
     },
@@ -147,9 +138,7 @@ export function useUpdatePerfilAcesso() {
         await applyDefaultFlag(id, true);
       } else if (!input.perfil_padrao_novos_usuarios && wasDefault) {
         // Block: must always have at least one default
-        throw new Error(
-          "Deve haver pelo menos um perfil padrão. Marque outro como padrão antes.",
-        );
+        throw new Error("Deve haver pelo menos um perfil padrão. Marque outro como padrão antes.");
       }
       return data;
     },
@@ -173,10 +162,7 @@ export function useDeletePerfilAcesso() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from("perfis_acesso")
-        .delete()
-        .eq("id", id);
+      const { error } = await supabase.from("perfis_acesso").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
