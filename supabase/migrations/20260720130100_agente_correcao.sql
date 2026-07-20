@@ -60,8 +60,14 @@ for select using (
 -- Sem policies de insert/update/delete: clientes não escrevem direto.
 -- As Edge Functions usam service_role, que ignora RLS.
 
--- 5. Nunca expor o callback_secret para o cliente
-revoke select (callback_secret) on public.agente_execucoes from anon, authenticated;
+-- 5. Nunca expor o callback_secret para o cliente:
+-- REVOKE de coluna não subtrai de um grant de tabela (padrão documentado do Supabase),
+-- então revogamos SELECT no nível da tabela e concedemos SELECT só nas colunas seguras.
+revoke select on public.agente_execucoes from anon, authenticated;
+grant select (
+  id, demanda_id, status, github_run_id, github_run_url, pr_url, deploy_url,
+  resumo, erro_mensagem, retorno_id, disparado_por, created_at, updated_at, finished_at
+) on public.agente_execucoes to anon, authenticated;
 
 -- 6. Grant da permissão ao perfil Desenvolvedor
 update public.perfis_acesso
