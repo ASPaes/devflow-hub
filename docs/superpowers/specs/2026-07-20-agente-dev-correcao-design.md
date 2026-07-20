@@ -10,7 +10,9 @@ Usuários do **DoctorSaaS** relatam problemas que viram **demandas** no **Doctor
 (devflow-hub). Hoje o time trata cada demanda manualmente. Para as demandas que são
 falhas no produto ("Correção"), queremos um **agente de desenvolvimento** que:
 
-1. Recebe o contexto da demanda.
+1. Recebe o contexto da demanda — **incluindo as imagens/prints** anexados (a demanda
+   quase sempre traz um screenshot mostrando o local e o erro; o agente precisa
+   **enxergar** a imagem, não só ler o texto).
 2. Corrige o problema no código do DoctorSaaS.
 3. Publica a correção (até deploy).
 4. Monta um texto explicando a origem do problema e como foi corrigido.
@@ -112,10 +114,14 @@ escreve via service role (Edge Function), fora do RLS do usuário.
 - Carrega a demanda + produto; erro claro se o produto não tem repo configurado.
 - Monta o contexto da demanda reaproveitando a lógica do `gerar-prompt-demanda`
   (descrição, comentários, anexos). Reusa o `prompt_ia` salvo se existir.
+- **Entrada multimodal**: coleta os anexos de imagem da demanda (prints do erro) e gera
+  **URLs assinadas** do Supabase Storage para cada um. Essas URLs vão junto no payload —
+  o agente precisa ver os screenshots, que muitas vezes mostram o local e a mensagem de
+  erro que não estão descritos no texto.
 - Cria a linha em `agente_execucoes` (status=`enfileirada`).
 - Chama a GitHub API `POST /repos/{owner}/{repo}/actions/workflows/{file}/dispatches`
-  com inputs: `execucao_id`, `demanda_codigo`, `contexto/prompt`, `callback_url`,
-  `callback_secret`, `auto_deploy`.
+  com inputs: `execucao_id`, `demanda_codigo`, `contexto/prompt`, `imagens` (lista de
+  URLs assinadas), `callback_url`, `callback_secret`, `auto_deploy`.
 - Retorna `execucao_id` pro front.
 
 **`agente-callback`**
@@ -135,17 +141,20 @@ Arquivo `.github/workflows/agente-correcao.yml` **versionado no repo do DoctorSa
 (repositório separado deste). `on: workflow_dispatch` com os inputs acima. Passos:
 
 1. Callback `corrigindo` → `actions/checkout`.
-2. **Claude Code Action** com o prompt + guardrails (escopo de arquivos permitido,
-   instruções de correção). Aplica a correção numa branch nova.
-3. Callback `testando` → roda testes/lint/build (**gate obrigatório**).
+2. **Baixa as imagens** das URLs assinadas para uma pasta no runner (ex.:
+   `.agente/prints/`). O prompt lista os caminhos locais desses arquivos para o Claude
+   Code abrir e analisar (input multimodal — o agente vê os prints do erro).
+3. **Claude Code Action** com o prompt + os caminhos das imagens + guardrails (escopo de
+   arquivos permitido, instruções de correção). Aplica a correção numa branch nova.
+4. Callback `testando` → roda testes/lint/build (**gate obrigatório**).
    - Falhou → callback `falhou` com log e encerra.
-4. Verde:
+5. Verde:
    - `auto_deploy=false` → abre **PR** para revisão humana; devolutiva referencia o PR.
    - `auto_deploy=true` → merge na `branch_base` + dispara o **deploy** existente do
      DoctorSaaS; callback `deploy`.
-5. Claude gera o **texto da devolutiva** (origem do problema + como corrigiu) a partir do
+6. Claude gera o **texto da devolutiva** (origem do problema + como corrigiu) a partir do
    diff.
-6. Callback `concluida` com `pr_url`, `deploy_url`, `resumo`.
+7. Callback `concluida` com `pr_url`, `deploy_url`, `resumo`.
 
 Qualquer erro em qualquer passo → callback `falhou` com o log relevante.
 
@@ -193,6 +202,8 @@ Qualquer erro em qualquer passo → callback `falhou` com o log relevante.
 - Envio automático da devolutiva via **WhatsApp**.
 - Acionamento automático por categorização (sem botão).
 - Suporte a **múltiplos repositórios** além do DoctorSaaS.
+- Analisar anexos de **vídeo/áudio** como input do agente — nesta fase só **imagens**
+  (prints) são enviadas ao agente.
 
 ## Pré-requisitos / dependências externas
 
