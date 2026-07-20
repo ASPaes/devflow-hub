@@ -22,7 +22,8 @@ export type AppPermissao =
   | "inserir_tempo_manual"
   | "criar_retorno_demanda"
   | "gerenciar_releases"
-  | "gerenciar_tipos";
+  | "gerenciar_tipos"
+  | "acionar_agente_correcao";
 
 export type ProfileWithPerfil = {
   id: string;
@@ -66,8 +67,7 @@ export function useProfile() {
   const helpers = useMemo(
     () => ({
       temPermissao: (p: AppPermissao) => permissoes.includes(p),
-      temAlgumaPermissao: (...ps: AppPermissao[]) =>
-        ps.some((p) => permissoes.includes(p)),
+      temAlgumaPermissao: (...ps: AppPermissao[]) => ps.some((p) => permissoes.includes(p)),
     }),
     [permissoes],
   );

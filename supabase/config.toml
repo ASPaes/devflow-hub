@@ -11,3 +11,11 @@ verify_jwt = true
 
 [functions.latest-release]
 verify_jwt = false
+
+# Chamada pelo front com o JWT do usuário (valida permissão no servidor)
+[functions.disparar-agente]
+verify_jwt = true
+
+# Chamada pelo workflow do GitHub SEM JWT — a auth é por assinatura HMAC (callback_secret)
+[functions.agente-callback]
+verify_jwt = false

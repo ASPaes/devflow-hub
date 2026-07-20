@@ -1,0 +1,129 @@
+# → Copie este arquivo para .github/workflows/agente-correcao.yml NO REPO DO DOCTORSAAS.
+# Secrets necessários no repo do DoctorSaaS: ANTHROPIC_API_KEY.
+# Os trechos marcados "DoctorSaaS-específico" (teste/build/merge/deploy) só existem
+# no outro repo e devem ser preenchidos lá com os comandos reais.
+name: Agente de Correção
+on:
+  workflow_dispatch:
+    inputs:
+      execucao_id:     { required: true,  type: string }
+      callback_url:    { required: true,  type: string }
+      callback_secret: { required: true,  type: string }
+      auto_deploy:     { required: false, type: string, default: "false" }
+      payload:         { required: true,  type: string } # JSON: {demanda_codigo, prompt, imagens[]}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  corrigir:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30   # guardrail: aborta execuções longas
+    steps:
+      # Helper de callback assinado (HMAC-SHA256 hex do corpo cru)
+      - name: Preparar callback
+        run: |
+          cat > /tmp/callback.sh <<'EOF'
+          #!/usr/bin/env bash
+          set -euo pipefail
+          BODY="$1"
+          SIG=$(printf '%s' "$BODY" | openssl dgst -sha256 -hmac "${CALLBACK_SECRET}" | awk '{print $2}')
+          curl -sS -X POST "${CALLBACK_URL}" \
+            -H "Content-Type: application/json" \
+            -H "x-agente-assinatura: ${SIG}" \
+            --data "$BODY" || true
+          EOF
+          chmod +x /tmp/callback.sh
+        env:
+          CALLBACK_URL: ${{ inputs.callback_url }}
+          CALLBACK_SECRET: ${{ inputs.callback_secret }}
+
+      - uses: actions/checkout@v4
+
+      - name: Callback corrigindo (com run URL)
+        run: |
+          /tmp/callback.sh "{\"execucao_id\":\"${{ inputs.execucao_id }}\",\"status\":\"corrigindo\",\"github_run_id\":${{ github.run_id }},\"github_run_url\":\"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}"
+        env:
+          CALLBACK_URL: ${{ inputs.callback_url }}
+          CALLBACK_SECRET: ${{ inputs.callback_secret }}
+
+      - name: Baixar prints anexados
+        env:
+          PAYLOAD: ${{ inputs.payload }}   # via env pra evitar injeção de shell (texto da demanda é do usuário)
+        run: |
+          mkdir -p .agente/prints
+          printf '%s' "$PAYLOAD" > .agente/payload.json
+          node -e '
+            const fs=require("fs");
+            const p=JSON.parse(fs.readFileSync(".agente/payload.json","utf8"));
+            fs.writeFileSync(".agente/prompt.md", p.prompt || "");
+            (p.imagens||[]).forEach((u,i)=>console.log(i+" "+u));
+          ' | while read i url; do
+            curl -sSL "$url" -o ".agente/prints/print_$i" || true
+          done
+
+      - name: Rodar Claude Code
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Leia o contexto do problema em .agente/prompt.md e analise TODAS as
+            imagens em .agente/prints/ (são prints do erro mostrando onde ele acontece).
+            Corrija a causa raiz no código. Regras:
+            - NÃO altere migrations, arquivos de infra, CI ou segredos.
+            - Faça a correção mínima necessária.
+            - Deixe as mudanças commitadas numa branch nova chamada
+              agente/${{ inputs.execucao_id }}.
+
+      - name: Rodar testes / build (gate)
+        id: testes
+        run: |
+          /tmp/callback.sh "{\"execucao_id\":\"${{ inputs.execucao_id }}\",\"status\":\"testando\"}"
+          # DoctorSaaS-específico: troque pelos comandos reais de teste/build do repo.
+          npm ci
+          npm test --if-present
+          npm run build --if-present
+        env:
+          CALLBACK_URL: ${{ inputs.callback_url }}
+          CALLBACK_SECRET: ${{ inputs.callback_secret }}
+
+      - name: Falha nos testes → callback falhou
+        if: failure() && steps.testes.outcome == 'failure'
+        run: |
+          /tmp/callback.sh "{\"execucao_id\":\"${{ inputs.execucao_id }}\",\"status\":\"falhou\",\"erro_mensagem\":\"Testes/build falharam. Ver o run.\"}"
+        env:
+          CALLBACK_URL: ${{ inputs.callback_url }}
+          CALLBACK_SECRET: ${{ inputs.callback_secret }}
+
+      - name: Gerar devolutiva (texto para o cliente)
+        id: devolutiva
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Com base no diff desta branch, escreva um texto curto e claro em
+            português para o cliente explicando: (1) a ORIGEM do problema e
+            (2) COMO foi corrigido. Salve APENAS esse texto em .agente/devolutiva.txt.
+
+      - name: Publicar (PR ou merge+deploy) e concluir
+        run: |
+          BRANCH="agente/${{ inputs.execucao_id }}"
+          RESUMO=$(node -e 'console.log(JSON.stringify(require("fs").readFileSync(".agente/devolutiva.txt","utf8")))' 2>/dev/null || echo '"Correção aplicada."')
+          git push origin "$BRANCH" || true
+          if [ "${{ inputs.auto_deploy }}" = "true" ]; then
+            # DoctorSaaS-específico: merge e deploy reais do repo.
+            gh pr create --base ${{ github.ref_name }} --head "$BRANCH" --title "Correção automática ${{ inputs.execucao_id }}" --body "Gerado pelo agente." || true
+            gh pr merge "$BRANCH" --squash --admin || true
+            # ... comando de deploy do DoctorSaaS aqui ...
+            DEPLOY_URL="https://<deploy-do-doctorsaas>"
+            /tmp/callback.sh "{\"execucao_id\":\"${{ inputs.execucao_id }}\",\"status\":\"deploy\",\"deploy_url\":\"$DEPLOY_URL\"}"
+            /tmp/callback.sh "{\"execucao_id\":\"${{ inputs.execucao_id }}\",\"status\":\"concluida\",\"resumo\":$RESUMO,\"deploy_url\":\"$DEPLOY_URL\"}"
+          else
+            PR_URL=$(gh pr create --base ${{ github.ref_name }} --head "$BRANCH" --title "Correção automática ${{ inputs.execucao_id }}" --body "Gerado pelo agente. Revise antes de mergear." | tail -1)
+            /tmp/callback.sh "{\"execucao_id\":\"${{ inputs.execucao_id }}\",\"status\":\"concluida\",\"resumo\":$RESUMO,\"pr_url\":\"$PR_URL\"}"
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CALLBACK_URL: ${{ inputs.callback_url }}
+          CALLBACK_SECRET: ${{ inputs.callback_secret }}

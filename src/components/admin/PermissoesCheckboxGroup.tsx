@@ -1,11 +1,7 @@
 import * as React from "react";
 
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import type { AppPermissao } from "@/hooks/useProfile";
 
@@ -41,8 +37,7 @@ const GROUPS: Group[] = [
       {
         key: "editar_qualquer_demanda",
         label: "Editar qualquer demanda",
-        description:
-          "Mudar status, classificação, datas e demais campos de qualquer demanda",
+        description: "Mudar status, classificação, datas e demais campos de qualquer demanda",
       },
       {
         key: "deletar_demanda",
@@ -52,8 +47,7 @@ const GROUPS: Group[] = [
       {
         key: "pode_ser_responsavel",
         label: "Pode ser responsável",
-        description:
-          "Pode ser atribuído como responsável de uma demanda (devs e atribuíveis)",
+        description: "Pode ser atribuído como responsável de uma demanda (devs e atribuíveis)",
       },
       {
         key: "alterar_produto_demanda",
@@ -72,6 +66,12 @@ const GROUPS: Group[] = [
         label: "Publicar retornos",
         description:
           "Pode criar, editar e excluir retornos (entregas com texto, imagem, vídeo ou áudio) na aba Retornos da demanda",
+      },
+      {
+        key: "acionar_agente_correcao",
+        label: "Acionar agente de correção",
+        description:
+          "Disparar o agente de dev (Claude Code) que corrige o problema da demanda no repositório e gera a devolutiva",
       },
     ],
   },
@@ -101,8 +101,7 @@ const GROUPS: Group[] = [
       {
         key: "gerenciar_usuarios",
         label: "Gerenciar usuários",
-        description:
-          "Convidar, alterar perfil e ativar/desativar usuários",
+        description: "Convidar, alterar perfil e ativar/desativar usuários",
       },
       {
         key: "gerenciar_perfis_acesso",
@@ -146,12 +145,7 @@ interface Props {
   disabledReason?: string;
 }
 
-export function PermissoesCheckboxGroup({
-  value,
-  onChange,
-  disabled,
-  disabledReason,
-}: Props) {
+export function PermissoesCheckboxGroup({ value, onChange, disabled, disabledReason }: Props) {
   const toggle = React.useCallback(
     (perm: AppPermissao, checked: boolean) => {
       if (checked) {
@@ -166,10 +160,7 @@ export function PermissoesCheckboxGroup({
   return (
     <div className="space-y-4">
       {GROUPS.map((group) => (
-        <fieldset
-          key={group.label}
-          className="rounded-lg border border-border p-3"
-        >
+        <fieldset key={group.label} className="rounded-lg border border-border p-3">
           <legend className="px-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
             {group.label}
           </legend>
@@ -192,12 +183,8 @@ export function PermissoesCheckboxGroup({
                     className="mt-0.5"
                   />
                   <div className="min-w-0">
-                    <div className="text-sm font-medium text-foreground">
-                      {item.label}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {item.description}
-                    </div>
+                    <div className="text-sm font-medium text-foreground">{item.label}</div>
+                    <div className="text-xs text-muted-foreground">{item.description}</div>
                   </div>
                 </label>
               );
@@ -207,9 +194,7 @@ export function PermissoesCheckboxGroup({
                     <TooltipTrigger asChild>
                       <div>{row}</div>
                     </TooltipTrigger>
-                    <TooltipContent side="left">
-                      {disabledReason}
-                    </TooltipContent>
+                    <TooltipContent side="left">{disabledReason}</TooltipContent>
                   </Tooltip>
                 );
               }
