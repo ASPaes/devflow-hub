@@ -55,11 +55,14 @@ Deno.serve(async (req) => {
     );
     if (!ok) return json({ error: "Assinatura inválida" }, 401);
 
-    // Valida a transição (idempotente: mesmo status repetido é aceito sem erro)
-    if (
-      (exec as any).status !== novoStatus &&
-      !transicaoValida((exec as any).status, novoStatus as any)
-    ) {
+    // Idempotência: mesmo status repetido = replay/retry do webhook (GitHub entrega
+    // at-least-once). É um no-op: não recria Retorno nem mexe em finished_at.
+    if ((exec as any).status === novoStatus) {
+      return json({ ok: true, idempotente: true }, 200);
+    }
+
+    // Valida a transição
+    if (!transicaoValida((exec as any).status, novoStatus as any)) {
       return json(
         { error: `Transição inválida ${(exec as any).status} → ${novoStatus}` },
         409,
@@ -81,7 +84,7 @@ Deno.serve(async (req) => {
 
     // Na conclusão com resumo: cria o Retorno na demanda
     if (novoStatus === "concluida" && body.resumo) {
-      const { data: retorno } = await admin
+      const { data: retorno, error: retErr } = await admin
         .from("demanda_retornos")
         .insert({
           demanda_id: (exec as any).demanda_id,
@@ -90,7 +93,13 @@ Deno.serve(async (req) => {
         })
         .select("id")
         .single();
-      if (retorno?.id) patch.retorno_id = retorno.id;
+      if (retErr || !retorno) {
+        return json(
+          { error: `Falha ao criar retorno: ${retErr?.message ?? "desconhecido"}` },
+          500,
+        );
+      }
+      patch.retorno_id = retorno.id;
     }
 
     const { error: upErr } = await admin
