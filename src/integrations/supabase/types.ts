@@ -14,6 +14,89 @@ export type Database = {
   }
   public: {
     Tables: {
+      agente_execucoes: {
+        Row: {
+          callback_secret: string
+          created_at: string
+          demanda_id: string
+          deploy_url: string | null
+          disparado_por: string | null
+          erro_mensagem: string | null
+          finished_at: string | null
+          github_run_id: number | null
+          github_run_url: string | null
+          id: string
+          pr_url: string | null
+          resumo: string | null
+          retorno_id: string | null
+          status: Database["public"]["Enums"]["status_agente_execucao"]
+          updated_at: string
+        }
+        Insert: {
+          callback_secret: string
+          created_at?: string
+          demanda_id: string
+          deploy_url?: string | null
+          disparado_por?: string | null
+          erro_mensagem?: string | null
+          finished_at?: string | null
+          github_run_id?: number | null
+          github_run_url?: string | null
+          id?: string
+          pr_url?: string | null
+          resumo?: string | null
+          retorno_id?: string | null
+          status?: Database["public"]["Enums"]["status_agente_execucao"]
+          updated_at?: string
+        }
+        Update: {
+          callback_secret?: string
+          created_at?: string
+          demanda_id?: string
+          deploy_url?: string | null
+          disparado_por?: string | null
+          erro_mensagem?: string | null
+          finished_at?: string | null
+          github_run_id?: number | null
+          github_run_url?: string | null
+          id?: string
+          pr_url?: string | null
+          resumo?: string | null
+          retorno_id?: string | null
+          status?: Database["public"]["Enums"]["status_agente_execucao"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agente_execucoes_demanda_id_fkey"
+            columns: ["demanda_id"]
+            isOneToOne: false
+            referencedRelation: "demandas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agente_execucoes_demanda_id_fkey"
+            columns: ["demanda_id"]
+            isOneToOne: false
+            referencedRelation: "vw_demandas_excluidas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agente_execucoes_demanda_id_fkey"
+            columns: ["demanda_id"]
+            isOneToOne: false
+            referencedRelation: "vw_demandas_lista"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agente_execucoes_retorno_id_fkey"
+            columns: ["retorno_id"]
+            isOneToOne: false
+            referencedRelation: "demanda_retornos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       areas: {
         Row: {
           ativo: boolean
@@ -1144,30 +1227,45 @@ export type Database = {
       produtos: {
         Row: {
           ativo: boolean
+          auto_deploy: boolean
+          branch_base: string
           created_at: string
           created_by: string | null
           descricao: string | null
+          github_owner: string | null
+          github_repo: string | null
           id: string
           nome: string
           updated_at: string
+          workflow_file: string | null
         }
         Insert: {
           ativo?: boolean
+          auto_deploy?: boolean
+          branch_base?: string
           created_at?: string
           created_by?: string | null
           descricao?: string | null
+          github_owner?: string | null
+          github_repo?: string | null
           id?: string
           nome: string
           updated_at?: string
+          workflow_file?: string | null
         }
         Update: {
           ativo?: boolean
+          auto_deploy?: boolean
+          branch_base?: string
           created_at?: string
           created_by?: string | null
           descricao?: string | null
+          github_owner?: string | null
+          github_repo?: string | null
           id?: string
           nome?: string
           updated_at?: string
+          workflow_file?: string | null
         }
         Relationships: [
           {
@@ -2885,7 +2983,16 @@ export type Database = {
         | "criar_retorno_demanda"
         | "gerenciar_releases"
         | "gerenciar_tipos"
+        | "acionar_agente_correcao"
       cor_rascunho: "cinza" | "verde" | "azul" | "amarelo" | "vermelho"
+      status_agente_execucao:
+        | "enfileirada"
+        | "corrigindo"
+        | "testando"
+        | "deploy"
+        | "concluida"
+        | "falhou"
+        | "cancelada"
       status_demanda:
         | "triagem"
         | "analise"
@@ -3066,8 +3173,18 @@ export const Constants = {
         "criar_retorno_demanda",
         "gerenciar_releases",
         "gerenciar_tipos",
+        "acionar_agente_correcao",
       ],
       cor_rascunho: ["cinza", "verde", "azul", "amarelo", "vermelho"],
+      status_agente_execucao: [
+        "enfileirada",
+        "corrigindo",
+        "testando",
+        "deploy",
+        "concluida",
+        "falhou",
+        "cancelada",
+      ],
       status_demanda: [
         "triagem",
         "analise",
