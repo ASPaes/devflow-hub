@@ -170,8 +170,14 @@ for select using (
 -- Sem policies de insert/update/delete: clientes não escrevem direto.
 -- As Edge Functions usam service_role, que ignora RLS.
 
--- 5. Nunca expor o callback_secret para o cliente
-revoke select (callback_secret) on public.agente_execucoes from anon, authenticated;
+-- 5. Nunca expor o callback_secret para o cliente:
+-- REVOKE de coluna não subtrai de um grant de tabela (padrão documentado do Supabase),
+-- então revogamos SELECT no nível da tabela e concedemos SELECT só nas colunas seguras.
+revoke select on public.agente_execucoes from anon, authenticated;
+grant select (
+  id, demanda_id, status, github_run_id, github_run_url, pr_url, deploy_url,
+  resumo, erro_mensagem, retorno_id, disparado_por, created_at, updated_at, finished_at
+) on public.agente_execucoes to anon, authenticated;
 
 -- 6. Grant da permissão ao perfil Desenvolvedor
 update public.perfis_acesso
@@ -870,11 +876,14 @@ Deno.serve(async (req) => {
     );
     if (!ok) return json({ error: "Assinatura inválida" }, 401);
 
-    // Valida a transição (idempotente: mesmo status repetido é aceito sem erro)
-    if (
-      (exec as any).status !== novoStatus &&
-      !transicaoValida((exec as any).status, novoStatus as any)
-    ) {
+    // Idempotência: mesmo status repetido = replay/retry do webhook (GitHub entrega
+    // at-least-once). É um no-op: não recria Retorno nem mexe em finished_at.
+    if ((exec as any).status === novoStatus) {
+      return json({ ok: true, idempotente: true }, 200);
+    }
+
+    // Valida a transição
+    if (!transicaoValida((exec as any).status, novoStatus as any)) {
       return json(
         { error: `Transição inválida ${(exec as any).status} → ${novoStatus}` },
         409,
@@ -894,9 +903,10 @@ Deno.serve(async (req) => {
     if (body.erro_mensagem) patch.erro_mensagem = body.erro_mensagem;
     if (terminal) patch.finished_at = new Date().toISOString();
 
-    // Na conclusão com resumo: cria o Retorno na demanda
+    // Na conclusão com resumo: cria o Retorno na demanda.
+    // Se o insert falhar, retorna 500 SEM avançar o status — o workflow pode reenviar.
     if (novoStatus === "concluida" && body.resumo) {
-      const { data: retorno } = await admin
+      const { data: retorno, error: retErr } = await admin
         .from("demanda_retornos")
         .insert({
           demanda_id: (exec as any).demanda_id,
@@ -905,7 +915,13 @@ Deno.serve(async (req) => {
         })
         .select("id")
         .single();
-      if (retorno?.id) patch.retorno_id = retorno.id;
+      if (retErr || !retorno) {
+        return json(
+          { error: `Falha ao criar retorno: ${retErr?.message ?? "desconhecido"}` },
+          500,
+        );
+      }
+      patch.retorno_id = retorno.id;
     }
 
     const { error: upErr } = await admin
