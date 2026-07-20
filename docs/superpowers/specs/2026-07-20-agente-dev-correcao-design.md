@@ -182,10 +182,30 @@ Qualquer erro em qualquer passo → callback `falhou` com o log relevante.
 - **Timeout + limite de custo** por execução.
 - **Log completo** (run URL, diff, PR) registrado em `agente_execucoes`.
 
-### 6. Segurança
+### 6. Autenticação do Claude Code (como o agente atua)
+
+O workflow roda **headless** no GitHub Actions — sem login interativo — então a
+credencial vem de um **secret** no repo do DoctorSaaS. Opções e escolha:
+
+- **✅ Escolhido: `ANTHROPIC_API_KEY` (chave de API Anthropic)** na `anthropics/claude-code-action`
+  (input `anthropic_api_key`, secret `ANTHROPIC_API_KEY`). É a via feita para uso
+  **programático/não supervisionado**: sem risco de violar Termos, cobrança na conta de
+  **API** (quota própria), escalável. **Reusa a mesma conta Anthropic** que já roda o
+  `gerar-prompt-demanda` hoje.
+- **❌ Descartado: token de assinatura Pro/Max (`CLAUDE_CODE_OAUTH_TOKEN`, via
+  `claude setup-token`)** — os Termos de consumidor restringem esse token a Claude
+  Code/claude.ai; usá-lo em CI automatizado sob demanda do usuário é **risco de violação
+  de Termos** e consome a **mesma quota** da assinatura pessoal (sem pool de CI separado).
+- **🔒 Evolução futura: Workload Identity Federation (WIF)** — troca a OIDC do GitHub por
+  token curto, **sem secret estático** (inputs `anthropic_federation_rule_id`,
+  `anthropic_organization_id`, `anthropic_service_account_id`; requer `id-token: write`).
+  Migração possível depois, sem reescrever o fluxo. (Bedrock/Vertex ficam como opção caso
+  o time centralize em AWS/GCP.)
+
+### 7. Segurança
 
 - `ANTHROPIC_API_KEY` e token do GitHub (App/PAT) ficam no Supabase (Edge Functions
-  secrets) e no GitHub Actions secrets — **nunca no front**.
+  secrets) e no GitHub Actions secrets do DoctorSaaS — **nunca no front**.
 - Callback assinado por HMAC com `callback_secret` único por execução.
 - Permissão de Desenvolvedor validada **no servidor**, não só na UI.
 
@@ -209,4 +229,5 @@ Qualquer erro em qualquer passo → callback `falhou` com o log relevante.
 
 - DoctorSaaS hospedado no **GitHub**, com CI (testes/lint/build) e pipeline de deploy.
 - GitHub App ou PAT com permissão de `workflow_dispatch` e escrita no repo do DoctorSaaS.
-- `ANTHROPIC_API_KEY` disponível no GitHub Actions do DoctorSaaS.
+- `ANTHROPIC_API_KEY` (conta de API Anthropic, a mesma do `gerar-prompt-demanda`)
+  cadastrada como **secret no repo do DoctorSaaS** para a `claude-code-action`.
