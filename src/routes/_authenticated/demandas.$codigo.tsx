@@ -1,21 +1,21 @@
 import * as React from "react";
+import { createFileRoute, Link, notFound, useRouter } from "@tanstack/react-router";
 import {
-  createFileRoute,
-  Link,
-  notFound,
-  useRouter,
-} from "@tanstack/react-router";
-import { ChevronDown, ChevronLeft, ChevronUp, FileQuestion, Link as LinkIcon, MoreHorizontal, Sparkles, Trash2 } from "lucide-react";
+  Bot,
+  ChevronDown,
+  ChevronLeft,
+  ChevronUp,
+  FileQuestion,
+  Link as LinkIcon,
+  MoreHorizontal,
+  Sparkles,
+  Trash2,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,11 +27,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { formatRelativeSP } from "@/lib/format";
-import {
-  useDemanda,
-  useUpdateDemanda,
-  type UpdateDemandaPatch,
-} from "@/hooks/useDemandas";
+import { useDemanda, useUpdateDemanda, type UpdateDemandaPatch } from "@/hooks/useDemandas";
 import { EditableField } from "@/components/demandas/EditableField";
 import { AnexosSecao } from "@/components/demandas/AnexosSecao";
 import { ComentariosSecao } from "@/components/demandas/ComentariosSecao";
@@ -54,6 +50,8 @@ import { TipoBadge } from "@/components/demandas/TipoBadge";
 import { useTiposDemanda } from "@/hooks/useTiposDemanda";
 import { ExcluirDemandaDialog } from "@/components/demandas/ExcluirDemandaDialog";
 import { GerarPromptIADialog } from "@/components/demandas/GerarPromptIADialog";
+import { AcionarAgenteDialog } from "@/components/demandas/AcionarAgenteDialog";
+import { AgenteExecucaoCard } from "@/components/demandas/AgenteExecucaoCard";
 import { IncluirReleaseDialog } from "@/components/demandas/IncluirReleaseDialog";
 import { ReleaseTab } from "@/components/demandas/ReleaseTab";
 import { useReleaseDaDemanda } from "@/hooks/useReleases";
@@ -89,12 +87,11 @@ function DemandaDetalhe() {
   const updateMutation = useUpdateDemanda();
   const [excluirOpen, setExcluirOpen] = React.useState(false);
   const [iaDialogOpen, setIaDialogOpen] = React.useState(false);
+  const [agenteDialogOpen, setAgenteDialogOpen] = React.useState(false);
   const [releaseDialogOpen, setReleaseDialogOpen] = React.useState(false);
   const { data: releaseDaDemanda } = useReleaseDaDemanda(demanda?.id);
 
-  useDocumentTitle(
-    demanda ? `${demanda.codigo ?? codigo} · ${demanda.titulo}` : codigo,
-  );
+  useDocumentTitle(demanda ? `${demanda.codigo ?? codigo} · ${demanda.titulo}` : codigo);
 
   const canEditAny = temPermissao("editar_qualquer_demanda");
 
@@ -202,9 +199,7 @@ function DemandaDetalhe() {
           {/* Header */}
           <div className="space-y-3">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="font-mono text-sm text-muted-foreground">
-                {demanda.codigo}
-              </span>
+              <span className="font-mono text-sm text-muted-foreground">{demanda.codigo}</span>
               <TipoBadge
                 codigo={tipoInfo?.codigo ?? demanda.tipo}
                 label={tipoInfo?.label}
@@ -223,6 +218,17 @@ function DemandaDetalhe() {
                   >
                     <Sparkles className="h-3.5 w-3.5 text-purple-500" />
                     Gerar prompt IA
+                  </Button>
+                )}
+                {canEditAny && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setAgenteDialogOpen(true)}
+                    className="gap-1.5"
+                  >
+                    <Bot className="h-3.5 w-3.5 text-purple-500" />
+                    Acionar Agente
                   </Button>
                 )}
                 <DropdownMenu>
@@ -287,12 +293,11 @@ function DemandaDetalhe() {
 
           {/* Anexos */}
           {user && (
-            <AnexosSecao
-              demandaId={demanda.id}
-              userId={user.id}
-              podeRemoverDeOutros={canEditAny}
-            />
+            <AnexosSecao demandaId={demanda.id} userId={user.id} podeRemoverDeOutros={canEditAny} />
           )}
+
+          {/* Agente de correção */}
+          <AgenteExecucaoCard demandaId={demanda.id} />
 
           {/* Tabs: Comentários | Retornos | Histórico | Vínculos | Releases */}
           <DetalheTabs
@@ -351,6 +356,15 @@ function DemandaDetalhe() {
           demandaCodigo={demanda.codigo ?? codigo}
           promptInicial={demanda.prompt_ia}
           promptAtualizadoEm={demanda.prompt_ia_atualizado_em}
+        />
+      )}
+
+      {canEditAny && (
+        <AcionarAgenteDialog
+          open={agenteDialogOpen}
+          onOpenChange={setAgenteDialogOpen}
+          demandaId={demanda.id}
+          demandaCodigo={demanda.codigo ?? codigo}
         />
       )}
 
@@ -429,9 +443,7 @@ function DemandaNaoEncontrada() {
   return (
     <div className="flex flex-col items-center justify-center rounded-lg border border-border bg-card p-12 text-center">
       <FileQuestion className="mb-4 h-12 w-12 text-muted-foreground" />
-      <h2 className="text-lg font-semibold text-foreground">
-        Demanda não encontrada
-      </h2>
+      <h2 className="text-lg font-semibold text-foreground">Demanda não encontrada</h2>
       <p className="mt-1 max-w-sm text-sm text-muted-foreground">
         Pode ter sido excluída ou você não tem permissão pra visualizá-la.
       </p>
@@ -580,10 +592,7 @@ function DescricaoCard({ value, disabled, onSave }: DescricaoCardProps) {
       <CardContent>
         <div
           ref={contentRef}
-          className={cn(
-            "overflow-y-auto overscroll-contain pr-1",
-            !expanded && "max-h-[520px]",
-          )}
+          className={cn("overflow-y-auto overscroll-contain pr-1", !expanded && "max-h-[520px]")}
           style={!expanded ? { maxHeight: DESCRICAO_COLLAPSED_MAX_PX } : undefined}
         >
           <EditableField
