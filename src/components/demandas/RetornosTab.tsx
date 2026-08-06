@@ -8,6 +8,7 @@ import { CriarRetornoForm } from "./CriarRetornoForm";
 import { RetornoMidiaPlayer } from "./RetornoMidiaPlayer";
 import { EditarRetornoDialog } from "./EditarRetornoDialog";
 import { ComunicarClienteDialog } from "./ComunicarClienteDialog";
+import { ComunicacoesEnviadas } from "./ComunicacoesEnviadas";
 import type { DemandaRetornoComAutor } from "@/types/retorno";
 
 export function RetornosTab({
@@ -75,6 +76,8 @@ export function RetornosTab({
           </div>
         )}
       </div>
+
+      <ComunicacoesEnviadas demandaId={demandaId} />
 
       {editando && (
         <EditarRetornoDialog

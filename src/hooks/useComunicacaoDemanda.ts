@@ -4,10 +4,34 @@ import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 import type {
   CanalComunicacao,
+  ComunicacaoEnviada,
   DadosComunicacaoDemanda,
   MensagemGerada,
   MomentoComunicacao,
 } from "@/types/comunicacao";
+
+/**
+ * Histórico completo do que já foi enviado ao cliente nesta demanda, com o
+ * texto integral de cada mensagem. Quem enxerga é decidido pela RLS da tabela.
+ */
+export function useComunicacoesDemanda(demandaId: string | undefined) {
+  return useQuery<ComunicacaoEnviada[]>({
+    queryKey: ["comunicacoes-demanda", demandaId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("demanda_comunicacoes")
+        .select(
+          "id, canal, email_destinatario, telefone_destinatario, nome_destinatario, assunto, corpo_texto, enviado_em, status, erro_detalhe",
+        )
+        .eq("demanda_id", demandaId!)
+        .order("enviado_em", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as unknown as ComunicacaoEnviada[];
+    },
+    enabled: !!demandaId,
+    staleTime: 30_000,
+  });
+}
 
 /**
  * O invoke() do supabase-js descarta o corpo quando a function responde não-2xx:
@@ -112,6 +136,7 @@ export function useEnviarComunicacao() {
     },
     onSuccess: (res, vars) => {
       qc.invalidateQueries({ queryKey: ["comunicacao-demanda", vars.demandaId] });
+      qc.invalidateQueries({ queryKey: ["comunicacoes-demanda", vars.demandaId] });
       // O envio cria um comentário automático na demanda
       qc.invalidateQueries({ queryKey: ["comentarios", vars.demandaId] });
       toast.success(

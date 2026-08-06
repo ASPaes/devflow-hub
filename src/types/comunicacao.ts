@@ -38,6 +38,20 @@ export interface DadosComunicacaoDemanda {
   envios: EnvioAnterior[];
 }
 
+/** Uma comunicação já enviada, como fica guardada em demanda_comunicacoes. */
+export interface ComunicacaoEnviada {
+  id: string;
+  canal: CanalComunicacao;
+  email_destinatario: string | null;
+  telefone_destinatario: string | null;
+  nome_destinatario: string | null;
+  assunto: string | null;
+  corpo_texto: string;
+  enviado_em: string;
+  status: string;
+  erro_detalhe: string | null;
+}
+
 export interface MensagemGerada {
   canal: CanalComunicacao;
   momento: MomentoComunicacao;
