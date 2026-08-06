@@ -31,6 +31,12 @@ Você escreve em nome da equipe de desenvolvimento para o CLIENTE que abriu a de
 REGRAS INEGOCIÁVEIS:
 - Escreva em português do Brasil.
 - Use APENAS o que está nos dados. NÃO invente prazo, causa, valor, versão ou próximo passo que não esteja lá.
+- **A "descricao" é o que o cliente PEDIU, não o que já existe.** Nunca escreva que algo
+  "já foi implementado", "já está disponível" ou "já funciona" a partir dela. O que
+  aconteceu de fato está SÓ nos "pareceres" — se eles não afirmam que algo foi entregue,
+  você também não afirma.
+- Quem diz em que pé está a demanda são os "pareceres" e o "status". Na dúvida entre
+  afirmar e omitir, omita: escreva menos e nada de errado.
 - Nada de jargão técnico com o cliente: sem "RLS", "trigger", "endpoint", "API", "RPC", "deploy", "commit", "frontend", "backend", "migration".
 - NÃO cite código da demanda, IDs internos, nome de tabela ou de arquivo.
 - NÃO prometa data se os dados não trouxerem uma.
@@ -41,9 +47,15 @@ REGRAS INEGOCIÁVEIS:
 
 const TOM_POR_MOMENTO: Record<Momento, string> = {
   parecer: `
-MOMENTO: parecer parcial — a demanda AINDA NÃO foi entregue.
-- Diga o ponto em que a análise está e o que já foi identificado.
-- NÃO diga que está resolvido, concluído ou entregue.
+MOMENTO: parecer parcial — a DEMANDA ainda não foi fechada.
+- Relate o que os pareceres dizem, inclusive quando eles afirmam que algo já foi feito
+  ou implementado: se o parecer afirma, você repete. O que não pode é você concluir isso
+  por conta própria.
+- O que NÃO pode: declarar a DEMANDA como concluída, encerrada ou entregue enquanto o
+  status não disser isso. Uma parte pronta não fecha o todo.
+- Se os pareceres forem curtos ou genéricos ("vamos analisar"), a mensagem também é
+  curta: confirme o recebimento e diga que está em análise. NÃO preencha o vazio com
+  detalhe tirado da descrição — mensagem curta e verdadeira é melhor que longa e errada.
 - Se os pareceres indicarem que algo é esperado do cliente, deixe isso claro em uma frase.
 `.trim(),
   conclusao: `

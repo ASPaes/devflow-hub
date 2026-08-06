@@ -55,6 +55,46 @@ function textoParaHtml(texto: string): string {
   return `<div style="font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;font-size:15px;line-height:1.6;color:#1E293B;">${paragrafos}</div>`;
 }
 
+/**
+ * Assunto com acento precisa virar "encoded-word" (RFC 2047). O denomailer faz
+ * isso errado: deixa espaco literal dentro do bloco (proibido) e passa dos 75
+ * caracteres, entao o Gmail desiste e mostra o `=?utf-8?Q?...` cru pro cliente.
+ *
+ * Aqui a gente codifica antes, em base64, quebrando em blocos que cabem no
+ * limite. O resultado e ASCII puro, entao o denomailer nao mexe mais nele.
+ */
+function codificarAssunto(s: string): string {
+  // Só ASCII imprimível: não precisa codificar
+  if (/^[\x20-\x7E]*$/.test(s)) return s;
+
+  const enc = new TextEncoder();
+  const blocos: string[] = [];
+  let atual: string[] = [];
+  let bytes = 0;
+
+  // 45 bytes por bloco: base64 vira 60 chars, + "=?UTF-8?B?" e "?=" = 72 < 75.
+  // Corta em caractere inteiro pra não partir um acento no meio.
+  for (const ch of Array.from(s)) {
+    const n = enc.encode(ch).length;
+    if (bytes + n > 45) {
+      blocos.push(atual.join(""));
+      atual = [];
+      bytes = 0;
+    }
+    atual.push(ch);
+    bytes += n;
+  }
+  if (atual.length) blocos.push(atual.join(""));
+
+  return blocos
+    .map((b) => {
+      let bin = "";
+      for (const x of enc.encode(b)) bin += String.fromCharCode(x);
+      return `=?UTF-8?B?${btoa(bin)}?=`;
+    })
+    .join(" "); // blocos vizinhos separados por espaço são concatenados pelo leitor
+}
+
 function utf8ParaBase64(s: string): string {
   const bytes = new TextEncoder().encode(s);
   let bin = "";
@@ -105,7 +145,7 @@ async function enviarEmail(
     await client.send({
       from: `${nomeRemetente} <${remetente}>`,
       to: destino,
-      subject: assunto,
+      subject: codificarAssunto(assunto),
       content: corpo,
       html: textoParaHtml(corpo),
     });
