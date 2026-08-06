@@ -351,42 +351,51 @@ export type Database = {
           },
         ]
       }
-      demanda_emails_enviados: {
+      demanda_comunicacoes: {
         Row: {
-          assunto: string
+          assunto: string | null
+          canal: string
           corpo_texto: string
           demanda_id: string
-          email_destinatario: string
+          email_destinatario: string | null
           enviado_em: string
           enviado_por: string | null
           erro_detalhe: string | null
           id: string
           nome_destinatario: string | null
+          provider_message_id: string | null
           status: string
+          telefone_destinatario: string | null
         }
         Insert: {
-          assunto: string
+          assunto?: string | null
+          canal?: string
           corpo_texto: string
           demanda_id: string
-          email_destinatario: string
+          email_destinatario?: string | null
           enviado_em?: string
           enviado_por?: string | null
           erro_detalhe?: string | null
           id?: string
           nome_destinatario?: string | null
+          provider_message_id?: string | null
           status?: string
+          telefone_destinatario?: string | null
         }
         Update: {
-          assunto?: string
+          assunto?: string | null
+          canal?: string
           corpo_texto?: string
           demanda_id?: string
-          email_destinatario?: string
+          email_destinatario?: string | null
           enviado_em?: string
           enviado_por?: string | null
           erro_detalhe?: string | null
           id?: string
           nome_destinatario?: string | null
+          provider_message_id?: string | null
           status?: string
+          telefone_destinatario?: string | null
         }
         Relationships: [
           {
@@ -1299,6 +1308,7 @@ export type Database = {
           id: string
           nome: string
           perfil_acesso_id: string
+          telefone: string | null
           tenant_id: string
           updated_at: string
         }
@@ -1309,6 +1319,7 @@ export type Database = {
           id: string
           nome: string
           perfil_acesso_id: string
+          telefone?: string | null
           tenant_id: string
           updated_at?: string
         }
@@ -1319,6 +1330,7 @@ export type Database = {
           id?: string
           nome?: string
           perfil_acesso_id?: string
+          telefone?: string | null
           tenant_id?: string
           updated_at?: string
         }
@@ -2573,7 +2585,7 @@ export type Database = {
       }
       obter_contexto_demanda: { Args: { p_demanda_id: string }; Returns: Json }
       obter_contexto_release: { Args: { p_demanda_id: string }; Returns: Json }
-      obter_dados_email_demanda: {
+      obter_dados_comunicacao_demanda: {
         Args: { p_demanda_id: string }
         Returns: Json
       }
@@ -2751,15 +2763,18 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: number
       }
-      registrar_email_demanda: {
+      registrar_comunicacao_demanda: {
         Args: {
-          p_assunto: string
+          p_assunto?: string
+          p_canal: string
           p_corpo_texto: string
           p_demanda_id: string
-          p_email_destinatario: string
+          p_email_destinatario?: string
           p_erro_detalhe?: string
-          p_nome_destinatario: string
+          p_nome_destinatario?: string
+          p_provider_message_id?: string
           p_status?: string
+          p_telefone_destinatario?: string
         }
         Returns: string
       }

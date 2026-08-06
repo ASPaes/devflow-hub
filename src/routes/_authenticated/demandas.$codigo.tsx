@@ -8,6 +8,7 @@ import {
   FileQuestion,
   Link as LinkIcon,
   MoreHorizontal,
+  Send,
   Sparkles,
   Trash2,
 } from "lucide-react";
@@ -53,8 +54,10 @@ import { GerarPromptIADialog } from "@/components/demandas/GerarPromptIADialog";
 import { AcionarAgenteDialog } from "@/components/demandas/AcionarAgenteDialog";
 import { AgenteExecucaoCard } from "@/components/demandas/AgenteExecucaoCard";
 import { IncluirReleaseDialog } from "@/components/demandas/IncluirReleaseDialog";
+import { ComunicarClienteDialog } from "@/components/demandas/ComunicarClienteDialog";
 import { ReleaseTab } from "@/components/demandas/ReleaseTab";
 import { useReleaseDaDemanda } from "@/hooks/useReleases";
+import type { MomentoComunicacao } from "@/types/comunicacao";
 
 type DemandaSearch = {
   tab?: string;
@@ -89,6 +92,13 @@ function DemandaDetalhe() {
   const [iaDialogOpen, setIaDialogOpen] = React.useState(false);
   const [agenteDialogOpen, setAgenteDialogOpen] = React.useState(false);
   const [releaseDialogOpen, setReleaseDialogOpen] = React.useState(false);
+  const [comunicarOpen, setComunicarOpen] = React.useState(false);
+  const [momentoComunicar, setMomentoComunicar] = React.useState<MomentoComunicacao | undefined>(
+    undefined,
+  );
+  // Entrega abre o convite de release primeiro; a comunicação ao cliente
+  // fica na fila e só aparece quando aquele fecha.
+  const [comunicarPendente, setComunicarPendente] = React.useState(false);
   const { data: releaseDaDemanda } = useReleaseDaDemanda(demanda?.id);
 
   useDocumentTitle(demanda ? `${demanda.codigo ?? codigo} · ${demanda.titulo}` : codigo);
@@ -114,8 +124,26 @@ function DemandaDetalhe() {
     ) {
       setReleaseDialogOpen(true);
     }
+    // Independente da release: entregou, oferece comunicar o cliente
+    if (
+      statusAnterior !== undefined &&
+      statusAnterior !== "entregue" &&
+      statusAtual === "entregue" &&
+      canEditAny
+    ) {
+      setMomentoComunicar("conclusao");
+      setComunicarPendente(true);
+    }
     statusAnteriorRef.current = statusAtual;
   }, [statusAtual, incluirRelease, canEditAny, releaseDaDemanda]);
+
+  // Só abre quando o dialog de release não está na frente
+  React.useEffect(() => {
+    if (comunicarPendente && !releaseDialogOpen) {
+      setComunicarPendente(false);
+      setComunicarOpen(true);
+    }
+  }, [comunicarPendente, releaseDialogOpen]);
 
   // Auto-scroll até a aba Releases quando chega via fluxo do Kanban (com IA preenchida)
   // Flag persiste ao consume dos search params pelo ReleaseTab no mount.
@@ -214,6 +242,20 @@ function DemandaDetalhe() {
                   <Button
                     variant="outline"
                     size="sm"
+                    onClick={() => {
+                      setMomentoComunicar(undefined);
+                      setComunicarOpen(true);
+                    }}
+                    className="gap-1.5"
+                  >
+                    <Send className="h-3.5 w-3.5" />
+                    Comunicar cliente
+                  </Button>
+                )}
+                {canEditAny && (
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={() => setIaDialogOpen(true)}
                     className="gap-1.5"
                   >
@@ -303,6 +345,7 @@ function DemandaDetalhe() {
           {/* Tabs: Comentários | Retornos | Histórico | Vínculos | Releases */}
           <DetalheTabs
             demandaId={demanda.id}
+            demandaCodigo={demanda.codigo ?? codigo}
             demandaTipo={demanda.tipo}
             incluirRelease={!!demanda.incluir_release}
             podeAdicionarVinculo={canEditAny || canEditOwnTriagem}
@@ -366,6 +409,16 @@ function DemandaDetalhe() {
           onOpenChange={setAgenteDialogOpen}
           demandaId={demanda.id}
           demandaCodigo={demanda.codigo ?? codigo}
+        />
+      )}
+
+      {canEditAny && (
+        <ComunicarClienteDialog
+          open={comunicarOpen}
+          onOpenChange={setComunicarOpen}
+          demandaId={demanda.id}
+          demandaCodigo={demanda.codigo ?? codigo}
+          momento={momentoComunicar}
         />
       )}
 
@@ -457,6 +510,7 @@ function DemandaNaoEncontrada() {
 
 interface DetalheTabsProps {
   demandaId: string;
+  demandaCodigo: string;
   demandaTipo: string | null;
   incluirRelease: boolean;
   podeAdicionarVinculo: boolean;
@@ -470,6 +524,7 @@ interface DetalheTabsProps {
 
 function DetalheTabs({
   demandaId,
+  demandaCodigo,
   demandaTipo,
   incluirRelease,
   podeAdicionarVinculo,
@@ -510,7 +565,7 @@ function DetalheTabs({
         <ComentariosSecao demandaId={demandaId} />
       </TabsContent>
       <TabsContent value="retornos" className="mt-4">
-        <RetornosTab demandaId={demandaId} />
+        <RetornosTab demandaId={demandaId} demandaCodigo={demandaCodigo} />
       </TabsContent>
       <TabsContent value="historico" className="mt-4 rounded-lg border border-border bg-card p-6">
         <TimelineHistorico demandaId={demandaId} />

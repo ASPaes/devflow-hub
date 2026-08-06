@@ -1,24 +1,28 @@
 import * as React from "react";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Send, Trash2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import {
-  useExcluirRetorno,
-  useRetornosDemanda,
-} from "@/hooks/useRetornosDemanda";
+import { useExcluirRetorno, useRetornosDemanda } from "@/hooks/useRetornosDemanda";
 import { useProfile } from "@/hooks/useProfile";
 import { CriarRetornoForm } from "./CriarRetornoForm";
 import { RetornoMidiaPlayer } from "./RetornoMidiaPlayer";
 import { EditarRetornoDialog } from "./EditarRetornoDialog";
+import { ComunicarClienteDialog } from "./ComunicarClienteDialog";
 import type { DemandaRetornoComAutor } from "@/types/retorno";
 
-export function RetornosTab({ demandaId }: { demandaId: string }) {
+export function RetornosTab({
+  demandaId,
+  demandaCodigo,
+}: {
+  demandaId: string;
+  demandaCodigo: string;
+}) {
   const { temPermissao } = useProfile();
   const podeCriar = temPermissao("criar_retorno_demanda");
+  const podeComunicar = temPermissao("editar_qualquer_demanda");
   const { data: retornos = [], isLoading } = useRetornosDemanda(demandaId);
-  const [editando, setEditando] = React.useState<DemandaRetornoComAutor | null>(
-    null,
-  );
+  const [editando, setEditando] = React.useState<DemandaRetornoComAutor | null>(null);
+  const [comunicarOpen, setComunicarOpen] = React.useState(false);
 
   return (
     <div className="space-y-6">
@@ -31,6 +35,17 @@ export function RetornosTab({ demandaId }: { demandaId: string }) {
               ? "Sem retornos ainda"
               : `${retornos.length} retorno${retornos.length === 1 ? "" : "s"}`}
           </h3>
+          {podeComunicar && retornos.length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setComunicarOpen(true)}
+              className="gap-1.5"
+            >
+              <Send className="h-3.5 w-3.5" />
+              Comunicar cliente
+            </Button>
+          )}
         </div>
 
         {isLoading ? (
@@ -39,9 +54,7 @@ export function RetornosTab({ demandaId }: { demandaId: string }) {
           </div>
         ) : retornos.length === 0 ? (
           <div className="rounded-lg border border-dashed border-border bg-card/50 p-8 text-center">
-            <p className="text-sm text-muted-foreground">
-              Nenhum retorno publicado ainda.
-            </p>
+            <p className="text-sm text-muted-foreground">Nenhum retorno publicado ainda.</p>
             {podeCriar && (
               <p className="mt-1 text-xs text-muted-foreground">
                 Use o formulário acima para publicar.
@@ -70,6 +83,15 @@ export function RetornosTab({ demandaId }: { demandaId: string }) {
           retorno={editando}
         />
       )}
+
+      {podeComunicar && (
+        <ComunicarClienteDialog
+          open={comunicarOpen}
+          onOpenChange={setComunicarOpen}
+          demandaId={demandaId}
+          demandaCodigo={demandaCodigo}
+        />
+      )}
     </div>
   );
 }
@@ -88,12 +110,7 @@ function RetornoCard({
   const excluir = useExcluirRetorno();
 
   const handleExcluir = () => {
-    if (
-      !confirm(
-        "Excluir este retorno? Mídia anexada também será apagada.",
-      )
-    )
-      return;
+    if (!confirm("Excluir este retorno? Mídia anexada também será apagada.")) return;
     excluir.mutate({ retornoId: retorno.id, demandaId });
   };
 
@@ -156,9 +173,7 @@ function RetornoCard({
       )}
 
       {retorno.texto && (
-        <p className="whitespace-pre-wrap text-sm text-foreground">
-          {retorno.texto}
-        </p>
+        <p className="whitespace-pre-wrap text-sm text-foreground">{retorno.texto}</p>
       )}
     </div>
   );

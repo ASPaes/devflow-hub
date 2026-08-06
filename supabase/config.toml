@@ -19,3 +19,11 @@ verify_jwt = true
 # Chamada pelo workflow do GitHub SEM JWT — a auth é por assinatura HMAC (callback_secret)
 [functions.agente-callback]
 verify_jwt = false
+
+# Chamada pelo front com o JWT do usuário (valida permissão no servidor)
+[functions.gerar-mensagem-cliente]
+verify_jwt = true
+
+# Idem: o JWT identifica quem enviou, e é ele que assina o registro da comunicação
+[functions.notificar-cliente-demanda]
+verify_jwt = true

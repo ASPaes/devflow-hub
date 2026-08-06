@@ -26,6 +26,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/lib/supabase";
 import { initials } from "@/lib/utils";
+import { formatarTelefoneBR } from "@/types/comunicacao";
 
 export const Route = createFileRoute("/_authenticated/perfil")({
   component: PerfilPage,
@@ -33,6 +34,10 @@ export const Route = createFileRoute("/_authenticated/perfil")({
 
 const perfilSchema = z.object({
   nome: z.string().trim().min(2, "Nome muito curto").max(100, "Nome muito longo"),
+  telefone: z
+    .string()
+    .trim()
+    .refine((v) => v === "" || v.replace(/\D/g, "").length >= 10, "Informe DDD + número"),
 });
 
 type PerfilInput = z.infer<typeof perfilSchema>;
@@ -44,15 +49,25 @@ function PerfilPage() {
 
   const form = useForm<PerfilInput>({
     resolver: zodResolver(perfilSchema),
-    values: { nome: profile?.nome ?? "" },
+    values: {
+      nome: profile?.nome ?? "",
+      telefone: formatarTelefoneBR(profile?.telefone) || "",
+    },
   });
 
   const mutation = useMutation({
     mutationFn: async (input: PerfilInput) => {
       if (!user?.id) throw new Error("Sessão inválida");
+      // Guarda só dígitos com DDI — é assim que o envio de WhatsApp consome
+      const digitos = input.telefone.replace(/\D/g, "");
+      const telefone = digitos
+        ? digitos.length === 10 || digitos.length === 11
+          ? `55${digitos}`
+          : digitos
+        : null;
       const { error } = await supabase
         .from("profiles")
-        .update({ nome: input.nome })
+        .update({ nome: input.nome, telefone })
         .eq("id", user.id);
       if (error) throw error;
     },
@@ -65,10 +80,7 @@ function PerfilPage() {
     },
   });
 
-  const onSubmit = React.useCallback(
-    (data: PerfilInput) => mutation.mutate(data),
-    [mutation],
-  );
+  const onSubmit = React.useCallback((data: PerfilInput) => mutation.mutate(data), [mutation]);
 
   if (isLoading || !profile) {
     return (
@@ -117,6 +129,28 @@ function PerfilPage() {
                   <FormControl>
                     <Input placeholder="Seu nome" autoComplete="name" {...field} />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="telefone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>WhatsApp</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="(11) 99999-8888"
+                      inputMode="tel"
+                      autoComplete="tel"
+                      {...field}
+                    />
+                  </FormControl>
+                  <p className="text-xs text-muted-foreground">
+                    Usado para receber retorno das suas demandas por WhatsApp.
+                  </p>
                   <FormMessage />
                 </FormItem>
               )}

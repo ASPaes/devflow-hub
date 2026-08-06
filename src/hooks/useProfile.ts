@@ -29,6 +29,8 @@ export type ProfileWithPerfil = {
   id: string;
   nome: string;
   avatar_url: string | null;
+  /** Só dígitos com DDI (ex: 5511999998888). Destino do WhatsApp de retorno. */
+  telefone: string | null;
   ativo: boolean;
   tenant_id: string | null;
   tenant: { id: string; nome: string } | null;
@@ -48,7 +50,7 @@ export function useProfile() {
       const { data, error } = await supabase
         .from("profiles")
         .select(
-          "id, nome, avatar_url, ativo, tenant_id, tenant:tenants(id, nome), perfil_acesso:perfis_acesso(id, nome, permissoes)",
+          "id, nome, avatar_url, telefone, ativo, tenant_id, tenant:tenants(id, nome), perfil_acesso:perfis_acesso(id, nome, permissoes)",
         )
         .eq("id", user.id)
         .single();
