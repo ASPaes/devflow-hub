@@ -19,6 +19,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.85.0";
 
+import { ehChamadaDeServico } from "./auth.ts";
 import { ClienteImap } from "./imap.ts";
 import {
   cabecalho,
@@ -80,8 +81,7 @@ Deno.serve(async (req) => {
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 
   // Só o cron entra. Usuário autenticado comum não tem nada que fazer aqui.
-  const autorizacao = req.headers.get("Authorization") ?? "";
-  if (autorizacao.replace(/^Bearer\s+/i, "").trim() !== serviceKey) {
+  if (!ehChamadaDeServico(req.headers.get("Authorization"), serviceKey)) {
     return json({ error: "Não autorizado" }, 401);
   }
 
