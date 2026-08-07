@@ -38,18 +38,53 @@ export interface DadosComunicacaoDemanda {
   envios: EnvioAnterior[];
 }
 
-/** Uma comunicação já enviada, como fica guardada em demanda_comunicacoes. */
-export interface ComunicacaoEnviada {
+/** saida = mandamos ao cliente. entrada = o cliente respondeu por e-mail. */
+export type DirecaoComunicacao = "saida" | "entrada";
+
+/** Uma mensagem trocada com o cliente, como fica em demanda_comunicacoes. */
+export interface ComunicacaoDemanda {
   id: string;
   canal: CanalComunicacao;
+  direcao: DirecaoComunicacao;
   email_destinatario: string | null;
   telefone_destinatario: string | null;
   nome_destinatario: string | null;
+  remetente_email: string | null;
+  remetente_nome: string | null;
   assunto: string | null;
   corpo_texto: string;
+  /** Quando a mensagem foi mandada — por nós (saida) ou pelo cliente (entrada). */
   enviado_em: string;
   status: string;
   erro_detalhe: string | null;
+}
+
+/** Só a saída pode falhar. Entrada já chegou — o que ela pode ser é suspeita. */
+export function comunicacaoFalhou(c: ComunicacaoDemanda): boolean {
+  return c.direcao === "saida" && c.status !== "enviado";
+}
+
+/**
+ * Resposta cujo remetente não bate com o solicitante nem com ninguém da
+ * empresa. Fica registrada, mas não virou comentário na demanda — o token de
+ * resposta viaja num endereço de e-mail e qualquer um poderia forjá-lo.
+ */
+export function respostaSuspeita(c: ComunicacaoDemanda): boolean {
+  return c.direcao === "entrada" && c.status === "recebido_suspeito";
+}
+
+/** Quem está do outro lado da mensagem, do nosso ponto de vista. */
+export function contraparte(c: ComunicacaoDemanda): { nome: string | null; contato: string } {
+  if (c.direcao === "entrada") {
+    return { nome: c.remetente_nome, contato: c.remetente_email ?? "" };
+  }
+  return {
+    nome: c.nome_destinatario,
+    contato:
+      c.canal === "email"
+        ? (c.email_destinatario ?? "")
+        : formatarTelefoneBR(c.telefone_destinatario),
+  };
 }
 
 export interface MensagemGerada {

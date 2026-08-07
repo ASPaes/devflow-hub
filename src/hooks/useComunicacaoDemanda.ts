@@ -4,29 +4,31 @@ import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 import type {
   CanalComunicacao,
-  ComunicacaoEnviada,
+  ComunicacaoDemanda,
   DadosComunicacaoDemanda,
   MensagemGerada,
   MomentoComunicacao,
 } from "@/types/comunicacao";
 
 /**
- * Histórico completo do que já foi enviado ao cliente nesta demanda, com o
- * texto integral de cada mensagem. Quem enxerga é decidido pela RLS da tabela.
+ * A conversa inteira com o cliente nesta demanda — o que saiu e o que ele
+ * respondeu — com o texto integral de cada mensagem. Em ordem cronológica: é
+ * uma conversa, a resposta tem que vir depois da mensagem que ela responde.
+ * Quem enxerga é decidido pela RLS da tabela.
  */
 export function useComunicacoesDemanda(demandaId: string | undefined) {
-  return useQuery<ComunicacaoEnviada[]>({
+  return useQuery<ComunicacaoDemanda[]>({
     queryKey: ["comunicacoes-demanda", demandaId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("demanda_comunicacoes")
         .select(
-          "id, canal, email_destinatario, telefone_destinatario, nome_destinatario, assunto, corpo_texto, enviado_em, status, erro_detalhe",
+          "id, canal, direcao, email_destinatario, telefone_destinatario, nome_destinatario, remetente_email, remetente_nome, assunto, corpo_texto, enviado_em, status, erro_detalhe",
         )
         .eq("demanda_id", demandaId!)
-        .order("enviado_em", { ascending: false });
+        .order("enviado_em", { ascending: true });
       if (error) throw error;
-      return (data ?? []) as unknown as ComunicacaoEnviada[];
+      return (data ?? []) as unknown as ComunicacaoDemanda[];
     },
     enabled: !!demandaId,
     staleTime: 30_000,

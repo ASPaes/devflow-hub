@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       agente_execucoes: {
@@ -357,13 +382,20 @@ export type Database = {
           canal: string
           corpo_texto: string
           demanda_id: string
+          direcao: string
           email_destinatario: string | null
           enviado_em: string
           enviado_por: string | null
           erro_detalhe: string | null
           id: string
+          in_reply_to: string | null
+          message_id: string | null
           nome_destinatario: string | null
           provider_message_id: string | null
+          recebido_em: string | null
+          remetente_email: string | null
+          remetente_nome: string | null
+          reply_token: string | null
           status: string
           telefone_destinatario: string | null
         }
@@ -372,13 +404,20 @@ export type Database = {
           canal?: string
           corpo_texto: string
           demanda_id: string
+          direcao?: string
           email_destinatario?: string | null
           enviado_em?: string
           enviado_por?: string | null
           erro_detalhe?: string | null
           id?: string
+          in_reply_to?: string | null
+          message_id?: string | null
           nome_destinatario?: string | null
           provider_message_id?: string | null
+          recebido_em?: string | null
+          remetente_email?: string | null
+          remetente_nome?: string | null
+          reply_token?: string | null
           status?: string
           telefone_destinatario?: string | null
         }
@@ -387,13 +426,20 @@ export type Database = {
           canal?: string
           corpo_texto?: string
           demanda_id?: string
+          direcao?: string
           email_destinatario?: string | null
           enviado_em?: string
           enviado_por?: string | null
           erro_detalhe?: string | null
           id?: string
+          in_reply_to?: string | null
+          message_id?: string | null
           nome_destinatario?: string | null
           provider_message_id?: string | null
+          recebido_em?: string | null
+          remetente_email?: string | null
+          remetente_nome?: string | null
+          reply_token?: string | null
           status?: string
           telefone_destinatario?: string | null
         }
@@ -1166,6 +1212,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      email_ingestao_estado: {
+        Row: {
+          id: number
+          uidvalidity: number | null
+          ultima_execucao: string | null
+          ultimo_erro: string | null
+          ultimo_uid: number
+        }
+        Insert: {
+          id?: number
+          uidvalidity?: number | null
+          ultima_execucao?: string | null
+          ultimo_erro?: string | null
+          ultimo_uid?: number
+        }
+        Update: {
+          id?: number
+          uidvalidity?: number | null
+          ultima_execucao?: string | null
+          ultimo_erro?: string | null
+          ultimo_uid?: number
+        }
+        Relationships: []
       }
       modulos: {
         Row: {
@@ -2773,10 +2843,25 @@ export type Database = {
           p_erro_detalhe?: string
           p_nome_destinatario?: string
           p_provider_message_id?: string
+          p_reply_token?: string
           p_status?: string
           p_telefone_destinatario?: string
         }
         Returns: string
+      }
+      registrar_resposta_cliente_demanda: {
+        Args: {
+          p_assunto?: string
+          p_corpo_texto: string
+          p_demanda_id: string
+          p_email_destinatario?: string
+          p_enviado_em?: string
+          p_in_reply_to?: string
+          p_message_id?: string
+          p_remetente_email: string
+          p_remetente_nome?: string
+        }
+        Returns: Json
       }
       relatorio_horas_desenvolvedor:
         | {
@@ -2814,6 +2899,7 @@ export type Database = {
               valor_total: number
             }[]
           }
+      resolver_reply_token: { Args: { p_token: string }; Returns: Json }
       restaurar_demanda: {
         Args: { p_demanda_id: string }
         Returns: {
@@ -3166,6 +3252,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       app_permissao: [
