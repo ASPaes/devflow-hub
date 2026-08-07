@@ -355,14 +355,33 @@ export function htmlParaTexto(html: string): string {
 // ──────────────────────────────────────────────────────────────────────
 
 const MARCAS_DE_CITACAO: RegExp[] = [
-  // "Em qua., 6 de ago. de 2026 às 14:03, Fulano <x@y> escreveu:"
-  /^\s*(em|on)\b.*\b(escreveu|wrote)\s*:\s*$/i,
   /^\s*-{2,}\s*(mensagem original|original message|forwarded message|mensagem encaminhada)/i,
   /^\s*_{5,}\s*$/,
   /^\s*(de|from)\s*:\s*.+<.+@.+>/i,
   /^\s*(enviada?( em)?|sent)\s*:\s*.+/i,
   /^\s*>{1,}/,
 ];
+
+/**
+ * A linha de atribuição do Gmail/Apple Mail:
+ *
+ *   Em sex., 7 de ago. de 2026 às 00:36, DoctorDev <asp@aspsoftwares.com.br>
+ *   escreveu:
+ *
+ * Repare que ela vem QUEBRADA — o "escreveu:" cai na linha seguinte. Testar
+ * linha a linha não pega isso (foi o que deixou a atribuição vazar para dentro
+ * da resposta em 07/08/2026), então a checagem olha uma janela de 3 linhas.
+ *
+ * As três condições juntas evitam falso positivo: começa com "Em"/"On", tem
+ * endereço de e-mail, e termina em "escreveu:"/"wrote:". Texto normal que
+ * mencione "escreveu:" não passa nas três.
+ */
+function ehAtribuicaoDeCitacao(linhas: string[], i: number): boolean {
+  if (!/^\s*(em|on)\b/i.test(linhas[i])) return false;
+
+  const janela = linhas.slice(i, i + 3).join(" ");
+  return /\b(escreveu|wrote)\s*:/i.test(janela) && /[^\s@]+@[^\s@]+/.test(janela);
+}
 
 /**
  * Corta a resposta no ponto em que começa a citação do e-mail anterior.
@@ -374,12 +393,12 @@ export function removerCitacao(texto: string): string {
   let corte = -1;
 
   for (let i = 0; i < linhas.length; i++) {
-    if (MARCAS_DE_CITACAO.some((r) => r.test(linhas[i]))) {
-      corte = i;
-      break;
-    }
-    // Assinatura ("-- " sozinho) também não interessa
-    if (/^-{2}\s*$/.test(linhas[i])) {
+    if (
+      ehAtribuicaoDeCitacao(linhas, i) ||
+      MARCAS_DE_CITACAO.some((r) => r.test(linhas[i])) ||
+      // Assinatura ("-- " sozinho) também não interessa
+      /^-{2}\s*$/.test(linhas[i])
+    ) {
       corte = i;
       break;
     }

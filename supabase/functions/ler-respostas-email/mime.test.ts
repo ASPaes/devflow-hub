@@ -158,6 +158,28 @@ describe("removerCitacao", () => {
     expect(removerCitacao(texto)).toBe("Pode publicar, está aprovado.");
   });
 
+  it("corta a atribuicao do Gmail quebrada em duas linhas", () => {
+    // Caso real, DEM de 07/08/2026: o Gmail dobra a linha e o "escreveu:" cai
+    // sozinho embaixo. Testar linha a linha deixava a atribuicao vazar.
+    const texto = [
+      "Boa noite",
+      "",
+      "Em sex., 7 de ago. de 2026 às 00:36, DoctorDev <asp@aspsoftwares.com.br>",
+      "escreveu:",
+      "",
+      "> Olá Vinicius,",
+      ">",
+      "> Finalizamos a implementação da funcionalidade de notificações.",
+    ].join("\n");
+
+    expect(removerCitacao(texto)).toBe("Boa noite");
+  });
+
+  it("nao corta texto que so menciona escreveu:", () => {
+    const texto = "Como o Pedro escreveu: o ajuste ficou bom.\n\nPode seguir.";
+    expect(removerCitacao(texto)).toBe(texto);
+  });
+
   it("corta o bloco do Outlook", () => {
     const texto = [
       "Ok",
