@@ -12,6 +12,8 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.85.0";
 import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
 
+import { codificarAssunto } from "./assunto.ts";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -55,46 +57,6 @@ function textoParaHtml(texto: string): string {
   return `<div style="font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;font-size:15px;line-height:1.6;color:#1E293B;">${paragrafos}</div>`;
 }
 
-/**
- * Assunto com acento precisa virar "encoded-word" (RFC 2047). O denomailer faz
- * isso errado: deixa espaco literal dentro do bloco (proibido) e passa dos 75
- * caracteres, entao o Gmail desiste e mostra o `=?utf-8?Q?...` cru pro cliente.
- *
- * Aqui a gente codifica antes, em base64, quebrando em blocos que cabem no
- * limite. O resultado e ASCII puro, entao o denomailer nao mexe mais nele.
- */
-function codificarAssunto(s: string): string {
-  // Só ASCII imprimível: não precisa codificar
-  if (/^[\x20-\x7E]*$/.test(s)) return s;
-
-  const enc = new TextEncoder();
-  const blocos: string[] = [];
-  let atual: string[] = [];
-  let bytes = 0;
-
-  // 45 bytes por bloco: base64 vira 60 chars, + "=?UTF-8?B?" e "?=" = 72 < 75.
-  // Corta em caractere inteiro pra não partir um acento no meio.
-  for (const ch of Array.from(s)) {
-    const n = enc.encode(ch).length;
-    if (bytes + n > 45) {
-      blocos.push(atual.join(""));
-      atual = [];
-      bytes = 0;
-    }
-    atual.push(ch);
-    bytes += n;
-  }
-  if (atual.length) blocos.push(atual.join(""));
-
-  return blocos
-    .map((b) => {
-      let bin = "";
-      for (const x of enc.encode(b)) bin += String.fromCharCode(x);
-      return `=?UTF-8?B?${btoa(bin)}?=`;
-    })
-    .join(" "); // blocos vizinhos separados por espaço são concatenados pelo leitor
-}
-
 function utf8ParaBase64(s: string): string {
   const bytes = new TextEncoder().encode(s);
   let bin = "";
@@ -115,10 +77,43 @@ async function assinar(payloadB64: string, segredo: string): Promise<string> {
   return btoa(String.fromCharCode(...new Uint8Array(sig)));
 }
 
+/** 64 bits de aleatório em hex. Vai dentro do endereço de resposta, então só
+ * pode usar caractere que sobrevive a qualquer servidor de e-mail. */
+function gerarReplyToken(): string {
+  const bytes = new Uint8Array(8);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+/**
+ * Endereço de resposta com o token embutido: `caixa+r<token>@dominio`.
+ * O cliente responde pra lá, o leitor de IMAP (ler-respostas-email) acha o
+ * token e sabe de qual demanda é a resposta.
+ *
+ * REPLY_TO_BASE existe pra quando o remetente é um alias que ninguém lê:
+ * aponte para a caixa que o leitor abre. Sem ele, usa o próprio remetente.
+ */
+function enderecoDeResposta(token: string): string | null {
+  const env = (nome: string) => (Deno.env.get(nome) ?? "").trim() || null;
+  const base = env("REPLY_TO_BASE") ?? env("SMTP_FROM") ?? env("SMTP_USER") ?? "";
+  const at = base.lastIndexOf("@");
+  if (at <= 0) return null;
+
+  const local = base.slice(0, at);
+  const dominio = base.slice(at + 1);
+  // Local part do RFC 5321 para em 64 caracteres. Estourar aqui é erro de
+  // configuração (caixa com nome enorme), não do cliente — melhor não mandar
+  // Reply-To nenhum do que mandar um endereço que quica.
+  if (local.length + 2 + token.length > 64) return null;
+
+  return `${local}+r${token}@${dominio}`;
+}
+
 async function enviarEmail(
   destino: string,
   assunto: string,
   corpo: string,
+  responderPara: string | null,
 ): Promise<{ ok: true } | { ok: false; erro: string }> {
   const host = Deno.env.get("SMTP_HOST");
   const porta = Number(Deno.env.get("SMTP_PORT") ?? "587");
@@ -145,6 +140,9 @@ async function enviarEmail(
     await client.send({
       from: `${nomeRemetente} <${remetente}>`,
       to: destino,
+      // Endereço puro, sem nome de exibição: nome com acento aqui cairia no
+      // mesmo problema de encoded-word que o assunto já teve.
+      ...(responderPara ? { replyTo: responderPara } : {}),
       subject: codificarAssunto(assunto),
       content: corpo,
       html: textoParaHtml(corpo),
@@ -257,7 +255,18 @@ Deno.serve(async (req) => {
         assuntoInformado ||
         `Atualização da sua solicitação${codigoDemanda ? ` (${codigoDemanda})` : ""}`;
 
-      const envio = await enviarEmail(destino, assunto, corpo);
+      // O token viaja no Reply-To e volta na resposta do cliente. Gerado antes
+      // do envio porque precisa estar dentro da mensagem; gravado depois, junto
+      // com o registro do envio.
+      const replyToken = gerarReplyToken();
+      const responderPara = enderecoDeResposta(replyToken);
+      if (!responderPara) {
+        console.warn(
+          "[notificar-cliente-demanda] sem Reply-To: REPLY_TO_BASE/SMTP_FROM inválido — a resposta do cliente não será correlacionada",
+        );
+      }
+
+      const envio = await enviarEmail(destino, assunto, corpo, responderPara);
 
       const { error: errReg } = await supabase.rpc("registrar_comunicacao_demanda", {
         p_demanda_id: demanda_id,
@@ -268,6 +277,7 @@ Deno.serve(async (req) => {
         p_assunto: assunto,
         p_status: envio.ok ? "enviado" : "falha",
         p_erro_detalhe: envio.ok ? null : envio.erro,
+        p_reply_token: responderPara ? replyToken : null,
       });
       if (errReg) console.error("[notificar-cliente-demanda] registro falhou:", errReg);
 
