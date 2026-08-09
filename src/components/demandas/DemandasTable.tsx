@@ -66,7 +66,7 @@ export function DemandasTable({
             <SortableHeader label="Tipo" campo="tipo" sort={sort} onSortChange={onSortChange ?? (() => {})} />
             <SortableHeader label="Data Criação" campo="data_criacao" sort={sort} onSortChange={onSortChange ?? (() => {})} />
             <SortableHeader label="Data Desenv." campo="data_desenvolvimento" sort={sort} onSortChange={onSortChange ?? (() => {})} />
-            <SortableHeader label="Data Entrega" campo="data_entrega" sort={sort} onSortChange={onSortChange ?? (() => {})} />
+            <SortableHeader label="Entregue em" campo="data_entrega" sort={sort} onSortChange={onSortChange ?? (() => {})} />
             <SortableHeader label="Prior." campo="prioridade" sort={sort} onSortChange={onSortChange ?? (() => {})} />
             <SortableHeader label="Status" campo="status" sort={sort} onSortChange={onSortChange ?? (() => {})} />
             <SortableHeader label="Empresa" campo="empresa" sort={sort} onSortChange={onSortChange ?? (() => {})} />
@@ -165,7 +165,7 @@ function DemandaRow({ row, onClick }: DemandaRowProps) {
         {formatDateSP(row.dev_deadline)}
       </td>
       <td className="whitespace-nowrap px-4 py-3 align-middle text-xs text-muted-foreground">
-        {formatDateSP(row.deadline)}
+        {formatDateSP(row.delivered_at)}
       </td>
       <td className="px-4 py-3 align-middle">
         <span

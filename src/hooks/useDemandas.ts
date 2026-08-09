@@ -261,7 +261,8 @@ export const COLUNAS_ORDENAVEIS = {
   tipo: "tipo",
   data_criacao: "created_at",
   data_desenvolvimento: "dev_deadline",
-  data_entrega: "deadline",
+  // A coluna "Entregue em" mostra delivered_at (entrega real), não deadline (prazo).
+  data_entrega: "delivered_at",
   prioridade: "prioridade",
   status: "status",
   empresa: "tenant_nome",
