@@ -380,10 +380,14 @@ export function useDemandasLista(
         const inicio = toIsoDate(filtros.periodo.from);
         const fim = toIsoDate(filtros.periodo.to);
 
+        // created_at/delivered_at são timestamptz: sem o offset explícito o
+        // PostgREST compara em UTC e a demanda entregue depois das 21h cai no
+        // dia seguinte. BR não tem horário de verão desde 2019, então -03:00 é
+        // fixo — e é o mesmo recorte que a RPC dashboard_metrics usa.
         if (tipoData === "criacao") {
           q = q
-            .gte("created_at", `${inicio}T00:00:00`)
-            .lte("created_at", `${fim}T23:59:59`);
+            .gte("created_at", `${inicio}T00:00:00-03:00`)
+            .lte("created_at", `${fim}T23:59:59-03:00`);
         } else if (tipoData === "desenvolvimento") {
           q = q
             .not("dev_deadline", "is", null)
@@ -394,6 +398,12 @@ export function useDemandasLista(
             .not("deadline", "is", null)
             .gte("deadline", inicio)
             .lte("deadline", fim);
+        } else if (tipoData === "entregue") {
+          q = q
+            .not("delivered_at", "is", null)
+            .neq("status", "cancelada")
+            .gte("delivered_at", `${inicio}T00:00:00-03:00`)
+            .lte("delivered_at", `${fim}T23:59:59-03:00`);
         }
       }
 

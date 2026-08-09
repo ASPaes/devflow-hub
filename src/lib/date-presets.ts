@@ -121,12 +121,16 @@ export function formatPillDate(d: Date): string {
 }
 
 // ============= Tipo de data =============
-export type TipoData = "criacao" | "desenvolvimento" | "entrega";
+// "entrega" é o PRAZO combinado (demandas.deadline), preenchido a mão.
+// "entregue" é a entrega real (demandas.delivered_at), carimbada pelo trigger
+// trg_demandas_status_timestamps quando o status vira 'entregue'.
+export type TipoData = "criacao" | "desenvolvimento" | "entrega" | "entregue";
 
 export const TIPO_DATA_LABEL: Record<TipoData, string> = {
   criacao: "Data de Criação",
-  desenvolvimento: "Data de Desenvolvimento",
-  entrega: "Data de Entrega",
+  desenvolvimento: "Prazo de Desenvolvimento",
+  entrega: "Prazo de Entrega",
+  entregue: "Entregue em",
 };
 
 // ============= Parser/formatador de input dd/MM/yyyy =============

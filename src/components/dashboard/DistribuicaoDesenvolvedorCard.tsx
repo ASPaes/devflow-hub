@@ -31,11 +31,16 @@ export function DistribuicaoDesenvolvedorCard({
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0">
-        <CardTitle className="flex items-center gap-2 text-base font-medium">
-          <Users className="h-4 w-4 text-muted-foreground" />
-          Distribuição por desenvolvedor
-        </CardTitle>
+      <CardHeader className="flex flex-row items-start justify-between space-y-0">
+        <div className="space-y-1">
+          <CardTitle className="flex items-center gap-2 text-base font-medium">
+            <Users className="h-4 w-4 text-muted-foreground" />
+            Distribuição por desenvolvedor
+          </CardTitle>
+          <p className="text-xs text-muted-foreground">
+            Horas lançadas e demandas entregues no período
+          </p>
+        </div>
         {!isLoading && (
           <span className="text-xs text-muted-foreground">
             {data.length} {data.length === 1 ? "pessoa" : "pessoas"}
@@ -51,7 +56,7 @@ export function DistribuicaoDesenvolvedorCard({
           </div>
         ) : data.length === 0 ? (
           <div className="py-6 text-center text-sm text-muted-foreground">
-            Nenhuma demanda no período/filtros selecionados
+            Nenhuma entrega nem hora lançada no período/filtros selecionados
           </div>
         ) : (
           data.map((row, idx) => {
@@ -98,11 +103,17 @@ export function DistribuicaoDesenvolvedorCard({
                       {row.nome}
                     </span>
                     <span className="flex items-center gap-2 shrink-0">
-                      <span className="font-mono text-xs text-muted-foreground">
+                      <span
+                        className="font-mono text-xs text-muted-foreground"
+                        title="Horas lançadas no período"
+                      >
                         {formatHMFromSegundos(row.total_segundos)}
                       </span>
                       <span className="text-muted-foreground/40">|</span>
-                      <span className="font-mono text-xs font-semibold text-foreground">
+                      <span
+                        className="font-mono text-xs font-semibold text-foreground"
+                        title="Demandas entregues no período"
+                      >
                         {row.total}
                       </span>
                     </span>

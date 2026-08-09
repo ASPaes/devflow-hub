@@ -173,6 +173,7 @@ export function PeriodoPicker({
             {TIPO_DATA_LABEL.desenvolvimento}
           </SelectItem>
           <SelectItem value="entrega">{TIPO_DATA_LABEL.entrega}</SelectItem>
+          <SelectItem value="entregue">{TIPO_DATA_LABEL.entregue}</SelectItem>
         </SelectContent>
       </Select>
 

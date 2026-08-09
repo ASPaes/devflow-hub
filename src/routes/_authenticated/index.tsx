@@ -49,7 +49,6 @@ const STATUS_ABERTAS: StatusDemanda[] = [
   "para_publicar",
   "reaberta",
 ];
-const STATUS_CONCLUIDAS: StatusDemanda[] = ["entregue", "encerrada"];
 
 export const Route = createFileRoute("/_authenticated/")({
   component: Dashboard,
@@ -485,7 +484,7 @@ function Dashboard() {
           isLoading={metricsLoading}
           icon={CheckCircle2}
           iconClassName="h-5 w-5 text-status-entregue"
-          onClick={() => drillDown({ status: STATUS_CONCLUIDAS })}
+          onClick={() => drillDown({}, { tipoData: "entregue" })}
         />
       </div>
 
@@ -553,7 +552,9 @@ function Dashboard() {
           <DistribuicaoDesenvolvedorCard
             data={metrics.por_responsavel ?? []}
             isLoading={metricsLoading}
-            onSelect={(id) => drillDown({ responsavel_id: [id] })}
+            onSelect={(id) =>
+              drillDown({ responsavel_id: [id] }, { tipoData: "entregue" })
+            }
           />
         )}
       </div>
