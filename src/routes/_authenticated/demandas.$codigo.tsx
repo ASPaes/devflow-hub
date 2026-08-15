@@ -27,7 +27,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
-import { formatRelativeSP } from "@/lib/format";
+import { formatDataHoraRelativaSP } from "@/lib/format";
 import { useDemanda, useUpdateDemanda, type UpdateDemandaPatch } from "@/hooks/useDemandas";
 import { EditableField } from "@/components/demandas/EditableField";
 import { AnexosSecao } from "@/components/demandas/AnexosSecao";
@@ -312,7 +312,7 @@ function DemandaDetalhe() {
             <p className="text-sm text-muted-foreground">
               Aberto por <SolicitanteSummary solicitante={demanda.solicitante} />
               {demanda.tenant?.nome ? ` (${demanda.tenant.nome})` : ""}{" "}
-              {formatRelativeSP(demanda.created_at)}
+              {formatDataHoraRelativaSP(demanda.created_at)}
             </p>
           </div>
 

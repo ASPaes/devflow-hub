@@ -30,6 +30,26 @@ export function formatRelativeSP(iso: string | null | undefined): string {
   return formatDateSP(iso);
 }
 
+export function formatHoraSP(iso: string | null | undefined): string {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleTimeString("pt-BR", {
+    timeZone: SP_TZ,
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+/**
+ * "14/08/2026 às 14:25 · há 5 dias".
+ * Acima de 30 dias o relativo já vira data — aí mostra só o absoluto.
+ */
+export function formatDataHoraRelativaSP(iso: string | null | undefined): string {
+  if (!iso) return "—";
+  const absoluto = `${formatDateSP(iso)} às ${formatHoraSP(iso)}`;
+  const relativo = formatRelativeSP(iso);
+  return relativo === formatDateSP(iso) ? absoluto : `${absoluto} · ${relativo}`;
+}
+
 /**
  * Formata segundos em "HHh MMm" (ex: 9000 → "02h 30m").
  */
