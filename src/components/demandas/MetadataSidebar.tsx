@@ -42,8 +42,8 @@ import {
 } from "@/lib/dates";
 import {
   PRIORIDADE_LABEL_CURTA,
-  PROXIMOS_STATUS,
   STATUS_DEMANDA_LABEL,
+  STATUS_DEMANDA_VALUES,
   TRANSICAO_LABEL,
   mapCodigoToEnumLegacy,
   type DemandaCompleta,
@@ -338,8 +338,8 @@ interface StatusDropdownProps {
 }
 
 function StatusDropdown({ current, disabled, onChange }: StatusDropdownProps) {
-  const next = PROXIMOS_STATUS[current];
-  if (next.length === 0) return null;
+  // Lista completa, na ordem do fluxo — sem whitelist de transição.
+  const opcoes = STATUS_DEMANDA_VALUES.filter((s) => s !== current);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -348,8 +348,8 @@ function StatusDropdown({ current, disabled, onChange }: StatusDropdownProps) {
           <ChevronDown className="ml-1 h-3.5 w-3.5" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        {next.map((s) => (
+      <DropdownMenuContent align="end" className="max-h-[70vh] overflow-y-auto">
+        {opcoes.map((s) => (
           <DropdownMenuItem key={s} onSelect={() => onChange(s)}>
             {TRANSICAO_LABEL[s]}
           </DropdownMenuItem>
