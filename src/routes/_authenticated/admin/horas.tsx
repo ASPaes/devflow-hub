@@ -140,10 +140,10 @@ function HorasDevPage() {
   const [dataInicio, setDataInicio] = React.useState(firstDayOfMonth());
   const [dataFim, setDataFim] = React.useState(todayISO());
   const [selectedIds, setSelectedIds] = React.useState<string[]>([]);
-  const [selectedStatuses, setSelectedStatuses] = React.useState<string[]>([
-    "entregue",
-    "encerrada",
-  ]);
+  // Sem status pré-selecionado: o período já recorta pela entrega
+  // (fn_competencia_hora). Filtrar por status escondia a demanda que foi
+  // entregue no mês e depois reaberta.
+  const [selectedStatuses, setSelectedStatuses] = React.useState<string[]>([]);
 
   const profilesQuery = useQuery<ProfileLite[]>({
     queryKey: ["profiles-ativos-horas"],
@@ -350,6 +350,13 @@ function HorasDevPage() {
             </PopoverContent>
           </Popover>
         </div>
+
+        <p className="w-full text-xs text-muted-foreground">
+          O período considera a data de entrega da demanda: a hora entra no
+          relatório quando a demanda é entregue, com todas as horas dela.
+          Apontamento anterior a 01/09/2026 continua contando na data em que foi
+          lançado.
+        </p>
       </div>
 
       <ScrollableTable className="rounded-lg border border-border bg-card">
