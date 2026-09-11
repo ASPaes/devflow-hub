@@ -39,6 +39,7 @@ const STATUS_OPCOES: Array<keyof typeof STATUS_DEMANDA_LABEL> = [
   "para_desenvolver",
   "duvidas_dev",
   "aguardando_cliente",
+  "retorno_cliente",
   "desenvolvimento",
   "teste",
   "para_publicar",

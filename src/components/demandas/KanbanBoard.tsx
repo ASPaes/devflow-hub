@@ -32,6 +32,7 @@ import { IncluirReleaseDialog } from "@/components/demandas/IncluirReleaseDialog
 import { useNavigate } from "@tanstack/react-router";
 
 export type ColunaStatus =
+  | "retorno_cliente"
   | "triagem"
   | "aprovado"
   | "nao_aprovado"
@@ -45,6 +46,9 @@ export type ColunaStatus =
   | "entregue";
 
 const COLUNAS: { key: ColunaStatus; label: string; cor: string }[] = [
+  // Primeira de propósito: é o cliente respondendo o e-mail da demanda, e
+  // resposta que ficava fora da vista acabava encerrada sem ninguém ler.
+  { key: "retorno_cliente", label: STATUS_DEMANDA_LABEL.retorno_cliente, cor: "var(--color-status-retorno_cliente)" },
   { key: "triagem", label: STATUS_DEMANDA_LABEL.triagem, cor: "var(--color-status-triagem)" },
   { key: "aprovado", label: STATUS_DEMANDA_LABEL.aprovado, cor: "var(--color-status-aprovado)" },
   { key: "nao_aprovado", label: STATUS_DEMANDA_LABEL.nao_aprovado, cor: "var(--color-status-nao_aprovado)" },
@@ -59,6 +63,7 @@ const COLUNAS: { key: ColunaStatus; label: string; cor: string }[] = [
 ];
 
 export const STATUS_NO_BOARD: StatusDemanda[] = [
+  "retorno_cliente",
   "triagem",
   "reaberta",
   "aprovado",
@@ -249,6 +254,7 @@ function ColunaDroppable({
 function statusToColuna(s: StatusDemanda): ColunaStatus | null {
   if (s === "reaberta") return "triagem";
   if (
+    s === "retorno_cliente" ||
     s === "triagem" ||
     s === "aprovado" ||
     s === "nao_aprovado" ||
@@ -330,6 +336,7 @@ export function KanbanBoard({ rows, isLoading, onCardClick }: KanbanBoardProps) 
 
   const porColuna = React.useMemo(() => {
     const mapa: Record<ColunaStatus, DemandaListaRow[]> = {
+      retorno_cliente: [],
       triagem: [],
       aprovado: [],
       nao_aprovado: [],
