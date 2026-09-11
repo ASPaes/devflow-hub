@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
 import { loginSchema, type LoginInput } from "@/lib/auth-schemas";
 import { translateAuthError } from "@/lib/auth-errors";
+import { supabase } from "@/lib/supabase";
 
 const searchSchema = z.object({
   redirect: z.string().optional(),
@@ -20,8 +21,13 @@ const searchSchema = z.object({
 
 export const Route = createFileRoute("/login")({
   validateSearch: searchSchema,
-  beforeLoad: ({ context, search }) => {
-    if (context.auth.session) {
+  // Mesmo motivo do _authenticated: só o navegador sabe se há sessão.
+  ssr: false,
+  beforeLoad: async ({ context, search }) => {
+    // No primeiro carregamento o contexto ainda é o stub (AuthProvider não
+    // montou); a sessão salva no localStorage é a fonte que vale.
+    const session = context.auth.session ?? (await supabase.auth.getSession()).data.session;
+    if (session) {
       throw redirect({ to: search.redirect ?? "/" });
     }
   },
