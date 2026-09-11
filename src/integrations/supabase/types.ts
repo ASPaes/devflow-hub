@@ -378,6 +378,7 @@ export type Database = {
       }
       demanda_comunicacoes: {
         Row: {
+          anexos: Json | null
           assunto: string | null
           canal: string
           corpo_texto: string
@@ -400,6 +401,7 @@ export type Database = {
           telefone_destinatario: string | null
         }
         Insert: {
+          anexos?: Json | null
           assunto?: string | null
           canal?: string
           corpo_texto: string
@@ -422,6 +424,7 @@ export type Database = {
           telefone_destinatario?: string | null
         }
         Update: {
+          anexos?: Json | null
           assunto?: string | null
           canal?: string
           corpo_texto?: string

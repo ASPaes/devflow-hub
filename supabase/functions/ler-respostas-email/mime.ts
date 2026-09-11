@@ -180,27 +180,28 @@ function decodificarQuotedPrintable(s: string): string {
     .replace(/=([0-9A-Fa-f]{2})/g, (_m, hex) => String.fromCharCode(parseInt(hex, 16)));
 }
 
+/** Desfaz o Content-Transfer-Encoding. Entra e sai string binária. */
+function decodificarTransferencia(corpoBinario: string, transferencia: string | null): string {
+  const cte = (transferencia ?? "7bit").toLowerCase().trim();
+
+  if (cte === "base64") {
+    try {
+      return atob(corpoBinario.replace(/\s+/g, ""));
+    } catch {
+      return corpoBinario;
+    }
+  }
+  if (cte === "quoted-printable") return decodificarQuotedPrintable(corpoBinario);
+  return corpoBinario;
+}
+
 /** Corpo de uma parte folha → texto legível. Entra string binária, sai string. */
 export function decodificarCorpo(
   corpoBinario: string,
   transferencia: string | null,
   charset: string | null,
 ): string {
-  const cte = (transferencia ?? "7bit").toLowerCase().trim();
-  let binario: string;
-
-  if (cte === "base64") {
-    try {
-      binario = atob(corpoBinario.replace(/\s+/g, ""));
-    } catch {
-      binario = corpoBinario;
-    }
-  } else if (cte === "quoted-printable") {
-    binario = decodificarQuotedPrintable(corpoBinario);
-  } else {
-    binario = corpoBinario;
-  }
-
+  const binario = decodificarTransferencia(corpoBinario, transferencia);
   return decodificarComCharset(binarioParaBytes(binario), charset).replace(/\r\n/g, "\n");
 }
 
@@ -466,4 +467,121 @@ export function ehAutomatica(h: Cabecalhos): boolean {
   if (retorno === "<>") return true;
 
   return false;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Anexos — a imagem colada no corpo, o print, o PDF
+// ──────────────────────────────────────────────────────────────────────
+
+export interface AnexoEmail {
+  nome: string;
+  mime: string;
+  bytes: Uint8Array;
+  /** Colada no corpo (Content-Disposition inline ou sem disposição), não "anexar arquivo". */
+  inline: boolean;
+}
+
+/**
+ * Tudo que não é o texto da mensagem. O caso que motivou: o Gmail manda a
+ * imagem colada no corpo como `image/*` inline dentro de multipart/related, e
+ * no text/plain deixa só "[image: image.png]" — ler só o texto perdia o print
+ * (DEM-0379, 10/09/2026).
+ *
+ * Não desce em message/rfc822: e-mail encaminhado dentro da resposta traz os
+ * anexos DELE, não os do cliente.
+ */
+export function extrairAnexos(brutoBinario: string): AnexoEmail[] {
+  const { cabecalhos: h, corpo } = separarMensagem(brutoBinario);
+  const saida: AnexoEmail[] = [];
+  coletarAnexos(h, corpo, 0, saida);
+  return saida;
+}
+
+function coletarAnexos(h: Cabecalhos, corpo: string, profundidade: number, saida: AnexoEmail[]) {
+  if (profundidade > 12) return;
+
+  const { tipo, parametros } = parseContentType(cabecalho(h, "content-type"));
+
+  if (tipo.startsWith("multipart/")) {
+    const fronteira = parametros["boundary"];
+    if (!fronteira) return;
+    for (const parte of separarPartes(corpo, fronteira)) {
+      const { cabecalhos: ph, corpo: pc } = separarMensagem(parte);
+      coletarAnexos(ph, pc, profundidade + 1, saida);
+    }
+    return;
+  }
+
+  if (tipo === "message/rfc822") return;
+
+  const dispBruta = cabecalho(h, "content-disposition");
+  const disp = dispBruta ? parseContentType(dispBruta) : { tipo: "", parametros: {} };
+  const ehArquivo = disp.tipo === "attachment";
+
+  // O texto do corpo é do extrairTexto. Texto mandado como arquivo é anexo.
+  if ((tipo === "text/plain" || tipo === "text/html") && !ehArquivo) return;
+
+  let binario = decodificarTransferencia(corpo, cabecalho(h, "content-transfer-encoding"));
+  // Em 7bit/8bit/binary o CRLF antes da próxima fronteira pertence a ela.
+  if (!/base64|quoted-printable/i.test(cabecalho(h, "content-transfer-encoding") ?? "")) {
+    binario = binario.replace(/\r?\n$/, "");
+  }
+  const bytes = binarioParaBytes(binario);
+  if (bytes.length === 0) return;
+
+  const nome =
+    nomeDoArquivo(disp.parametros, "filename") ??
+    nomeDoArquivo(parametros, "name") ??
+    `anexo-${saida.length + 1}${extensaoDoTipo(tipo)}`;
+
+  saida.push({ nome, mime: tipo, bytes, inline: !ehArquivo });
+}
+
+/**
+ * `filename="x.png"`, `filename="=?UTF-8?B?…?="` (RFC 2047, o que o Gmail usa)
+ * ou `filename*=UTF-8''relat%C3%B3rio.pdf` com ou sem continuação
+ * `filename*0*=…; filename*1*=…` (RFC 2231, o que o Outlook usa).
+ */
+function nomeDoArquivo(p: Record<string, string>, base: string): string | null {
+  if (p[`${base}*`] !== undefined) return decodificarRfc2231(p[`${base}*`]);
+
+  const pedacos: string[] = [];
+  let codificado = false;
+  for (let i = 0; ; i++) {
+    const cod = p[`${base}*${i}*`];
+    const cru = p[`${base}*${i}`];
+    if (cod === undefined && cru === undefined) break;
+    if (cod !== undefined && i === 0) codificado = true;
+    pedacos.push(cod ?? cru);
+  }
+  if (pedacos.length > 0) {
+    const junto = pedacos.join("");
+    return codificado ? decodificarRfc2231(junto) : junto;
+  }
+
+  const simples = p[base];
+  return simples ? decodificarPalavrasCodificadas(simples) : null;
+}
+
+function decodificarRfc2231(valor: string): string {
+  // charset'idioma'texto-com-%XX — o charset só vem no primeiro pedaço
+  const m = valor.match(/^([^']*)'[^']*'([\s\S]*)$/);
+  const charset = m?.[1] || "utf-8";
+  const texto = m ? m[2] : valor;
+  const binario = texto.replace(/%([0-9A-Fa-f]{2})/g, (_m, hex) =>
+    String.fromCharCode(parseInt(hex, 16)),
+  );
+  return decodificarComCharset(binarioParaBytes(binario), charset);
+}
+
+function extensaoDoTipo(tipo: string): string {
+  const mapa: Record<string, string> = {
+    "image/png": ".png",
+    "image/jpeg": ".jpg",
+    "image/gif": ".gif",
+    "image/webp": ".webp",
+    "application/pdf": ".pdf",
+    "video/mp4": ".mp4",
+  };
+  return mapa[tipo] ?? "";
 }

@@ -15,16 +15,21 @@
 //
 // Chamada pelo pg_cron com a service_role key. `?dry_run=1` faz a varredura
 // inteira sem gravar nada e sem mexer na marca d'água.
+// `?reprocessar=<demanda_comunicacoes.id>` busca de novo UMA resposta já
+// gravada (pelo Message-ID) e guarda os anexos dela — foi assim que o print da
+// DEM-0379 voltou. Também não mexe na marca d'água.
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.85.0";
+import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.85.0";
 
 import { ehChamadaDeServico } from "./auth.ts";
 import { ClienteImap } from "./imap.ts";
 import {
+  type AnexoEmail,
   cabecalho,
   decodificarPalavrasCodificadas,
   ehAutomatica,
+  extrairAnexos,
   extrairEndereco,
   extrairReplyToken,
   extrairTexto,
@@ -43,6 +48,23 @@ const MAX_POR_RODADA = 200;
 
 /** Corpos baixados por rodada — é a parte cara. */
 const MAX_CORPOS = 25;
+
+/** O bucket dos anexos da demanda e o que ele aceita (storage.buckets). */
+const ANEXO_BUCKET = "demanda-anexos";
+const ANEXO_TIPOS = new Set([
+  "image/png",
+  "image/jpeg",
+  "image/gif",
+  "image/webp",
+  "video/mp4",
+  "video/webm",
+  "video/quicktime",
+  "application/pdf",
+]);
+const ANEXO_MAX_BYTES = 25 * 1024 * 1024;
+/** Imagem inline menor que isso é pixel de rastreio ou espaçador, não print. */
+const ANEXO_INLINE_MIN_BYTES = 2048;
+const ANEXO_MAX_POR_MENSAGEM = 10;
 
 const CAMPOS_DE_TRIAGEM = [
   "TO",
@@ -74,6 +96,78 @@ function env(nome: string): string | null {
   return (Deno.env.get(nome) ?? "").trim() || null;
 }
 
+async function sha256Hex(texto: string): Promise<string> {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(texto));
+  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+/** Separa o que dá para guardar do que o bucket recusaria. */
+function selecionarAnexos(todos: AnexoEmail[]): { aceitos: AnexoEmail[]; ignorados: string[] } {
+  const aceitos: AnexoEmail[] = [];
+  const ignorados: string[] = [];
+
+  for (const a of todos) {
+    const mime = a.mime === "image/jpg" ? "image/jpeg" : a.mime;
+    if (!ANEXO_TIPOS.has(mime)) {
+      ignorados.push(`${a.nome} (${a.mime})`);
+      continue;
+    }
+    if (a.inline && a.bytes.length < ANEXO_INLINE_MIN_BYTES) continue;
+    if (a.bytes.length > ANEXO_MAX_BYTES) {
+      ignorados.push(`${a.nome} (maior que 25 MB)`);
+      continue;
+    }
+    if (aceitos.length >= ANEXO_MAX_POR_MENSAGEM) {
+      ignorados.push(`${a.nome} (passou de ${ANEXO_MAX_POR_MENSAGEM} por mensagem)`);
+      continue;
+    }
+    aceitos.push({ ...a, mime });
+  }
+
+  return { aceitos, ignorados };
+}
+
+/**
+ * Sobe os anexos para o bucket da demanda e amarra na comunicação. O caminho é
+ * determinístico (hash do Message-ID + posição) e o upload é upsert: rodar de
+ * novo para a mesma mensagem regrava o mesmo objeto em vez de criar órfão.
+ */
+async function guardarAnexos(
+  admin: SupabaseClient,
+  alvo: { demandaId: string; comunicacaoId: string },
+  chave: string,
+  anexos: AnexoEmail[],
+): Promise<{ guardados: number; erro: string | null }> {
+  const prefixo = (await sha256Hex(chave)).slice(0, 16);
+  const registros: Record<string, unknown>[] = [];
+
+  for (const [i, a] of anexos.entries()) {
+    const seguro = a.nome.replace(/[^\w.\-]/g, "_").slice(0, 100) || `anexo-${i + 1}`;
+    const caminho = `demandas/${alvo.demandaId}/email-${prefixo}-${i + 1}-${seguro}`;
+
+    const { error } = await admin.storage
+      .from(ANEXO_BUCKET)
+      .upload(caminho, a.bytes, { contentType: a.mime, upsert: true });
+    if (error) return { guardados: 0, erro: `upload ${a.nome}: ${error.message}` };
+
+    registros.push({
+      storage_path: caminho,
+      nome_arquivo: a.nome,
+      mime_type: a.mime,
+      tamanho_bytes: a.bytes.length,
+      inline: a.inline,
+    });
+  }
+
+  const { error } = await admin.rpc("anexar_arquivos_resposta_cliente", {
+    p_comunicacao_id: alvo.comunicacaoId,
+    p_anexos: registros,
+  });
+  if (error) return { guardados: 0, erro: `anexar: ${error.message}` };
+
+  return { guardados: registros.length, erro: null };
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -85,7 +179,9 @@ Deno.serve(async (req) => {
     return json({ error: "Não autorizado" }, 401);
   }
 
-  const simulacao = new URL(req.url).searchParams.get("dry_run") === "1";
+  const parametros = new URL(req.url).searchParams;
+  const simulacao = parametros.get("dry_run") === "1";
+  const reprocessar = parametros.get("reprocessar");
 
   const host = env("IMAP_HOST") ?? "imap.gmail.com";
   const porta = Number(env("IMAP_PORT") ?? "993");
@@ -112,12 +208,50 @@ Deno.serve(async (req) => {
     suspeitas: 0,
     automaticas: 0,
     sem_demanda: 0,
+    anexos: 0,
+    anexos_ignorados: [] as string[],
     ultimo_uid: 0,
     marco_inicial: false,
     erros: [] as string[],
   };
 
   try {
+    if (reprocessar) {
+      const { data: com, error: errCom } = await admin
+        .from("demanda_comunicacoes")
+        .select("id, demanda_id, direcao, message_id")
+        .eq("id", reprocessar)
+        .maybeSingle();
+
+      if (errCom) return json({ error: errCom.message }, 500);
+      if (!com || com.direcao !== "entrada" || !com.message_id) {
+        return json({ error: "Comunicação não é resposta de cliente com Message-ID" }, 400);
+      }
+
+      await cliente.conectar();
+      await cliente.login();
+      await cliente.abrir(caixaNome);
+
+      const uid = await cliente.buscarUidPorMessageId(com.message_id);
+      if (!uid) return json({ error: "A mensagem não está mais na caixa", message_id: com.message_id }, 404);
+
+      const bruto = await cliente.buscarMensagem(uid);
+      if (!bruto) return json({ error: `uid ${uid}: corpo não veio` }, 502);
+
+      const { aceitos, ignorados } = selecionarAnexos(extrairAnexos(bruto));
+      if (simulacao || aceitos.length === 0) {
+        return json({ ok: true, simulacao, uid, anexos: aceitos.map((a) => a.nome), ignorados });
+      }
+
+      const r = await guardarAnexos(
+        admin,
+        { demandaId: com.demanda_id, comunicacaoId: com.id },
+        com.message_id,
+        aceitos,
+      );
+      return json({ ok: r.erro === null, uid, anexos: r.guardados, ignorados, erro: r.erro }, r.erro ? 500 : 200);
+    }
+
     const { data: estado, error: errEstado } = await admin
       .from("email_ingestao_estado")
       .select("uidvalidity, ultimo_uid")
@@ -223,20 +357,29 @@ Deno.serve(async (req) => {
       }
 
       const { cabecalhos: hCompleto, texto } = extrairTexto(bruto);
-      const resposta = removerCitacao(texto);
+      const { aceitos, ignorados } = selecionarAnexos(extrairAnexos(bruto));
+      resumo.anexos_ignorados.push(...ignorados.map((n) => `uid ${uid}: ${n}`));
+
+      let resposta = removerCitacao(texto);
 
       if (resposta.trim() === "") {
-        resumo.erros.push(`uid ${uid}: resposta sem texto aproveitável`);
-        maiorUidTratado = uid;
-        continue;
+        if (aceitos.length === 0) {
+          resumo.erros.push(`uid ${uid}: resposta sem texto aproveitável`);
+          maiorUidTratado = uid;
+          continue;
+        }
+        // Cliente mandou só o print: a resposta existe, é a imagem.
+        resposta = "(Resposta sem texto, só com anexo.)";
       }
 
       const assunto = decodificarPalavrasCodificadas(cabecalho(hCompleto, "subject") ?? "");
       const dataBruta = cabecalho(hCompleto, "date");
       const quando = dataBruta ? new Date(dataBruta) : new Date();
+      const messageId = cabecalho(hCompleto, "message-id");
 
       if (simulacao) {
         resumo.gravadas++;
+        resumo.anexos += aceitos.length;
         maiorUidTratado = uid;
         continue;
       }
@@ -249,7 +392,7 @@ Deno.serve(async (req) => {
           p_remetente_email: remetente.email,
           p_remetente_nome: remetente.nome,
           p_assunto: assunto || null,
-          p_message_id: cabecalho(hCompleto, "message-id"),
+          p_message_id: messageId,
           p_in_reply_to: cabecalho(hCompleto, "in-reply-to"),
           p_email_destinatario: alvo.email_destinatario ?? null,
           p_enviado_em: isNaN(quando.getTime()) ? new Date().toISOString() : quando.toISOString(),
@@ -265,6 +408,20 @@ Deno.serve(async (req) => {
       if (gravado?.duplicada) resumo.duplicadas++;
       else resumo.gravadas++;
       if (gravado?.confiavel === false) resumo.suspeitas++;
+
+      // O texto já está gravado; anexo que falhar vai para o ultimo_erro e
+      // pode ser refeito com ?reprocessar=<id>. Travar a fila por causa dele
+      // seria pior.
+      if (aceitos.length > 0 && gravado?.id) {
+        const r = await guardarAnexos(
+          admin,
+          { demandaId: alvo.demanda_id, comunicacaoId: gravado.id },
+          messageId ?? `${caixa.uidvalidity}:${uid}`,
+          aceitos,
+        );
+        resumo.anexos += r.guardados;
+        if (r.erro) resumo.erros.push(`uid ${uid}: anexos — ${r.erro} (comunicação ${gravado.id})`);
+      }
 
       maiorUidTratado = uid;
     }
@@ -288,7 +445,7 @@ Deno.serve(async (req) => {
     const mensagem = err instanceof Error ? err.message : String(err);
     console.error("[ler-respostas-email] CATCH:", mensagem);
 
-    if (!simulacao) {
+    if (!simulacao && !reprocessar) {
       await admin
         .from("email_ingestao_estado")
         .update({ ultima_execucao: new Date().toISOString(), ultimo_erro: mensagem.slice(0, 2000) })

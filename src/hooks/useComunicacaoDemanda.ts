@@ -23,7 +23,7 @@ export function useComunicacoesDemanda(demandaId: string | undefined) {
       const { data, error } = await supabase
         .from("demanda_comunicacoes")
         .select(
-          "id, canal, direcao, email_destinatario, telefone_destinatario, nome_destinatario, remetente_email, remetente_nome, assunto, corpo_texto, enviado_em, status, erro_detalhe",
+          "id, canal, direcao, email_destinatario, telefone_destinatario, nome_destinatario, remetente_email, remetente_nome, assunto, corpo_texto, enviado_em, status, erro_detalhe, anexos",
         )
         .eq("demanda_id", demandaId!)
         .order("enviado_em", { ascending: true });

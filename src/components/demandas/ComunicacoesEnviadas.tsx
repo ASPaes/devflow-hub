@@ -1,17 +1,27 @@
 import * as React from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   AlertCircle,
   ChevronDown,
   CornerDownLeft,
+  FileText,
   Mail,
   MessageCircle,
+  Paperclip,
   ShieldAlert,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { getAnexoUrl } from "@/lib/storage";
+import { formatBytes } from "@/lib/upload-anexos";
 import { useComunicacoesDemanda } from "@/hooks/useComunicacaoDemanda";
-import { comunicacaoFalhou, contraparte, respostaSuspeita } from "@/types/comunicacao";
-import type { ComunicacaoDemanda } from "@/types/comunicacao";
+import {
+  comunicacaoFalhou,
+  contraparte,
+  respostaSuspeita,
+  textoSemMarcadorDeImagem,
+} from "@/types/comunicacao";
+import type { AnexoComunicacao, ComunicacaoDemanda } from "@/types/comunicacao";
 
 /**
  * A conversa com o cliente nesta demanda: o que a gente mandou e o que ele
@@ -53,6 +63,9 @@ function ItemComunicacao({ mensagem }: { mensagem: ComunicacaoDemanda }) {
   const falhou = comunicacaoFalhou(mensagem);
   const suspeita = respostaSuspeita(mensagem);
   const { nome, contato } = contraparte(mensagem);
+  const anexos = mensagem.anexos ?? [];
+  const texto =
+    anexos.length > 0 ? textoSemMarcadorDeImagem(mensagem.corpo_texto) : mensagem.corpo_texto;
 
   const data = new Date(mensagem.enviado_em).toLocaleString("pt-BR", {
     day: "2-digit",
@@ -99,6 +112,16 @@ function ItemComunicacao({ mensagem }: { mensagem: ComunicacaoDemanda }) {
           </div>
         </div>
 
+        {anexos.length > 0 && (
+          <span
+            className="flex shrink-0 items-center gap-1 text-xs text-muted-foreground"
+            title={`${anexos.length} anexo${anexos.length === 1 ? "" : "s"}`}
+          >
+            <Paperclip className="h-3.5 w-3.5" />
+            {anexos.length}
+          </span>
+        )}
+
         {falhou && (
           <span className="flex shrink-0 items-center gap-1 text-xs text-destructive">
             <AlertCircle className="h-3.5 w-3.5" />
@@ -128,7 +151,15 @@ function ItemComunicacao({ mensagem }: { mensagem: ComunicacaoDemanda }) {
               <span className="font-medium">Assunto:</span> {mensagem.assunto}
             </div>
           )}
-          <p className="whitespace-pre-wrap text-sm text-foreground">{mensagem.corpo_texto}</p>
+          {texto && <p className="whitespace-pre-wrap text-sm text-foreground">{texto}</p>}
+
+          {anexos.length > 0 && (
+            <div className="flex flex-wrap gap-2 pt-1">
+              {anexos.map((a) => (
+                <AnexoDaMensagem key={a.storage_path} anexo={a} />
+              ))}
+            </div>
+          )}
 
           {falhou && mensagem.erro_detalhe && (
             <p className="rounded border border-destructive/30 bg-destructive/5 p-2 text-xs text-destructive">
@@ -145,5 +176,50 @@ function ItemComunicacao({ mensagem }: { mensagem: ComunicacaoDemanda }) {
         </div>
       )}
     </div>
+  );
+}
+
+/** Imagem aparece no lugar; o resto vira um link com nome e tamanho. Abre em outra aba. */
+function AnexoDaMensagem({ anexo }: { anexo: AnexoComunicacao }) {
+  const { data: url } = useQuery({
+    queryKey: ["anexo-url-path", anexo.storage_path],
+    queryFn: () => getAnexoUrl(anexo.storage_path),
+    staleTime: 50 * 60_000,
+  });
+
+  if (anexo.mime_type.startsWith("image/")) {
+    return (
+      <a
+        href={url}
+        target="_blank"
+        rel="noreferrer"
+        title={anexo.nome_arquivo}
+        className="block overflow-hidden rounded-md border border-border bg-background transition-colors hover:border-primary"
+      >
+        {url ? (
+          <img
+            src={url}
+            alt={anexo.nome_arquivo}
+            className="max-h-72 max-w-full object-contain"
+            loading="lazy"
+          />
+        ) : (
+          <div className="h-32 w-48 animate-pulse bg-muted" />
+        )}
+      </a>
+    );
+  }
+
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noreferrer"
+      className="flex items-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground transition-colors hover:border-primary"
+    >
+      <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
+      <span className="max-w-[16rem] truncate">{anexo.nome_arquivo}</span>
+      <span className="shrink-0 text-muted-foreground">{formatBytes(anexo.tamanho_bytes)}</span>
+    </a>
   );
 }

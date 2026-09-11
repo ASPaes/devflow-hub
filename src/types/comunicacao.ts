@@ -57,6 +57,31 @@ export interface ComunicacaoDemanda {
   enviado_em: string;
   status: string;
   erro_detalhe: string | null;
+  /** Arquivos que vieram na resposta do cliente. Nulo na saída. */
+  anexos: AnexoComunicacao[] | null;
+}
+
+/** Um arquivo da resposta do cliente, no bucket demanda-anexos. */
+export interface AnexoComunicacao {
+  storage_path: string;
+  nome_arquivo: string;
+  mime_type: string;
+  tamanho_bytes: number;
+  /** Colado no corpo do e-mail, não "anexar arquivo". */
+  inline?: boolean;
+}
+
+/**
+ * O Gmail troca a imagem colada por "[image: image.png]" no texto, e o Outlook
+ * por "[cid:image001.png@…]". Quando o arquivo veio junto e aparece embaixo,
+ * o marcador é ruído.
+ */
+export function textoSemMarcadorDeImagem(texto: string): string {
+  return texto
+    .replace(/^[ \t]*\[(?:image|imagem):[^\]\n]*\][ \t]*$/gim, "")
+    .replace(/\[cid:[^\]\n]*\]/gi, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
 }
 
 /** Só a saída pode falhar. Entrada já chegou — o que ela pode ser é suspeita. */

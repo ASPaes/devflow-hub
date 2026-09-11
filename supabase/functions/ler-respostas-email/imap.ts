@@ -118,6 +118,22 @@ export class ClienteImap {
     return resposta.get(uid) ?? null;
   }
 
+  /**
+   * UID da mensagem com esse Message-ID, ou null se ela não está mais na caixa.
+   * É o que permite reprocessar uma resposta já gravada (`?reprocessar=`),
+   * sem mexer na marca d'água.
+   */
+  async buscarUidPorMessageId(messageId: string): Promise<number | null> {
+    const linhas = await this.#comando(`UID SEARCH HEADER Message-ID ${aspas(messageId)}`);
+    for (const linha of linhas) {
+      const m = linha.match(/^\* SEARCH\b(.*)$/i);
+      if (!m) continue;
+      const uids = m[1].trim().split(/\s+/).filter(Boolean).map(Number);
+      if (uids.length > 0) return Math.max(...uids);
+    }
+    return null;
+  }
+
   // ── protocolo ──────────────────────────────────────────────────────
 
   async #uidFetch(faixa: string, itens: string): Promise<Map<number, string>> {
