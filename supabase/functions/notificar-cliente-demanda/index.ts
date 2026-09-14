@@ -13,6 +13,13 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.85.0";
 import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
 
 import { codificarAssunto } from "./assunto.ts";
+import {
+  type ContaEmail,
+  type CredenciaisEnvio,
+  credenciaisDeEnvio,
+  enderecoDeResposta,
+  ERRO_SEM_CONTA,
+} from "./conta.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -86,52 +93,39 @@ function gerarReplyToken(): string {
 }
 
 /**
- * Endereço de resposta com o token embutido: `caixa+r<token>@dominio`.
- * O cliente responde pra lá, o leitor de IMAP (ler-respostas-email) acha o
- * token e sabe de qual demanda é a resposta.
- *
- * REPLY_TO_BASE existe pra quando o remetente é um alias que ninguém lê:
- * aponte para a caixa que o leitor abre. Sem ele, usa o próprio remetente.
+ * Conta da tela Configurações › E-mail; sem ela, os Secrets SMTP_* de antes
+ * (ver conta.ts). Erro ao ler a conta não cai nos Secrets: a senha deles pode
+ * ser de outra caixa, e o envio sairia por uma conta que ninguém escolheu.
  */
-function enderecoDeResposta(token: string): string | null {
+async function carregarCredenciaisEnvio(
+  supabaseUrl: string,
+  serviceKey: string,
+): Promise<CredenciaisEnvio | { erro: string }> {
+  const admin = createClient(supabaseUrl, serviceKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+  const { data, error } = await admin.rpc("obter_conta_email_servico");
+  if (error) return { erro: `Não foi possível ler a conta de e-mail: ${error.message}` };
+
   const env = (nome: string) => (Deno.env.get(nome) ?? "").trim() || null;
-  const base = env("REPLY_TO_BASE") ?? env("SMTP_FROM") ?? env("SMTP_USER") ?? "";
-  const at = base.lastIndexOf("@");
-  if (at <= 0) return null;
-
-  const local = base.slice(0, at);
-  const dominio = base.slice(at + 1);
-  // Local part do RFC 5321 para em 64 caracteres. Estourar aqui é erro de
-  // configuração (caixa com nome enorme), não do cliente — melhor não mandar
-  // Reply-To nenhum do que mandar um endereço que quica.
-  if (local.length + 2 + token.length > 64) return null;
-
-  return `${local}+r${token}@${dominio}`;
+  return credenciaisDeEnvio((data as ContaEmail | null) ?? null, env) ?? { erro: ERRO_SEM_CONTA };
 }
 
 async function enviarEmail(
+  credenciais: CredenciaisEnvio,
   destino: string,
   assunto: string,
   corpo: string,
   responderPara: string | null,
 ): Promise<{ ok: true } | { ok: false; erro: string }> {
-  const host = Deno.env.get("SMTP_HOST");
-  const porta = Number(Deno.env.get("SMTP_PORT") ?? "587");
-  const usuario = Deno.env.get("SMTP_USER");
-  const senha = Deno.env.get("SMTP_PASS");
-  const remetente = Deno.env.get("SMTP_FROM") ?? usuario;
-  const nomeRemetente = Deno.env.get("SMTP_FROM_NAME") ?? "DoctorDev";
+  const { host, porta, tls, usuario, senha, remetente, nomeRemetente } = credenciais;
 
-  if (!host || !usuario || !senha || !remetente) {
-    return { ok: false, erro: "SMTP não configurado (SMTP_HOST/USER/PASS/FROM)" };
-  }
-
-  // 465 = TLS implícito. 587/25 = conexão limpa + STARTTLS (o denomailer faz o upgrade).
+  // tls = TLS implícito (465). Sem ele, conexão limpa + STARTTLS (o denomailer faz o upgrade).
   const client = new SMTPClient({
     connection: {
       hostname: host,
       port: porta,
-      tls: porta === 465,
+      tls,
       auth: { username: usuario, password: senha },
     },
   });
@@ -258,15 +252,20 @@ Deno.serve(async (req) => {
       // O token viaja no Reply-To e volta na resposta do cliente. Gerado antes
       // do envio porque precisa estar dentro da mensagem; gravado depois, junto
       // com o registro do envio.
+      const credenciais = await carregarCredenciaisEnvio(supabaseUrl, serviceKey);
       const replyToken = gerarReplyToken();
-      const responderPara = enderecoDeResposta(replyToken);
-      if (!responderPara) {
+      const responderPara = "erro" in credenciais
+        ? null
+        : enderecoDeResposta(replyToken, credenciais.baseResposta);
+      if (!("erro" in credenciais) && !responderPara) {
         console.warn(
-          "[notificar-cliente-demanda] sem Reply-To: REPLY_TO_BASE/SMTP_FROM inválido — a resposta do cliente não será correlacionada",
+          `[notificar-cliente-demanda] sem Reply-To: base ${credenciais.baseResposta} (${credenciais.origem}) inválida — a resposta do cliente não será correlacionada`,
         );
       }
 
-      const envio = await enviarEmail(destino, assunto, corpo, responderPara);
+      const envio = "erro" in credenciais
+        ? { ok: false as const, erro: credenciais.erro }
+        : await enviarEmail(credenciais, destino, assunto, corpo, responderPara);
 
       const { error: errReg } = await supabase.rpc("registrar_comunicacao_demanda", {
         p_demanda_id: demanda_id,

@@ -23,6 +23,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.85.0";
 
 import { ehChamadaDeServico } from "./auth.ts";
+import { type ContaEmail, credenciaisDeLeitura } from "./conta.ts";
 import { ClienteImap } from "./imap.ts";
 import {
   type AnexoEmail,
@@ -183,20 +184,30 @@ Deno.serve(async (req) => {
   const simulacao = parametros.get("dry_run") === "1";
   const reprocessar = parametros.get("reprocessar");
 
-  const host = env("IMAP_HOST") ?? "imap.gmail.com";
-  const porta = Number(env("IMAP_PORT") ?? "993");
-  const usuario = env("IMAP_USER") ?? env("SMTP_USER");
-  const senha = env("IMAP_PASS") ?? env("SMTP_PASS");
   const caixaNome = env("IMAP_MAILBOX") ?? "INBOX";
-  const nossoEndereco = (env("REPLY_TO_BASE") ?? env("SMTP_FROM") ?? usuario ?? "").toLowerCase();
-
-  if (!usuario || !senha) {
-    return json({ error: "IMAP não configurado (IMAP_USER/IMAP_PASS ou SMTP_USER/SMTP_PASS)" }, 500);
-  }
 
   const admin = createClient(supabaseUrl, serviceKey, {
     auth: { autoRefreshToken: false, persistSession: false },
   });
+
+  // Conta da tela Configurações › E-mail; sem ela, os Secrets de antes (conta.ts).
+  const { data: conta, error: errConta } = await admin.rpc("obter_conta_email_servico");
+  if (errConta) return json({ error: `Conta de e-mail: ${errConta.message}` }, 500);
+
+  const leitura = credenciaisDeLeitura((conta as ContaEmail | null) ?? null, env);
+  if (!leitura.ok) {
+    // Vai para o ultimo_erro para a tela mostrar: foi por não aparecer em lugar
+    // nenhum que a senha revogada de 13/09/2026 passou despercebida.
+    if (!simulacao && !reprocessar) {
+      await admin
+        .from("email_ingestao_estado")
+        .update({ ultima_execucao: new Date().toISOString(), ultimo_erro: leitura.motivo })
+        .eq("id", 1);
+    }
+    return json({ ok: false, error: leitura.motivo }, leitura.configurado ? 200 : 500);
+  }
+
+  const { host, porta, usuario, senha, nossoEndereco } = leitura.credenciais;
 
   const cliente = new ClienteImap({ host, porta, usuario, senha, tempoLimiteMs: 90_000 });
   const resumo = {
