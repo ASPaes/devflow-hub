@@ -27,6 +27,7 @@ import { Route as AuthenticatedDemandasKanbanRouteImport } from './routes/_authe
 import { Route as AuthenticatedDemandasExcluidasRouteImport } from './routes/_authenticated/demandas.excluidas'
 import { Route as AuthenticatedDemandasCodigoRouteImport } from './routes/_authenticated/demandas.$codigo'
 import { Route as AuthenticatedConfiguracoesTiposRouteImport } from './routes/_authenticated/configuracoes/tipos'
+import { Route as AuthenticatedConfiguracoesEmailRouteImport } from './routes/_authenticated/configuracoes/email'
 import { Route as AuthenticatedAdminUsuariosRouteImport } from './routes/_authenticated/admin/usuarios'
 import { Route as AuthenticatedAdminTenantsRouteImport } from './routes/_authenticated/admin/tenants'
 import { Route as AuthenticatedAdminSubmodulosRouteImport } from './routes/_authenticated/admin/submodulos'
@@ -131,6 +132,12 @@ const AuthenticatedConfiguracoesTiposRoute =
     path: '/configuracoes/tipos',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedConfiguracoesEmailRoute =
+  AuthenticatedConfiguracoesEmailRouteImport.update({
+    id: '/configuracoes/email',
+    path: '/configuracoes/email',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedAdminUsuariosRoute =
   AuthenticatedAdminUsuariosRouteImport.update({
     id: '/usuarios',
@@ -198,6 +205,7 @@ export interface FileRoutesByFullPath {
   '/admin/submodulos': typeof AuthenticatedAdminSubmodulosRoute
   '/admin/tenants': typeof AuthenticatedAdminTenantsRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
+  '/configuracoes/email': typeof AuthenticatedConfiguracoesEmailRoute
   '/configuracoes/tipos': typeof AuthenticatedConfiguracoesTiposRoute
   '/demandas/$codigo': typeof AuthenticatedDemandasCodigoRoute
   '/demandas/excluidas': typeof AuthenticatedDemandasExcluidasRoute
@@ -225,6 +233,7 @@ export interface FileRoutesByTo {
   '/admin/submodulos': typeof AuthenticatedAdminSubmodulosRoute
   '/admin/tenants': typeof AuthenticatedAdminTenantsRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
+  '/configuracoes/email': typeof AuthenticatedConfiguracoesEmailRoute
   '/configuracoes/tipos': typeof AuthenticatedConfiguracoesTiposRoute
   '/demandas/$codigo': typeof AuthenticatedDemandasCodigoRoute
   '/demandas/excluidas': typeof AuthenticatedDemandasExcluidasRoute
@@ -254,6 +263,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/submodulos': typeof AuthenticatedAdminSubmodulosRoute
   '/_authenticated/admin/tenants': typeof AuthenticatedAdminTenantsRoute
   '/_authenticated/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
+  '/_authenticated/configuracoes/email': typeof AuthenticatedConfiguracoesEmailRoute
   '/_authenticated/configuracoes/tipos': typeof AuthenticatedConfiguracoesTiposRoute
   '/_authenticated/demandas/$codigo': typeof AuthenticatedDemandasCodigoRoute
   '/_authenticated/demandas/excluidas': typeof AuthenticatedDemandasExcluidasRoute
@@ -283,6 +293,7 @@ export interface FileRouteTypes {
     | '/admin/submodulos'
     | '/admin/tenants'
     | '/admin/usuarios'
+    | '/configuracoes/email'
     | '/configuracoes/tipos'
     | '/demandas/$codigo'
     | '/demandas/excluidas'
@@ -310,6 +321,7 @@ export interface FileRouteTypes {
     | '/admin/submodulos'
     | '/admin/tenants'
     | '/admin/usuarios'
+    | '/configuracoes/email'
     | '/configuracoes/tipos'
     | '/demandas/$codigo'
     | '/demandas/excluidas'
@@ -338,6 +350,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/submodulos'
     | '/_authenticated/admin/tenants'
     | '/_authenticated/admin/usuarios'
+    | '/_authenticated/configuracoes/email'
     | '/_authenticated/configuracoes/tipos'
     | '/_authenticated/demandas/$codigo'
     | '/_authenticated/demandas/excluidas'
@@ -484,6 +497,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedConfiguracoesTiposRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/configuracoes/email': {
+      id: '/_authenticated/configuracoes/email'
+      path: '/configuracoes/email'
+      fullPath: '/configuracoes/email'
+      preLoaderRoute: typeof AuthenticatedConfiguracoesEmailRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/admin/usuarios': {
       id: '/_authenticated/admin/usuarios'
       path: '/usuarios'
@@ -574,6 +594,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedRascunhosRoute: typeof AuthenticatedRascunhosRoute
   AuthenticatedReleasesRoute: typeof AuthenticatedReleasesRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedConfiguracoesEmailRoute: typeof AuthenticatedConfiguracoesEmailRoute
   AuthenticatedConfiguracoesTiposRoute: typeof AuthenticatedConfiguracoesTiposRoute
   AuthenticatedDemandasCodigoRoute: typeof AuthenticatedDemandasCodigoRoute
   AuthenticatedDemandasExcluidasRoute: typeof AuthenticatedDemandasExcluidasRoute
@@ -588,6 +609,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedRascunhosRoute: AuthenticatedRascunhosRoute,
   AuthenticatedReleasesRoute: AuthenticatedReleasesRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedConfiguracoesEmailRoute: AuthenticatedConfiguracoesEmailRoute,
   AuthenticatedConfiguracoesTiposRoute: AuthenticatedConfiguracoesTiposRoute,
   AuthenticatedDemandasCodigoRoute: AuthenticatedDemandasCodigoRoute,
   AuthenticatedDemandasExcluidasRoute: AuthenticatedDemandasExcluidasRoute,

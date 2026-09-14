@@ -8,6 +8,7 @@ import {
   Layers,
   LayoutDashboard,
   LogOut,
+  Mail,
   Network,
   NotebookPen,
   Package2,
@@ -160,6 +161,10 @@ export function Sidebar() {
                   icon={Tags}
                   label="Tipos"
                 />
+              )}
+              {/* admin = mesma regra da salvar_conta_email e do isAdminPerfil */}
+              {temPermissao("gerenciar_usuarios") && temPermissao("gerenciar_perfis_acesso") && (
+                <NavItem to="/configuracoes/email" icon={Mail} label="E-mail" />
               )}
               {temPermissao("gerenciar_usuarios") && (
                 <NavItem to="/admin/usuarios" icon={Users} label="Usuários" />
