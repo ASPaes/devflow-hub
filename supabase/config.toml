@@ -12,6 +12,10 @@ verify_jwt = true
 [functions.latest-release]
 verify_jwt = false
 
+# Feed da aba "Evolução DS" dentro do DoctorSaaS. Público como a latest-release.
+[functions.releases-feed]
+verify_jwt = false
+
 # Chamada pelo front com o JWT do usuário (valida permissão no servidor)
 [functions.disparar-agente]
 verify_jwt = true
