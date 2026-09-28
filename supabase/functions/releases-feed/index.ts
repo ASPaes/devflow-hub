@@ -97,6 +97,19 @@ Deno.serve(async (req) => {
     const moduloNome = new Map((modulos ?? []).map((m: { id: string; nome: string }) => [m.id, m.nome]));
     const tenantsDoCliente = new Set((tenants ?? []).map((t: { id: string }) => t.id));
 
+    // Conteúdo da novidade (vídeo, passo a passo com print, para que serve), gravado
+    // pelo /novidade do DoctorSaaS. Poucas releases têm, então vem numa query só.
+    type Extra = {
+      id: string; video_url: string | null; passo_a_passo: unknown;
+      para_que_serve: string[] | null; destaque: boolean;
+    };
+    const { data: extras, error: extrasErr } = await supabase
+      .from("releases")
+      .select("id, video_url, passo_a_passo, para_que_serve, destaque")
+      .or("video_url.not.is.null,passo_a_passo.not.is.null,para_que_serve.not.is.null,destaque.eq.true");
+    if (extrasErr) throw extrasErr;
+    const extraPorId = new Map(((extras ?? []) as Extra[]).map((e) => [e.id, e]));
+
     const itens = releases.flatMap((r) => {
       const tipo = TIPOS[r.tipo_codigo ?? ""];
       const dem = r.demanda_id ? demPorId.get(r.demanda_id) : undefined;
@@ -111,6 +124,10 @@ Deno.serve(async (req) => {
         modulo: dem.modulo_id ? moduloNome.get(dem.modulo_id) ?? null : null,
         publicado_em: publicado,
         pedido_pela_sua_empresa: !!dem.tenant_id && tenantsDoCliente.has(dem.tenant_id),
+        video_url: extraPorId.get(r.id)?.video_url ?? null,
+        passo_a_passo: Array.isArray(extraPorId.get(r.id)?.passo_a_passo) ? extraPorId.get(r.id)!.passo_a_passo : null,
+        para_que_serve: extraPorId.get(r.id)?.para_que_serve ?? null,
+        destaque: extraPorId.get(r.id)?.destaque ?? false,
       }];
     });
 
