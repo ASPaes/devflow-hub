@@ -20,6 +20,13 @@ import {
   enderecoDeResposta,
   ERRO_SEM_CONTA,
 } from "./conta.ts";
+import {
+  assuntoComCodigo,
+  linkDaDemanda,
+  rodapeHtml,
+  rodapeTexto,
+  rodapeWhatsApp,
+} from "./rodape.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -117,6 +124,7 @@ async function enviarEmail(
   assunto: string,
   corpo: string,
   responderPara: string | null,
+  rodape: { texto: string; html: string } | null,
 ): Promise<{ ok: true } | { ok: false; erro: string }> {
   const { host, porta, tls, usuario, senha, remetente, nomeRemetente } = credenciais;
 
@@ -138,8 +146,8 @@ async function enviarEmail(
       // mesmo problema de encoded-word que o assunto já teve.
       ...(responderPara ? { replyTo: responderPara } : {}),
       subject: codificarAssunto(assunto),
-      content: corpo,
-      html: textoParaHtml(corpo),
+      content: corpo + (rodape?.texto ?? ""),
+      html: textoParaHtml(corpo) + (rodape?.html ?? ""),
     });
     return { ok: true };
   } catch (e: any) {
@@ -245,9 +253,18 @@ Deno.serve(async (req) => {
       const destino = String(body.email ?? ctx?.solicitante?.email ?? "").trim();
       if (!destino) return json({ error: "Solicitante sem e-mail cadastrado" }, 422);
 
-      const assunto =
-        assuntoInformado ||
-        `Atualização da sua solicitação${codigoDemanda ? ` (${codigoDemanda})` : ""}`;
+      // Código no assunto e rodapé com o link saem sempre, mesmo que o agente
+      // tenha apagado do texto. O corpo gravado na demanda fica sem o rodapé.
+      const assunto = assuntoComCodigo(
+        assuntoInformado || "Atualização da sua solicitação",
+        codigoDemanda,
+      );
+      const link = codigoDemanda
+        ? linkDaDemanda(codigoDemanda, Deno.env.get("DOCTORDEV_APP_URL"))
+        : null;
+      const rodape = codigoDemanda && link
+        ? { texto: rodapeTexto(codigoDemanda, link), html: rodapeHtml(codigoDemanda, link) }
+        : null;
 
       // O token viaja no Reply-To e volta na resposta do cliente. Gerado antes
       // do envio porque precisa estar dentro da mensagem; gravado depois, junto
@@ -265,7 +282,7 @@ Deno.serve(async (req) => {
 
       const envio = "erro" in credenciais
         ? { ok: false as const, erro: credenciais.erro }
-        : await enviarEmail(credenciais, destino, assunto, corpo, responderPara);
+        : await enviarEmail(credenciais, destino, assunto, corpo, responderPara, rodape);
 
       const { error: errReg } = await supabase.rpc("registrar_comunicacao_demanda", {
         p_demanda_id: demanda_id,
@@ -294,7 +311,14 @@ Deno.serve(async (req) => {
       );
     }
 
-    const envio = await enviarWhatsApp(telefone, corpo, codigoDemanda);
+    // Mesmo rodapé do e-mail (código + link); o corpo gravado na demanda fica sem ele.
+    const rodapeWa = codigoDemanda
+      ? rodapeWhatsApp(
+        codigoDemanda,
+        linkDaDemanda(codigoDemanda, Deno.env.get("DOCTORDEV_APP_URL")),
+      )
+      : "";
+    const envio = await enviarWhatsApp(telefone, corpo + rodapeWa, codigoDemanda);
 
     const { error: errReg } = await supabase.rpc("registrar_comunicacao_demanda", {
       p_demanda_id: demanda_id,

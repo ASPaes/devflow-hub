@@ -1,5 +1,14 @@
 import * as React from "react";
-import { AlertTriangle, Check, Loader2, Mail, MessageCircle, Send, Sparkles } from "lucide-react";
+import {
+  AlertTriangle,
+  Check,
+  Link2,
+  Loader2,
+  Mail,
+  MessageCircle,
+  Send,
+  Sparkles,
+} from "lucide-react";
 
 import {
   Dialog,
@@ -68,6 +77,8 @@ export function ComunicarClienteDialog({
   const corpo = canal === "email" ? corpoEmail : corpoWhats;
   const setCorpo = canal === "email" ? setCorpoEmail : setCorpoWhats;
 
+  // Mesmo endereço que o notificar-cliente-demanda põe no rodapé (rodape.ts)
+  const linkDemanda = `https://doctordev.lovable.app/demandas/${demandaCodigo}`;
   const email = dados?.solicitante?.email ?? "";
   const semRetorno = (dados?.retornos?.length ?? 0) === 0;
   const telefoneDigitos = telefone.replace(/\D/g, "");
@@ -172,6 +183,12 @@ export function ComunicarClienteDialog({
                     placeholder="Assunto do e-mail"
                     maxLength={120}
                   />
+                  {assunto.trim() &&
+                    !assunto.toUpperCase().includes(demandaCodigo.toUpperCase()) && (
+                      <p className="text-xs text-muted-foreground">
+                        Sai como: {assunto.trim()} ({demandaCodigo})
+                      </p>
+                    )}
                 </div>
               </TabsContent>
 
@@ -217,6 +234,20 @@ export function ComunicarClienteDialog({
                 A IA sugere a partir dos pareceres registrados. Revise antes de enviar — o texto vai
                 exatamente como está aqui.
               </p>
+              <div className="flex items-start gap-2 rounded-md border border-border bg-muted/30 p-2.5 text-xs text-muted-foreground">
+                <Link2 className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                {canal === "email" ? (
+                  <span>
+                    Vai junto no fim do e-mail: <strong>Demanda {demandaCodigo}</strong> e o botão{" "}
+                    <strong>Acompanhar a demanda</strong> ({linkDemanda}).
+                  </span>
+                ) : (
+                  <span>
+                    Vai junto no fim da mensagem: <strong>Demanda {demandaCodigo}</strong> e o link{" "}
+                    {linkDemanda}.
+                  </span>
+                )}
+              </div>
             </div>
 
             {dados && dados.envios.length > 0 && (
