@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Link2, MessageSquare, Paperclip, Undo2 } from "lucide-react";
+import { Eye, Link2, MessageSquare, Paperclip, Undo2 } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { TenantLogo } from "@/components/ui/TenantLogo";
@@ -25,6 +25,8 @@ interface DemandasTableProps {
   rows: DemandaListaRow[];
   isLoading?: boolean;
   onRowClick?: (row: DemandaListaRow) => void;
+  /** Olhinho: abre a pré-visualização sem entrar na demanda. */
+  onRowPreview?: (row: DemandaListaRow) => void;
   sort?: SortConfig;
   onSortChange?: (next: SortConfig | undefined) => void;
 }
@@ -33,6 +35,7 @@ export function DemandasTable({
   rows,
   isLoading,
   onRowClick,
+  onRowPreview,
   sort,
   onSortChange,
 }: DemandasTableProps) {
@@ -77,7 +80,12 @@ export function DemandasTable({
         </thead>
         <tbody className="divide-y divide-border">
           {rows.map((row) => (
-            <DemandaRow key={row.id ?? row.codigo} row={row} onClick={onRowClick} />
+            <DemandaRow
+              key={row.id ?? row.codigo}
+              row={row}
+              onClick={onRowClick}
+              onPreview={onRowPreview}
+            />
           ))}
         </tbody>
       </table>
@@ -88,9 +96,10 @@ export function DemandasTable({
 interface DemandaRowProps {
   row: DemandaListaRow;
   onClick?: (row: DemandaListaRow) => void;
+  onPreview?: (row: DemandaListaRow) => void;
 }
 
-function DemandaRow({ row, onClick }: DemandaRowProps) {
+function DemandaRow({ row, onClick, onPreview }: DemandaRowProps) {
   const handleClick = React.useCallback(() => {
     onClick?.(row);
   }, [onClick, row]);
@@ -115,10 +124,27 @@ function DemandaRow({ row, onClick }: DemandaRowProps) {
       onKeyDown={handleKey}
       className="cursor-pointer outline-none transition-colors hover:bg-secondary/30 focus-visible:bg-secondary/30"
     >
-      <td className="px-4 py-3 align-middle">
-        <span className="font-mono text-xs text-muted-foreground">
-          {row.codigo}
-        </span>
+      <td className="whitespace-nowrap px-4 py-3 align-middle">
+        <div className="flex items-center gap-1.5">
+          <span className="font-mono text-xs text-muted-foreground">
+            {row.codigo}
+          </span>
+          {onPreview && (
+            <button
+              type="button"
+              title="Pré-visualizar"
+              aria-label={`Pré-visualizar ${row.codigo ?? "demanda"}`}
+              onKeyDown={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation();
+                onPreview(row);
+              }}
+              className="rounded p-1 text-muted-foreground transition-colors hover:bg-primary/15 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <Eye className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
       </td>
       <td className="max-w-md px-4 py-3 align-middle">
         <div className="flex items-center gap-2">

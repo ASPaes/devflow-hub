@@ -17,6 +17,7 @@ import {
   type StatusDemanda,
 } from "@/hooks/useDemandas";
 import { DemandasTable } from "@/components/demandas/DemandasTable";
+import { DemandaPreviewDialog } from "@/components/demandas/DemandaPreviewDialog";
 import { ViewToggle } from "@/components/demandas/ViewToggle";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useDashboardFilters } from "@/contexts/DashboardFiltersContext";
@@ -39,6 +40,7 @@ function DemandasListagem() {
   const navigate = useNavigate({ from: "/demandas/" });
   const { temPermissao } = useProfile();
   useDocumentTitle("Demandas");
+  const [previewCodigo, setPreviewCodigo] = React.useState<string | null>(null);
 
   const {
     periodo,
@@ -254,6 +256,11 @@ function DemandasListagem() {
                 });
               }
             }}
+            onRowPreview={(row) => row.codigo && setPreviewCodigo(row.codigo)}
+          />
+          <DemandaPreviewDialog
+            codigo={previewCodigo}
+            onClose={() => setPreviewCodigo(null)}
           />
           {!isLoading && (
             <div className="mt-3 text-xs text-muted-foreground">

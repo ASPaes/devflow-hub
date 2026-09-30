@@ -24,6 +24,7 @@ import {
   KanbanBoard,
   STATUS_NO_BOARD,
 } from "@/components/demandas/KanbanBoard";
+import { DemandaPreviewDialog } from "@/components/demandas/DemandaPreviewDialog";
 import { useDashboardFilters } from "@/contexts/DashboardFiltersContext";
 import { useTenants } from "@/hooks/useTenants";
 import {
@@ -59,6 +60,7 @@ function KanbanPage() {
   const navigate = useNavigate({ from: "/demandas/kanban" });
   const { temPermissao } = useProfile();
   useDocumentTitle("Kanban");
+  const [previewCodigo, setPreviewCodigo] = React.useState<string | null>(null);
 
   const {
     filtros: filtrosCompartilhados,
@@ -205,6 +207,12 @@ function KanbanPage() {
             });
           }
         }}
+        onCardPreview={(row) => row.codigo && setPreviewCodigo(row.codigo)}
+      />
+
+      <DemandaPreviewDialog
+        codigo={previewCodigo}
+        onClose={() => setPreviewCodigo(null)}
       />
     </div>
   );

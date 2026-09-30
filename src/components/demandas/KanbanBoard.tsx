@@ -85,16 +85,19 @@ interface KanbanBoardProps {
   rows: DemandaListaRow[];
   isLoading?: boolean;
   onCardClick?: (row: DemandaListaRow) => void;
+  onCardPreview?: (row: DemandaListaRow) => void;
 }
 
 function SortableCard({
   row,
   podeMover,
   onCardClick,
+  onCardPreview,
 }: {
   row: DemandaListaRow;
   podeMover: boolean;
   onCardClick?: (row: DemandaListaRow) => void;
+  onCardPreview?: (row: DemandaListaRow) => void;
 }) {
   const id = row.id ?? row.codigo ?? "";
   const {
@@ -126,7 +129,7 @@ function SortableCard({
       {...listeners}
       {...attributes}
     >
-      <KanbanCard row={row} onClick={onCardClick} />
+      <KanbanCard row={row} onClick={onCardClick} onPreview={onCardPreview} />
     </div>
   );
 }
@@ -148,12 +151,14 @@ function ColunaDroppable({
   isLoading,
   podeMover,
   onCardClick,
+  onCardPreview,
 }: {
   col: (typeof COLUNAS)[number];
   items: DemandaListaRow[];
   isLoading?: boolean;
   podeMover: boolean;
   onCardClick?: (row: DemandaListaRow) => void;
+  onCardPreview?: (row: DemandaListaRow) => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({
     id: col.key,
@@ -242,6 +247,7 @@ function ColunaDroppable({
                 row={row}
                 podeMover={podeMover}
                 onCardClick={onCardClick}
+                onCardPreview={onCardPreview}
               />
             ))
           )}
@@ -273,7 +279,7 @@ function statusToColuna(s: StatusDemanda): ColunaStatus | null {
 }
 
 
-export function KanbanBoard({ rows, isLoading, onCardClick }: KanbanBoardProps) {
+export function KanbanBoard({ rows, isLoading, onCardClick, onCardPreview }: KanbanBoardProps) {
   const { temPermissao } = useProfile();
   const podeMover = temPermissao("editar_qualquer_demanda");
   const podeGerenciarReleases = temPermissao("gerenciar_releases");
@@ -498,6 +504,7 @@ export function KanbanBoard({ rows, isLoading, onCardClick }: KanbanBoardProps) 
             isLoading={isLoading}
             podeMover={podeMover}
             onCardClick={onCardClick}
+            onCardPreview={onCardPreview}
           />
         ))}
       </div>

@@ -1,9 +1,10 @@
 import * as React from "react";
-import { Link2, MessageSquare, Paperclip, Undo2 } from "lucide-react";
+import { CalendarDays, Eye, Link2, MessageSquare, Paperclip, Undo2 } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { TenantLogo } from "@/components/ui/TenantLogo";
 import { cn, initials } from "@/lib/utils";
+import { formatDateSP } from "@/lib/format";
 import {
   PRIORIDADE_LABEL_CURTA,
   type DemandaListaRow,
@@ -15,9 +16,11 @@ import { TipoBadge } from "@/components/demandas/TipoBadge";
 interface KanbanCardProps {
   row: DemandaListaRow;
   onClick?: (row: DemandaListaRow) => void;
+  /** Olhinho: abre a pré-visualização sem entrar na demanda. */
+  onPreview?: (row: DemandaListaRow) => void;
 }
 
-export function KanbanCard({ row, onClick }: KanbanCardProps) {
+export function KanbanCard({ row, onClick, onPreview }: KanbanCardProps) {
   const handleClick = React.useCallback(() => onClick?.(row), [onClick, row]);
   const handleKey = React.useCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -114,23 +117,36 @@ export function KanbanCard({ row, onClick }: KanbanCardProps) {
 
       {/* Rodapé: solicitante, empresa, dev + contadores */}
       <div className="mt-3 space-y-2 border-t border-border pt-2">
-        {/* Solicitante */}
-        {row.solicitante_id && (
-          <div className="flex items-center gap-1.5 text-xs">
-            <span className="shrink-0 text-muted-foreground">Aberto por:</span>
-            <Avatar className="h-4 w-4">
-              {row.solicitante_avatar && (
-                <AvatarImage src={row.solicitante_avatar} alt="" />
-              )}
-              <AvatarFallback className="bg-secondary text-[8px] font-medium text-muted-foreground">
-                {initials(row.solicitante_nome ?? "")}
-              </AvatarFallback>
-            </Avatar>
-            <span className="truncate text-foreground">
-              {row.solicitante_nome}
-            </span>
+        {/* Solicitante + data de abertura */}
+        <div className="flex items-center justify-between gap-2 text-xs">
+          <div className="flex min-w-0 items-center gap-1.5">
+            {row.solicitante_id && (
+              <>
+                <span className="shrink-0 text-muted-foreground">Aberto por:</span>
+                <Avatar className="h-4 w-4">
+                  {row.solicitante_avatar && (
+                    <AvatarImage src={row.solicitante_avatar} alt="" />
+                  )}
+                  <AvatarFallback className="bg-secondary text-[8px] font-medium text-muted-foreground">
+                    {initials(row.solicitante_nome ?? "")}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="truncate text-foreground">
+                  {row.solicitante_nome}
+                </span>
+              </>
+            )}
           </div>
-        )}
+          {row.created_at && (
+            <span
+              className="inline-flex shrink-0 items-center gap-1 text-muted-foreground"
+              title="Data de abertura"
+            >
+              <CalendarDays className="h-3 w-3" />
+              {formatDateSP(row.created_at)}
+            </span>
+          )}
+        </div>
 
 
         {/* Dev + contadores */}
@@ -158,28 +174,43 @@ export function KanbanCard({ row, onClick }: KanbanCardProps) {
             )}
           </div>
 
-          {(totalC > 0 || totalA > 0 || totalV > 0) && (
-            <div className="flex shrink-0 items-center gap-2 text-muted-foreground">
-              {totalC > 0 && (
-                <span className="inline-flex items-center gap-0.5">
-                  <MessageSquare className="h-3 w-3" />
-                  {totalC}
-                </span>
-              )}
-              {totalA > 0 && (
-                <span className="inline-flex items-center gap-0.5">
-                  <Paperclip className="h-3 w-3" />
-                  {totalA}
-                </span>
-              )}
-              {totalV > 0 && (
-                <span className="inline-flex items-center gap-0.5">
-                  <Link2 className="h-3 w-3" />
-                  {totalV}
-                </span>
-              )}
-            </div>
-          )}
+          <div className="flex shrink-0 items-center gap-2 text-muted-foreground">
+            {totalC > 0 && (
+              <span className="inline-flex items-center gap-0.5">
+                <MessageSquare className="h-3 w-3" />
+                {totalC}
+              </span>
+            )}
+            {totalA > 0 && (
+              <span className="inline-flex items-center gap-0.5">
+                <Paperclip className="h-3 w-3" />
+                {totalA}
+              </span>
+            )}
+            {totalV > 0 && (
+              <span className="inline-flex items-center gap-0.5">
+                <Link2 className="h-3 w-3" />
+                {totalV}
+              </span>
+            )}
+            {onPreview && (
+              <button
+                type="button"
+                title="Pré-visualizar"
+                aria-label={`Pré-visualizar ${row.codigo ?? "demanda"}`}
+                // Não deixa o clique abrir a demanda nem começar o arrastar
+                onPointerDown={(e) => e.stopPropagation()}
+                onKeyDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onPreview(row);
+                }}
+                className="-m-1 rounded p-1 transition-colors hover:bg-primary/15 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <Eye className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>
