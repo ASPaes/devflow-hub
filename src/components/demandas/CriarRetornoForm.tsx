@@ -20,6 +20,16 @@ export function CriarRetornoForm({ demandaId }: { demandaId: string }) {
   const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
   const inputImagemRef = React.useRef<HTMLInputElement>(null);
   const inputVideoRef = React.useRef<HTMLInputElement>(null);
+  const textoRef = React.useRef<HTMLTextAreaElement>(null);
+
+  // Campo cresce com o texto até ~60% da tela; passou disso, rola.
+  React.useLayoutEffect(() => {
+    const el = textoRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    const max = Math.round(window.innerHeight * 0.6);
+    el.style.height = `${Math.min(el.scrollHeight + 2, max)}px`;
+  }, [texto]);
 
   const limparMidia = React.useCallback(() => {
     if (previewUrl) {
@@ -172,11 +182,12 @@ export function CriarRetornoForm({ demandaId }: { demandaId: string }) {
       )}
 
       <Textarea
+        ref={textoRef}
         value={texto}
         onChange={(e) => setTexto(e.target.value)}
         placeholder="Descreva o que está sendo entregue ou explique a mídia..."
         rows={3}
-        className="resize-none"
+        className="resize-none overflow-y-auto"
       />
 
       <div className="flex flex-wrap items-center gap-2">
