@@ -433,8 +433,20 @@ export function extrairEndereco(valor: string | null): { nome: string | null; em
   return { nome: null, email: solto ? solto[0].toLowerCase() : null };
 }
 
-/** Acha o `+r<16 hex>` que o envio plantou no Reply-To. */
+/**
+ * Acha o token que o envio plantou: no Message-ID (`<demanda.r<16 hex>@…>`,
+ * que volta no In-Reply-To/References) ou, no formato até 14/10/2026, no
+ * endereço (`caixa+r<16 hex>@…`).
+ */
 export function extrairReplyToken(h: Cabecalhos): string | null {
+  // In-Reply-To primeiro: é a mensagem que o cliente respondeu de fato. No
+  // References a mais recente é a última da lista.
+  for (const nome of ["in-reply-to", "references"]) {
+    const ids = cabecalhos(h, nome).join(" ").match(/<demanda\.r[0-9a-f]{16}@[^>\s]+>/gi) ?? [];
+    const id = nome === "references" ? ids[ids.length - 1] : ids[0];
+    if (id) return id.slice("<demanda.r".length, "<demanda.r".length + 16).toLowerCase();
+  }
+
   const candidatos = [
     ...cabecalhos(h, "to"),
     ...cabecalhos(h, "cc"),

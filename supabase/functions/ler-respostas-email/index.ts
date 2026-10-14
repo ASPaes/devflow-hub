@@ -2,10 +2,14 @@
 // mandou por e-mail.
 //
 // Como a resposta encontra a demanda: o envio (notificar-cliente-demanda)
-// coloca `Reply-To: caixa+r<token>@dominio` e guarda o token na linha do envio.
-// O cliente responde, o token volta no `To:`, e aqui ele vira demanda_id.
-// Não depende do código da demanda (que é adivinhável) nem de Message-ID (que o
-// Gmail reescreve na saída).
+// coloca `Message-ID: <demanda.r<token>@dominio>` e guarda o token na linha do
+// envio. O cliente responde, o token volta no In-Reply-To/References, e aqui
+// ele vira demanda_id. Não depende do código da demanda (que é adivinhável).
+//
+// Até 14/10/2026 o token ia no endereço (`Reply-To: caixa+r<token>@dominio`),
+// porque o Gmail reescrevia o Message-ID na saída. A conta foi para a
+// Hostinger, que não aceita o "+" e devolvia toda resposta. O `+r` no To
+// continua sendo lido para o que ainda chegar desse jeito.
 //
 // Regras de convivência com uma caixa de gente:
 //   • abre em EXAMINE (leitura) — nada é marcado como lido;
@@ -78,6 +82,7 @@ const CAMPOS_DE_TRIAGEM = [
   "DATE",
   "MESSAGE-ID",
   "IN-REPLY-TO",
+  "REFERENCES",
   "AUTO-SUBMITTED",
   "PRECEDENCE",
   "RETURN-PATH",

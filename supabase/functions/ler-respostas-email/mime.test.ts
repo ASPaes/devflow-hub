@@ -229,6 +229,40 @@ describe("token do Reply-To", () => {
   });
 });
 
+describe("token no Message-ID (desde 14/10/2026)", () => {
+  it("acha no In-Reply-To com o To limpo", () => {
+    const h = parseCabecalhos(
+      juntar("To: dev@doctorsaas.com.br", "In-Reply-To: <demanda.r4dd488004654f671@doctorsaas.com.br>"),
+    );
+    expect(extrairReplyToken(h)).toBe("4dd488004654f671");
+  });
+
+  it("acha no References dobrado e pega o envio mais recente", () => {
+    const h = parseCabecalhos(
+      juntar(
+        "References: <CAxyz@mail.gmail.com> <demanda.r0000000000000001@doctorsaas.com.br>",
+        " <demanda.rAABBCCDDEEFF0011@doctorsaas.com.br>",
+      ),
+    );
+    expect(extrairReplyToken(h)).toBe("aabbccddeeff0011");
+  });
+
+  it("In-Reply-To vence o References", () => {
+    const h = parseCabecalhos(
+      juntar(
+        "In-Reply-To: <demanda.r1111111111111111@doctorsaas.com.br>",
+        "References: <demanda.r2222222222222222@doctorsaas.com.br>",
+      ),
+    );
+    expect(extrairReplyToken(h)).toBe("1111111111111111");
+  });
+
+  it("ignora Message-ID que não é nosso", () => {
+    const h = parseCabecalhos("In-Reply-To: <CAH+r0a1b2c3d4e5f6789@mail.gmail.com>");
+    expect(extrairReplyToken(h)).toBeNull();
+  });
+});
+
 describe("remetente", () => {
   it("separa nome e e-mail", () => {
     expect(extrairEndereco('"Silva, João" <Joao.Silva@Empresa.com.BR>')).toEqual({

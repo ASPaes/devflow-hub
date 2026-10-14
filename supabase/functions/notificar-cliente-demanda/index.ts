@@ -17,8 +17,8 @@ import {
   type ContaEmail,
   type CredenciaisEnvio,
   credenciaisDeEnvio,
-  enderecoDeResposta,
   ERRO_SEM_CONTA,
+  messageIdDaMensagem,
 } from "./conta.ts";
 import {
   assuntoComCodigo,
@@ -91,8 +91,8 @@ async function assinar(payloadB64: string, segredo: string): Promise<string> {
   return btoa(String.fromCharCode(...new Uint8Array(sig)));
 }
 
-/** 64 bits de aleatório em hex. Vai dentro do endereço de resposta, então só
- * pode usar caractere que sobrevive a qualquer servidor de e-mail. */
+/** 64 bits de aleatório em hex. Vai dentro do Message-ID, então só pode usar
+ * caractere que sobrevive a qualquer servidor de e-mail. */
 function gerarReplyToken(): string {
   const bytes = new Uint8Array(8);
   crypto.getRandomValues(bytes);
@@ -123,7 +123,8 @@ async function enviarEmail(
   destino: string,
   assunto: string,
   corpo: string,
-  responderPara: string | null,
+  responderPara: string,
+  messageId: string | null,
   rodape: { texto: string; html: string } | null,
 ): Promise<{ ok: true } | { ok: false; erro: string }> {
   const { host, porta, tls, usuario, senha, remetente, nomeRemetente } = credenciais;
@@ -144,7 +145,10 @@ async function enviarEmail(
       to: destino,
       // Endereço puro, sem nome de exibição: nome com acento aqui cairia no
       // mesmo problema de encoded-word que o assunto já teve.
-      ...(responderPara ? { replyTo: responderPara } : {}),
+      replyTo: responderPara,
+      // O denomailer não escreve Message-ID; sem este, o servidor SMTP cria um
+      // e o token não volta na resposta.
+      ...(messageId ? { headers: { "Message-ID": messageId } } : {}),
       subject: codificarAssunto(assunto),
       content: corpo + (rodape?.texto ?? ""),
       html: textoParaHtml(corpo) + (rodape?.html ?? ""),
@@ -266,23 +270,23 @@ Deno.serve(async (req) => {
         ? { texto: rodapeTexto(codigoDemanda, link), html: rodapeHtml(codigoDemanda, link) }
         : null;
 
-      // O token viaja no Reply-To e volta na resposta do cliente. Gerado antes
-      // do envio porque precisa estar dentro da mensagem; gravado depois, junto
-      // com o registro do envio.
+      // O token viaja no Message-ID e volta no In-Reply-To/References da
+      // resposta do cliente. Gerado antes do envio porque precisa estar dentro
+      // da mensagem; gravado depois, junto com o registro do envio.
       const credenciais = await carregarCredenciaisEnvio(supabaseUrl, serviceKey);
       const replyToken = gerarReplyToken();
-      const responderPara = "erro" in credenciais
+      const messageId = "erro" in credenciais
         ? null
-        : enderecoDeResposta(replyToken, credenciais.baseResposta);
-      if (!("erro" in credenciais) && !responderPara) {
+        : messageIdDaMensagem(replyToken, credenciais.baseResposta);
+      if (!("erro" in credenciais) && !messageId) {
         console.warn(
-          `[notificar-cliente-demanda] sem Reply-To: base ${credenciais.baseResposta} (${credenciais.origem}) inválida — a resposta do cliente não será correlacionada`,
+          `[notificar-cliente-demanda] sem Message-ID: base ${credenciais.baseResposta} (${credenciais.origem}) inválida — a resposta do cliente não será correlacionada`,
         );
       }
 
       const envio = "erro" in credenciais
         ? { ok: false as const, erro: credenciais.erro }
-        : await enviarEmail(credenciais, destino, assunto, corpo, responderPara, rodape);
+        : await enviarEmail(credenciais, destino, assunto, corpo, credenciais.baseResposta, messageId, rodape);
 
       const { error: errReg } = await supabase.rpc("registrar_comunicacao_demanda", {
         p_demanda_id: demanda_id,
@@ -293,7 +297,7 @@ Deno.serve(async (req) => {
         p_assunto: assunto,
         p_status: envio.ok ? "enviado" : "falha",
         p_erro_detalhe: envio.ok ? null : envio.erro,
-        p_reply_token: responderPara ? replyToken : null,
+        p_reply_token: messageId ? replyToken : null,
       });
       if (errReg) console.error("[notificar-cliente-demanda] registro falhou:", errReg);
 

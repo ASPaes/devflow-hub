@@ -31,7 +31,7 @@ export interface CredenciaisEnvio {
   senha: string;
   remetente: string;
   nomeRemetente: string;
-  /** caixa onde o cliente responde; o token entra como caixa+r<token>@dominio */
+  /** caixa onde o cliente responde (Reply-To); o token vai no Message-ID */
   baseResposta: string;
 }
 
@@ -77,20 +77,19 @@ export function credenciaisDeEnvio(
 }
 
 /**
- * Endereço de resposta com o token embutido: `caixa+r<token>@dominio`.
- * O cliente responde pra lá, o leitor de IMAP acha o token e sabe de qual
- * demanda é a resposta.
+ * Message-ID com o token embutido: `<demanda.r<token>@dominio>`.
+ *
+ * O cliente responde para a própria caixa (Reply-To puro) e o programa de
+ * e-mail dele devolve este Message-ID no In-Reply-To/References da resposta;
+ * é por ali que o leitor acha a demanda.
+ *
+ * Até 14/10/2026 o token ia no endereço (`caixa+r<token>@dominio`). O Gmail
+ * entrega o "+", a Hostinger não: desde a troca da conta, em 15/09/2026, toda
+ * resposta voltava como "endereço não encontrado" (146 envios, 0 respostas).
+ * O Message-ID não depende do provedor aceitar subendereço.
  */
-export function enderecoDeResposta(token: string, base: string): string | null {
+export function messageIdDaMensagem(token: string, base: string): string | null {
   const at = base.lastIndexOf("@");
-  if (at <= 0) return null;
-
-  const local = base.slice(0, at);
-  const dominio = base.slice(at + 1);
-  // Local part do RFC 5321 para em 64 caracteres. Estourar aqui é erro de
-  // configuração (caixa com nome enorme), não do cliente — melhor não mandar
-  // Reply-To nenhum do que mandar um endereço que quica.
-  if (local.length + 2 + token.length > 64) return null;
-
-  return `${local}+r${token}@${dominio}`;
+  if (at <= 0 || at === base.length - 1) return null;
+  return `<demanda.r${token}@${base.slice(at + 1)}>`;
 }

@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from "bun:test";
 
-import { type ContaEmail, credenciaisDeEnvio, enderecoDeResposta } from "./conta.ts";
+import { type ContaEmail, credenciaisDeEnvio, messageIdDaMensagem } from "./conta.ts";
 
 const conta: ContaEmail = {
   email: "suporte@empresa.com.br",
@@ -58,13 +58,18 @@ describe("credenciaisDeEnvio", () => {
   });
 });
 
-describe("enderecoDeResposta", () => {
-  it("planta o token na caixa da base", () => {
-    expect(enderecoDeResposta("abc123", "suporte@empresa.com.br")).toBe("suporte+rabc123@empresa.com.br");
+describe("messageIdDaMensagem", () => {
+  it("planta o token no Message-ID, no domínio da caixa", () => {
+    expect(messageIdDaMensagem("0a1b2c3d4e5f6789", "suporte@empresa.com.br"))
+      .toBe("<demanda.r0a1b2c3d4e5f6789@empresa.com.br>");
   });
 
-  it("base inválida ou longa demais não gera Reply-To", () => {
-    expect(enderecoDeResposta("abc", "sem-arroba")).toBeNull();
-    expect(enderecoDeResposta("0123456789abcdef", `${"a".repeat(50)}@empresa.com.br`)).toBeNull();
+  it("caixa de nome comprido não atrapalha mais", () => {
+    expect(messageIdDaMensagem("abc", `${"a".repeat(60)}@empresa.com.br`)).toBe("<demanda.rabc@empresa.com.br>");
+  });
+
+  it("base inválida não gera Message-ID", () => {
+    expect(messageIdDaMensagem("abc", "sem-arroba")).toBeNull();
+    expect(messageIdDaMensagem("abc", "caixa@")).toBeNull();
   });
 });
