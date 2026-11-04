@@ -29,6 +29,7 @@ import { useProfile } from "@/hooks/useProfile";
 import type { AppPermissao } from "@/hooks/useProfile";
 import { STATUS_DEMANDA_LABEL } from "@/hooks/useDemandas";
 import { formatDataLogPT } from "@/lib/format";
+import { formatTempoDoPeriodo, usaHorasCorridas } from "@/lib/horasDev";
 import { cn } from "@/lib/utils";
 
 const STATUS_OPCOES: Array<keyof typeof STATUS_DEMANDA_LABEL> = [
@@ -126,13 +127,6 @@ function formatBRL(v: number): string {
   });
 }
 
-function formatHoras(h: number): string {
-  return (h ?? 0).toLocaleString("pt-BR", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-}
-
 function HorasDevPage() {
   useDocumentTitle("Horas de Desenvolvimento");
   const { temPermissao } = useProfile();
@@ -190,11 +184,12 @@ function HorasDevPage() {
     const rows = relatorioQuery.data ?? [];
     return rows.reduce(
       (acc, r) => {
+        acc.segundos += Number(r.total_segundos) || 0;
         acc.horas += Number(r.total_horas) || 0;
         acc.valor += Number(r.valor_total) || 0;
         return acc;
       },
-      { horas: 0, valor: 0 },
+      { segundos: 0, horas: 0, valor: 0 },
     );
   }, [relatorioQuery.data]);
 
@@ -357,6 +352,8 @@ function HorasDevPage() {
           relatório quando a demanda é entregue, com todas as horas dela.
           Apontamento anterior a 01/09/2026 continua contando na data em que foi
           lançado.
+          {usaHorasCorridas(dataInicio) &&
+            " Tempo em horas, minutos e segundos; o valor é proporcional à hora de 60 minutos."}
         </p>
       </div>
 
@@ -425,7 +422,10 @@ function HorasDevPage() {
                         {row.qtd_demandas}
                       </TableCell>
                       <TableCell className="text-right tabular-nums">
-                        {formatHoras(Number(row.total_horas))}
+                        {formatTempoDoPeriodo(dataInicio, {
+                          segundos: row.total_segundos,
+                          horas: row.total_horas,
+                        })}
                       </TableCell>
                       <TableCell className="text-right tabular-nums">
                         {Number(row.valor_hora) === 0 ? (
@@ -477,7 +477,10 @@ function HorasDevPage() {
                   <TableCell />
                   <TableCell />
                   <TableCell className="text-right tabular-nums">
-                    {formatHoras(totals.horas)}
+                    {formatTempoDoPeriodo(dataInicio, {
+                      segundos: totals.segundos,
+                      horas: totals.horas,
+                    })}
                   </TableCell>
                   <TableCell />
                   <TableCell className="text-right tabular-nums">
@@ -548,13 +551,19 @@ function DetalheDesenvolvedor({
   return (
     <div className="space-y-3">
       {rows.map((d) => (
-        <DetalheDemanda key={d.demanda_id} demanda={d} />
+        <DetalheDemanda key={d.demanda_id} demanda={d} dataInicio={dataInicio} />
       ))}
     </div>
   );
 }
 
-function DetalheDemanda({ demanda }: { demanda: DetalheRow }) {
+function DetalheDemanda({
+  demanda,
+  dataInicio,
+}: {
+  demanda: DetalheRow;
+  dataInicio: string;
+}) {
   const [open, setOpen] = React.useState(false);
   const semHoras = Number(demanda.total_horas) === 0;
   const statusLabel =
@@ -593,7 +602,11 @@ function DetalheDemanda({ demanda }: { demanda: DetalheRow }) {
           </Badge>
         </div>
         <span className="text-sm tabular-nums">
-          {formatHoras(Number(demanda.total_horas))} h
+          {formatTempoDoPeriodo(dataInicio, {
+            segundos: demanda.total_segundos,
+            horas: demanda.total_horas,
+          })}
+          {!usaHorasCorridas(dataInicio) && " h"}
         </span>
       </button>
       {open && (
@@ -617,7 +630,10 @@ function DetalheDemanda({ demanda }: { demanda: DetalheRow }) {
                     {d.origem}
                   </td>
                   <td className="py-1 text-right tabular-nums">
-                    {formatHoras(Number(d.horas))}
+                    {formatTempoDoPeriodo(dataInicio, {
+                      segundos: d.segundos,
+                      horas: d.horas,
+                    })}
                   </td>
                 </tr>
               ))}
