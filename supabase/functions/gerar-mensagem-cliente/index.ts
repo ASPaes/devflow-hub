@@ -6,6 +6,9 @@
 //
 // Mesmo padrão de auth/modelo das outras functions de IA do DoctorDev
 // (gerar-prompt-demanda, gerar-resumo-release-ia).
+//
+// Deploy: 17/11/2026 o deploy desta versão falhou pelo CLI v3 no workflow (ver
+// deploy-edge-functions.yml); reenviada junto com a correção do workflow.
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.85.0";

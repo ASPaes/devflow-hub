@@ -2,8 +2,8 @@
 // da demanda, por e-mail (SMTP próprio) ou WhatsApp (via DoctorSaaS, com HMAC).
 //
 // O texto vem pronto do frontend: a IA sugere (gerar-mensagem-cliente), o agente
-// revisa e edita, e o que chega aqui é o que vai ser enviado. Esta function não
-// reescreve nada.
+// revisa e edita, e o que chega aqui é o que vai ser enviado. A única mudança é
+// tirar travessão do assunto e do corpo (sem-travessao.ts, desde 17/11/2026).
 //
 // Todo envio — sucesso ou falha — é gravado por registrar_comunicacao_demanda,
 // que também cria o comentário automático na demanda quando dá certo.

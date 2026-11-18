@@ -59,7 +59,12 @@ jobs:
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v1
         with:
-          version: latest
+          # 17/11/2026: versao FIXA. Com "latest", o CLI virou v3 (02/11) e o v3 exige
+          # --yes em todo deploy em producao (HostedMutationConsentRequiredError);
+          # o deploy de b0315ae falhou nas 3 tentativas por isso. Mesma versao do
+          # DoctorSaaS. Para subir de versao: troque aqui, leia o guia de migracao
+          # e acrescente --yes no deploy.
+          version: 2.120.0
 
       - name: Descobrir o que mudou
         id: alvo
