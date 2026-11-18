@@ -125,7 +125,7 @@ export function ComunicarClienteDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Send className="h-4 w-4 text-primary" />
-            Comunicar cliente — {demandaCodigo}
+            Comunicar cliente · {demandaCodigo}
           </DialogTitle>
           <DialogDescription>
             {dados?.solicitante?.nome
@@ -147,7 +147,7 @@ export function ComunicarClienteDialog({
                 <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
                 <span>
                   Esta demanda não tem nenhum parecer registrado. Publique um retorno na aba
-                  Retornos — a IA escreve a partir dele.
+                  Retornos: a IA escreve a partir dele.
                 </span>
               </div>
             )}
@@ -231,8 +231,8 @@ export function ComunicarClienteDialog({
                 }
               />
               <p className="text-xs text-muted-foreground">
-                A IA sugere a partir dos pareceres registrados. Revise antes de enviar — o texto vai
-                exatamente como está aqui.
+                A IA escreve só o que está nos retornos registrados. Revise antes de enviar. Se
+                houver travessão, ele sai trocado por vírgula.
               </p>
               <div className="flex items-start gap-2 rounded-md border border-border bg-muted/30 p-2.5 text-xs text-muted-foreground">
                 <Link2 className="mt-0.5 h-3.5 w-3.5 shrink-0" />

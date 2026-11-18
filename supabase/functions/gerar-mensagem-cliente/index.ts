@@ -9,6 +9,7 @@
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.85.0";
+import { semTravessao } from "./sem-travessao.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -25,57 +26,99 @@ function json(body: unknown, status = 200) {
 type Canal = "email" | "whatsapp";
 type Momento = "parecer" | "conclusao";
 
+// ──────────────────────────────────────────────────────────────────────────
+// CONCEITO (revisto em 17/11/2026, DEM-0663)
+//
+// A mensagem é o PARECER da equipe traduzido para o cliente. Nada além disso.
+//
+// O que deu errado antes: na DEM-0663 o único retorno dizia "esse campo de busca
+// JÁ EXISTE na tela; o que seria essa palavra-chave? mande foto/vídeo". Nada foi
+// implementado. Como o card tinha ido para "entregue", o tom de conclusão mandava
+// "dizer o que foi entregue", e a IA, sem entrega nenhuma no parecer, foi buscar
+// na descrição (o PEDIDO do cliente) e escreveu "Finalizamos a melhoria na busca".
+//
+// Por isso:
+// 1. O parecer mais recente define o TIPO da mensagem (entrega, pergunta ao
+//    cliente, "isso já existe", em análise, recusa). O status nunca cria conteúdo.
+// 2. A descrição vai rotulada como "pedido_original_do_cliente", só de contexto.
+// 3. A IA devolve primeiro um campo "leitura" dizendo o que o parecer afirma e
+//    pergunta; isso a obriga a ler antes de escrever. O campo não vai para a tela.
+// 4. Travessão nunca: proibido no prompt e removido no servidor (sem-travessao.ts).
+// ──────────────────────────────────────────────────────────────────────────
+
 const DIRETRIZES_COMUNS = `
 Você escreve em nome da equipe de desenvolvimento para o CLIENTE que abriu a demanda.
+Sua tarefa é TRADUZIR para o cliente o que a equipe registrou nos "pareceres". Você não
+decide o que aconteceu: quem diz são os pareceres, e só eles.
+
+COMO LER OS DADOS:
+- "pareceres": o que a equipe escreveu, em ordem. O marcado com "mais_recente": true é o
+  que vale agora. Ele define o TIPO da mensagem:
+  a) ENTREGA: o parecer afirma que algo foi feito, ajustado, corrigido ou liberado.
+     Só aí você diz que foi feito, e só o que o parecer diz que foi feito.
+  b) PERGUNTA / PEDIDO AO CLIENTE: o parecer faz perguntas ou pede informação, print,
+     foto, vídeo, exemplo. A mensagem é para fazer ESSAS perguntas ao cliente, com
+     clareza, uma por uma. Nada foi entregue.
+  c) JÁ EXISTE: o parecer explica que o que o cliente pediu já existe no sistema.
+     Diga que já existe e onde, como o parecer descreve. NÃO diga que "implementamos",
+     "finalizamos", "melhoramos" ou "agora você consegue": não houve mudança.
+  d) EM ANÁLISE: o parecer diz que vai analisar ou é genérico. Mensagem curta:
+     recebemos e estamos analisando.
+  e) RECUSA / FORA DO ESCOPO: diga isso com cordialidade, com o motivo do parecer.
+  Um parecer pode misturar tipos (ex.: explica que já existe E faz perguntas). Aí a
+  mensagem leva as duas coisas, sem inventar uma terceira.
+- "pedido_original_do_cliente": o que o cliente PEDIU quando abriu a demanda. Serve só
+  para você entender o assunto. NUNCA tire dele afirmação de que algo foi feito, existe
+  ou funciona.
+- "status": a etapa do card. Status "entregue" NÃO prova que algo foi implementado; se o
+  parecer mais recente é pergunta ou explicação, a mensagem é pergunta ou explicação.
 
 REGRAS INEGOCIÁVEIS:
 - Escreva em português do Brasil.
-- Use APENAS o que está nos dados. NÃO invente prazo, causa, valor, versão ou próximo passo que não esteja lá.
-- **A "descricao" é o que o cliente PEDIU, não o que já existe.** Nunca escreva que algo
-  "já foi implementado", "já está disponível" ou "já funciona" a partir dela. O que
-  aconteceu de fato está SÓ nos "pareceres" — se eles não afirmam que algo foi entregue,
-  você também não afirma.
-- Quem diz em que pé está a demanda são os "pareceres" e o "status". Na dúvida entre
-  afirmar e omitir, omita: escreva menos e nada de errado.
+- Use APENAS o que está nos pareceres. NÃO invente prazo, causa, valor, versão, tela,
+  funcionalidade ou próximo passo que não esteja lá.
+- Na dúvida entre afirmar e omitir, omita: mensagem curta e verdadeira vale mais que
+  longa e errada.
+- NUNCA use travessão (—), meia-risca (–) nem hífen solto como pausa (" - "). Nem no
+  assunto, nem no corpo. Use vírgula, ponto ou dois-pontos. Também não use marcador de
+  lista com hífen.
 - Nada de jargão técnico com o cliente: sem "RLS", "trigger", "endpoint", "API", "RPC", "deploy", "commit", "frontend", "backend", "migration".
 - NÃO cite código da demanda, IDs internos, nome de tabela ou de arquivo.
-- NÃO prometa data se os dados não trouxerem uma.
-- Voz ativa e direta: "Ajustamos", "Identificamos", "Concluímos".
+- NÃO prometa data se os pareceres não trouxerem uma.
+- Voz ativa e direta.
 - Trate o cliente pelo primeiro nome quando ele estiver nos dados.
-- Se os pareceres registrados forem técnicos, TRADUZA para o efeito prático que o cliente percebe.
+- Se o parecer for técnico, TRADUZA para o efeito prático que o cliente percebe.
 `.trim();
 
 const TOM_POR_MOMENTO: Record<Momento, string> = {
   parecer: `
-MOMENTO: parecer parcial — a DEMANDA ainda não foi fechada.
-- Relate o que os pareceres dizem, inclusive quando eles afirmam que algo já foi feito
-  ou implementado: se o parecer afirma, você repete. O que não pode é você concluir isso
-  por conta própria.
-- O que NÃO pode: declarar a DEMANDA como concluída, encerrada ou entregue enquanto o
-  status não disser isso. Uma parte pronta não fecha o todo.
-- Se os pareceres forem curtos ou genéricos ("vamos analisar"), a mensagem também é
-  curta: confirme o recebimento e diga que está em análise. NÃO preencha o vazio com
-  detalhe tirado da descrição — mensagem curta e verdadeira é melhor que longa e errada.
-- Se os pareceres indicarem que algo é esperado do cliente, deixe isso claro em uma frase.
+MOMENTO: atualização. A demanda ainda não foi fechada.
+- Não declare a demanda concluída, encerrada ou entregue. Uma parte pronta não fecha o todo.
+- Se o parecer espera algo do cliente, deixe isso claro e peça a resposta.
 `.trim(),
   conclusao: `
-MOMENTO: conclusão — a demanda foi ENTREGUE.
-- Diga o que foi resolvido/entregue e o que muda na prática para o cliente.
-- Feche convidando o cliente a validar e a responder se algo não estiver como esperado.
+MOMENTO: o card foi movido para entregue/encerrado.
+- Isso NÃO muda o que você pode afirmar. Siga o TIPO do parecer mais recente.
+- Se o parecer é ENTREGA: diga o que foi feito (só o que ele diz) e o que muda na prática,
+  e convide o cliente a validar e a responder se algo não estiver como esperado.
+- Se o parecer é PERGUNTA, JÁ EXISTE ou EM ANÁLISE: escreva a mensagem desse tipo. Não
+  use "finalizamos", "entregamos", "concluímos" nem "entregue" no assunto.
 `.trim(),
 };
 
 const FORMATO_POR_CANAL: Record<Canal, string> = {
   email: `
 CANAL: e-mail.
-- "assunto": até 70 caracteres, específico, sem "Re:" e sem código de demanda.
+- "assunto": até 70 caracteres, específico, sem "Re:", sem código de demanda e sem
+  travessão. Reflete o TIPO do parecer (ex.: "Dúvida sobre a busca de clientes",
+  "Busca de clientes: precisamos de mais detalhes").
 - "corpo": texto puro, com saudação e despedida. 2 a 4 parágrafos curtos, no máximo 180 palavras.
 - SEM markdown: nada de #, *, - ou \`\`\`. Quebre parágrafos com linha em branco.
 - Assine como "Equipe de Desenvolvimento".
 `.trim(),
   whatsapp: `
 CANAL: WhatsApp.
-- "assunto": string vazia — WhatsApp não tem assunto.
+- "assunto": string vazia, porque WhatsApp não tem assunto.
 - "corpo": mensagem curta, no máximo 90 palavras, conversa de trabalho e não carta.
 - Comece com uma saudação curta. Sem despedida formal e sem assinatura.
 - Negrito é *entre asteriscos simples* (formato do WhatsApp). Nada de markdown.
@@ -153,20 +196,24 @@ Deno.serve(async (req) => {
       DIRETRIZES_COMUNS,
       TOM_POR_MOMENTO[momento],
       FORMATO_POR_CANAL[canal],
-      `Responda APENAS com o JSON puro {"assunto": "...", "corpo": "..."} — sem markdown, sem \`\`\`json, sem preâmbulo.`,
+      `Responda APENAS com o JSON puro {"leitura": "...", "assunto": "...", "corpo": "..."}, sem markdown, sem \`\`\`json, sem preâmbulo.
+"leitura" vem PRIMEIRO: em 1 a 3 frases, o TIPO do parecer mais recente (entrega, pergunta, já existe, em análise, recusa), o que ele afirma e quais perguntas ele faz. Escreva "assunto" e "corpo" de acordo com essa leitura.`,
     ].join("\n\n");
 
     // Só o que o cliente pode ver. O prompt_ia e os dados internos ficam de fora.
+    // Pareceres primeiro, com o mais recente marcado; o pedido vai rotulado como pedido.
+    const pareceres = retornos.map((r, i) => ({
+      ...(r as Record<string, unknown>),
+      mais_recente: i === retornos.length - 1,
+    }));
     const dadosParaIA = {
-      demanda: {
-        titulo: ctx?.demanda?.titulo ?? null,
-        descricao: ctx?.demanda?.descricao ?? null,
-        tipo: ctx?.demanda?.tipo ?? null,
-        status: statusDemanda || null,
-      },
-      empresa: ctx?.empresa ?? null,
+      pareceres,
+      status: statusDemanda || null,
       solicitante_nome: ctx?.solicitante?.nome ?? null,
-      pareceres: retornos,
+      empresa: ctx?.empresa ?? null,
+      titulo_da_demanda: ctx?.demanda?.titulo ?? null,
+      tipo_da_demanda: ctx?.demanda?.tipo ?? null,
+      pedido_original_do_cliente: ctx?.demanda?.descricao ?? null,
     };
 
     const anthropicRes = await fetch("https://api.anthropic.com/v1/messages", {
@@ -177,8 +224,9 @@ Deno.serve(async (req) => {
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-haiku-4-5-20251001",
-        max_tokens: 800,
+        // Sonnet e não Haiku: o erro da DEM-0663 foi de leitura, não de redação.
+        model: "claude-sonnet-5-5",
+        max_tokens: 1200,
         system: systemPrompt,
         messages: [
           {
@@ -202,7 +250,7 @@ Deno.serve(async (req) => {
         ?.map((b: any) => b.text)
         ?.join("") ?? "";
 
-    let parsed: { assunto?: string; corpo?: string };
+    let parsed: { leitura?: string; assunto?: string; corpo?: string };
     try {
       parsed = JSON.parse(textRaw.replace(/```json\n?|\n?```/g, "").trim());
     } catch {
@@ -213,11 +261,13 @@ Deno.serve(async (req) => {
       return json({ error: "IA retornou mensagem vazia", raw: textRaw }, 500);
     }
 
+    if (parsed.leitura) console.log("[gerar-mensagem-cliente] leitura:", parsed.leitura);
+
     return json({
       canal,
       momento,
-      assunto: canal === "email" ? (parsed.assunto ?? "").trim() : "",
-      corpo: parsed.corpo.trim(),
+      assunto: canal === "email" ? semTravessao((parsed.assunto ?? "").trim()) : "",
+      corpo: semTravessao(parsed.corpo.trim()),
       usage: {
         input_tokens: anthropicData.usage?.input_tokens ?? 0,
         output_tokens: anthropicData.usage?.output_tokens ?? 0,

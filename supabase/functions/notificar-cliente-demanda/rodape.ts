@@ -23,10 +23,11 @@ export function assuntoComCodigo(assunto: string, codigo: string | null): string
 }
 
 export function rodapeTexto(codigo: string, link: string): string {
-  return `\n\n--\nDemanda: ${codigo}\nAcompanhe: ${link}`;
+  // Sem a linha "--" de assinatura: nada de traço em mensagem ao cliente (17/11/2026).
+  return `\n\nDemanda: ${codigo}\nAcompanhe: ${link}`;
 }
 
-/** WhatsApp: sem o "--" do e-mail, e o código em negrito (*...*). */
+/** WhatsApp: o código em negrito (*...*). */
 export function rodapeWhatsApp(codigo: string, link: string): string {
   return `\n\nDemanda *${codigo}*\nAcompanhe: ${link}`;
 }

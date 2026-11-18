@@ -13,6 +13,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.85.0";
 import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
 
 import { codificarAssunto } from "./assunto.ts";
+import { semTravessao } from "./sem-travessao.ts";
 import {
   type ContaEmail,
   type CredenciaisEnvio,
@@ -228,8 +229,9 @@ Deno.serve(async (req) => {
 
     const demanda_id: string | undefined = body.demanda_id;
     const canal: string = body.canal;
-    const corpo: string = String(body.corpo ?? "").trim();
-    const assuntoInformado: string = String(body.assunto ?? "").trim();
+    // Travessão nunca sai para o cliente, nem o que o agente digitou (sem-travessao.ts).
+    const corpo: string = semTravessao(String(body.corpo ?? "").trim());
+    const assuntoInformado: string = semTravessao(String(body.assunto ?? "").trim());
 
     if (!demanda_id) return json({ error: "demanda_id obrigatório" }, 400);
     if (canal !== "email" && canal !== "whatsapp") return json({ error: "canal inválido" }, 400);
