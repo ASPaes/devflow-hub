@@ -4,7 +4,7 @@
  *
  * O prompt da IA já proíbe, mas modelo escorrega; e o agente pode digitar ou colar
  * um. Por isso a limpeza roda no servidor, em dois pontos: na saída da IA
- * (gerar-mensagem-cliente, CÓPIA deste arquivo; o original fica na notificar-cliente-demanda, com o teste) e no envio
+ * (gerar-mensagem-cliente e gerar-resumo-release-ia, com CÓPIAS deste arquivo; o original e o teste ficam na notificar-cliente-demanda) e no envio
  * (notificar-cliente-demanda, assunto e corpo). Mexeu aqui, mexa lá também.
  *
  * O que sai: travessão (—), meia-risca (–) e o hífen usado como travessão, com

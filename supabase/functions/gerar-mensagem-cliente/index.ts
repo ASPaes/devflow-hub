@@ -199,7 +199,7 @@ Deno.serve(async (req) => {
       DIRETRIZES_COMUNS,
       TOM_POR_MOMENTO[momento],
       FORMATO_POR_CANAL[canal],
-      `Responda APENAS com o JSON puro {"leitura": "...", "assunto": "...", "corpo": "..."}, sem markdown, sem \`\`\`json, sem preâmbulo.
+      `Responda chamando a ferramenta "mensagem" com os campos leitura, assunto e corpo.
 "leitura" vem PRIMEIRO: em 1 a 3 frases, o TIPO do parecer mais recente (entrega, pergunta, já existe, em análise, recusa), o que ele afirma e quais perguntas ele faz. Escreva "assunto" e "corpo" de acordo com essa leitura.`,
     ].join("\n\n");
 
@@ -237,6 +237,27 @@ Deno.serve(async (req) => {
             content: `Dados da demanda:\n${JSON.stringify(dadosParaIA, null, 2)}`,
           },
         ],
+        // Formato garantido pela API (tool_choice). Com JSON em texto livre, uma aspa
+        // sem escape no corpo ("Avançar") quebrava o JSON.parse e virava erro 500.
+        tools: [
+          {
+            name: "mensagem",
+            description: "Entrega a leitura do parecer, o assunto e o corpo da mensagem ao cliente.",
+            input_schema: {
+              type: "object",
+              properties: {
+                leitura: {
+                  type: "string",
+                  description: "Tipo do parecer mais recente, o que ele afirma e o que pergunta.",
+                },
+                assunto: { type: "string" },
+                corpo: { type: "string" },
+              },
+              required: ["leitura", "assunto", "corpo"],
+            },
+          },
+        ],
+        tool_choice: { type: "tool", name: "mensagem" },
       }),
     });
 
@@ -247,21 +268,12 @@ Deno.serve(async (req) => {
     }
 
     const anthropicData = await anthropicRes.json();
-    const textRaw: string =
-      anthropicData.content
-        ?.filter((b: any) => b.type === "text")
-        ?.map((b: any) => b.text)
-        ?.join("") ?? "";
-
-    let parsed: { leitura?: string; assunto?: string; corpo?: string };
-    try {
-      parsed = JSON.parse(textRaw.replace(/```json\n?|\n?```/g, "").trim());
-    } catch {
-      return json({ error: "IA retornou formato inválido", raw: textRaw }, 500);
-    }
+    const bloco = anthropicData.content?.find((b: any) => b.type === "tool_use");
+    const parsed = (bloco?.input ?? {}) as { leitura?: string; assunto?: string; corpo?: string };
 
     if (!parsed.corpo || !parsed.corpo.trim()) {
-      return json({ error: "IA retornou mensagem vazia", raw: textRaw }, 500);
+      console.error("[gerar-mensagem-cliente] resposta sem corpo", JSON.stringify(anthropicData.content));
+      return json({ error: "A IA devolveu a mensagem vazia. Tente de novo." }, 500);
     }
 
     if (parsed.leitura) console.log("[gerar-mensagem-cliente] leitura:", parsed.leitura);

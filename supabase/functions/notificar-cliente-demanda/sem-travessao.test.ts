@@ -4,6 +4,7 @@ import { describe, expect, it } from "bun:test";
 
 import { semTravessao } from "./sem-travessao.ts";
 import { semTravessao as copiaDaIA } from "../gerar-mensagem-cliente/sem-travessao.ts";
+import { semTravessao as copiaDaRelease } from "../gerar-resumo-release-ia/sem-travessao.ts";
 
 const casos: Array<[string, string, string]> = [
   ["travessão no assunto", "Busca de Estabelecimento — Entregue", "Busca de Estabelecimento, Entregue"],
@@ -29,9 +30,10 @@ describe("semTravessao", () => {
     expect(semTravessao("")).toBe("");
   });
 
-  it("a cópia da gerar-mensagem-cliente é idêntica", () => {
+  it("as cópias da gerar-mensagem-cliente e da gerar-resumo-release-ia são idênticas", () => {
     for (const [, entrada] of casos) {
       expect(copiaDaIA(entrada)).toBe(semTravessao(entrada));
+      expect(copiaDaRelease(entrada)).toBe(semTravessao(entrada));
     }
   });
 });

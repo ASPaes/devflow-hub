@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 import type { Release, ReleasePublicada, RetornoRelease } from "@/types/release";
+import { mensagemDoErro } from "@/hooks/useComunicacaoDemanda";
 
 /** Carrega release de uma demanda específica (rascunho ou publicada) */
 export function useReleaseDaDemanda(demandaId: string | undefined) {
@@ -128,14 +129,15 @@ export function useGerarResumoReleaseIA() {
         "gerar-resumo-release-ia",
         { body: { demanda_id: demandaId } },
       );
-      if (error) throw new Error(error.message || "Erro ao gerar resumo");
+      // Sem isto a tela só mostrava "Edge Function returned a non-2xx status code".
+      if (error) throw new Error(await mensagemDoErro(error, "Erro ao gerar resumo"));
       if (data?.error) throw new Error(data.error);
       if (!data?.titulo || !data?.resumo) {
         throw new Error("IA retornou resposta incompleta");
       }
       return { titulo: data.titulo as string, resumo: data.resumo as string };
     },
-    onError: (err) => toast.error(err.message || "Erro ao gerar resumo"),
+    onError: (err) => toast.error(`Erro ao gerar resumo da release: ${err.message}`),
   });
 }
 

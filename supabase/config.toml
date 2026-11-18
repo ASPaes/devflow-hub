@@ -28,6 +28,11 @@ verify_jwt = false
 [functions.gerar-mensagem-cliente]
 verify_jwt = true
 
+# Resumo de release com IA, chamada pelo front com o JWT (permissão gerenciar_releases).
+# Igual a produção antes de vir para o repo (17/11/2026).
+[functions.gerar-resumo-release-ia]
+verify_jwt = true
+
 # Idem: o JWT identifica quem enviou, e é ele que assina o registro da comunicação
 [functions.notificar-cliente-demanda]
 verify_jwt = true

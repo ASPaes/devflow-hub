@@ -40,7 +40,7 @@ export function useComunicacoesDemanda(demandaId: string | undefined) {
  * sobra só "Edge Function returned a non-2xx status code". As nossas functions
  * devolvem o motivo em `{ error }`, então lemos a Response que vem no `context`.
  */
-async function mensagemDoErro(error: unknown, fallback: string): Promise<string> {
+export async function mensagemDoErro(error: unknown, fallback: string): Promise<string> {
   const ctx = (error as { context?: unknown })?.context;
   if (ctx && typeof (ctx as Response).json === "function") {
     try {
