@@ -199,7 +199,7 @@ Deno.serve(async (req) => {
       DIRETRIZES_COMUNS,
       TOM_POR_MOMENTO[momento],
       FORMATO_POR_CANAL[canal],
-      `Responda chamando a ferramenta "mensagem" com os campos leitura, assunto e corpo.
+      `Responda com os campos leitura, assunto e corpo.
 "leitura" vem PRIMEIRO: em 1 a 3 frases, o TIPO do parecer mais recente (entrega, pergunta, já existe, em análise, recusa), o que ele afirma e quais perguntas ele faz. Escreva "assunto" e "corpo" de acordo com essa leitura.`,
     ].join("\n\n");
 
@@ -229,7 +229,9 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         // Sonnet e não Haiku: o erro da DEM-0663 foi de leitura, não de redação.
         model: "claude-sonnet-5-5",
-        max_tokens: 1200,
+        // O Sonnet 5.5 pensa sempre (adaptive) e o raciocínio conta aqui. Com 1200,
+        // o JSON podia sair cortado.
+        max_tokens: 8000,
         system: systemPrompt,
         messages: [
           {
@@ -237,13 +239,14 @@ Deno.serve(async (req) => {
             content: `Dados da demanda:\n${JSON.stringify(dadosParaIA, null, 2)}`,
           },
         ],
-        // Formato garantido pela API (tool_choice). Com JSON em texto livre, uma aspa
-        // sem escape no corpo ("Avançar") quebrava o JSON.parse e virava erro 500.
-        tools: [
-          {
-            name: "mensagem",
-            description: "Entrega a leitura do parecer, o assunto e o corpo da mensagem ao cliente.",
-            input_schema: {
+        // Formato garantido pela API (structured outputs). Com JSON em texto livre,
+        // uma aspa sem escape no corpo ("Avançar") quebrava o JSON.parse. O
+        // tool_choice forçado (fda136b) não serve: o Sonnet 5.5 responde 400
+        // "tool_choice: type tool and any are not supported for this model".
+        output_config: {
+          format: {
+            type: "json_schema",
+            schema: {
               type: "object",
               properties: {
                 leitura: {
@@ -254,10 +257,10 @@ Deno.serve(async (req) => {
                 corpo: { type: "string" },
               },
               required: ["leitura", "assunto", "corpo"],
+              additionalProperties: false,
             },
           },
-        ],
-        tool_choice: { type: "tool", name: "mensagem" },
+        },
       }),
     });
 
@@ -268,8 +271,26 @@ Deno.serve(async (req) => {
     }
 
     const anthropicData = await anthropicRes.json();
-    const bloco = anthropicData.content?.find((b: any) => b.type === "tool_use");
-    const parsed = (bloco?.input ?? {}) as { leitura?: string; assunto?: string; corpo?: string };
+    if (anthropicData.stop_reason === "refusal") {
+      console.error("[gerar-mensagem-cliente] recusa", JSON.stringify(anthropicData.stop_details));
+      return json({ error: "A IA se recusou a escrever esta mensagem. Escreva à mão." }, 500);
+    }
+    if (anthropicData.stop_reason === "max_tokens") {
+      console.error("[gerar-mensagem-cliente] cortada em max_tokens", JSON.stringify(anthropicData.usage));
+      return json({ error: "A resposta da IA veio cortada. Tente de novo." }, 500);
+    }
+
+    // Com output_config.format o JSON vem num bloco de texto, já validado pelo schema.
+    const texto = (anthropicData.content ?? [])
+      .filter((b: any) => b.type === "text")
+      .map((b: any) => b.text)
+      .join("");
+    let parsed: { leitura?: string; assunto?: string; corpo?: string } = {};
+    try {
+      parsed = texto ? JSON.parse(texto) : {};
+    } catch {
+      console.error("[gerar-mensagem-cliente] JSON inválido", texto.slice(0, 500));
+    }
 
     if (!parsed.corpo || !parsed.corpo.trim()) {
       console.error("[gerar-mensagem-cliente] resposta sem corpo", JSON.stringify(anthropicData.content));
