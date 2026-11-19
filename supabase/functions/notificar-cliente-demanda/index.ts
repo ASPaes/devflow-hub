@@ -14,6 +14,7 @@ import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
 
 import { codificarAssunto } from "./assunto.ts";
 import { semTravessao } from "./sem-travessao.ts";
+import { comPrazo, erroDePrazo, PRAZO_SMTP_MS, PrazoEsgotado } from "./prazo.ts";
 import {
   type ContaEmail,
   type CredenciaisEnvio,
@@ -141,7 +142,7 @@ async function enviarEmail(
   });
 
   try {
-    await client.send({
+    await comPrazo(client.send({
       from: `${nomeRemetente} <${remetente}>`,
       to: destino,
       // Endereço puro, sem nome de exibição: nome com acento aqui cairia no
@@ -153,15 +154,20 @@ async function enviarEmail(
       subject: codificarAssunto(assunto),
       content: corpo + (rodape?.texto ?? ""),
       html: textoParaHtml(corpo) + (rodape?.html ?? ""),
-    });
+    }), PRAZO_SMTP_MS);
     return { ok: true };
   } catch (e: any) {
+    if (e instanceof PrazoEsgotado) {
+      console.error(`[notificar-cliente-demanda] SMTP ${host}:${porta} sem resposta em ${e.ms} ms`);
+      return { ok: false, erro: erroDePrazo(e.ms, host) };
+    }
     return { ok: false, erro: e?.message ? String(e.message) : String(e) };
   } finally {
+    // O close também pode travar na mesma conexão: prazo curto e segue.
     try {
-      await client.close();
+      await comPrazo(client.close(), 3_000);
     } catch {
-      // conexão já caiu — não interessa
+      // conexão já caiu ou travou — não interessa
     }
   }
 }

@@ -42,13 +42,32 @@ export function useComunicacoesDemanda(demandaId: string | undefined) {
  */
 export async function mensagemDoErro(error: unknown, fallback: string): Promise<string> {
   const ctx = (error as { context?: unknown })?.context;
-  if (ctx && typeof (ctx as Response).json === "function") {
+  if (ctx && typeof (ctx as Response).text === "function") {
+    const res = ctx as Response;
+    let texto = "";
     try {
-      const corpo = await (ctx as Response).clone().json();
-      if (corpo?.error) return String(corpo.error);
+      texto = (await res.clone().text()).trim();
     } catch {
-      // corpo não era JSON — fica o fallback
+      // corpo já consumido ou ilegível
     }
+    let corpo: { error?: unknown; message?: unknown; msg?: unknown; code?: unknown } | null = null;
+    try {
+      corpo = texto ? JSON.parse(texto) : null;
+    } catch {
+      // não era JSON (página de erro, timeout do gateway)
+    }
+    if (corpo?.error) return String(corpo.error);
+
+    // Resposta que não veio do nosso código: gateway (401 de sessão, 504/546 de
+    // tempo ou limite do worker). Sem isto sobrava só a frase genérica e não
+    // dava para saber o que houve (DEM-0666, 19/11/2026).
+    const porStatus: Record<number, string> = {
+      401: "sessão expirada, saia e entre de novo",
+      504: "o servidor demorou demais para responder",
+      546: "o servidor estourou o limite de processamento",
+    };
+    const detalhe = String(corpo?.message ?? corpo?.msg ?? corpo?.code ?? texto).slice(0, 200);
+    return [`HTTP ${res.status}`, porStatus[res.status], detalhe].filter(Boolean).join(": ");
   }
   return (error as { message?: string })?.message || fallback;
 }
@@ -156,7 +175,7 @@ export function useEnviarComunicacao() {
       } else if (m.includes("DEVFLOW_WA_SECRET")) {
         toast.error("Integração de WhatsApp não configurada. Avise o admin.");
       } else {
-        toast.error(m || "Erro ao enviar");
+        toast.error(m.startsWith("HTTP ") ? `Erro ao enviar (${m})` : m || "Erro ao enviar");
       }
     },
   });
