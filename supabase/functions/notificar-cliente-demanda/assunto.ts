@@ -1,6 +1,10 @@
 /**
  * Assunto de e-mail com acento — RFC 2047, contornando o denomailer.
  *
+ * Desde 19/11/2026 o envio não usa mais o denomailer (smtp-envio.ts +
+ * mensagem.ts, que tira o espaço da frente com trim). A história abaixo fica
+ * porque explica o formato e o teste.
+ *
  * Arquivo separado por um motivo: assunto.test.ts roda isso no bun, sem rede e
  * sem Deno. Já quebrou em produção duas vezes; agora tem teste.
  */

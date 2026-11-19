@@ -10,11 +10,10 @@
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.85.0";
-import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
 
-import { codificarAssunto } from "./assunto.ts";
 import { semTravessao } from "./sem-travessao.ts";
-import { comPrazo, erroDePrazo, PRAZO_SMTP_MS, PrazoEsgotado } from "./prazo.ts";
+import { montarMensagem, paraData } from "./mensagem.ts";
+import { enviarPorSmtp } from "./smtp-envio.ts";
 import {
   type ContaEmail,
   type CredenciaisEnvio,
@@ -129,46 +128,30 @@ async function enviarEmail(
   messageId: string | null,
   rodape: { texto: string; html: string } | null,
 ): Promise<{ ok: true } | { ok: false; erro: string }> {
-  const { host, porta, tls, usuario, senha, remetente, nomeRemetente } = credenciais;
+  const { remetente, nomeRemetente } = credenciais;
+  const dominio = remetente.slice(remetente.lastIndexOf("@") + 1) || "doctordev";
 
-  // tls = TLS implícito (465). Sem ele, conexão limpa + STARTTLS (o denomailer faz o upgrade).
-  const client = new SMTPClient({
-    connection: {
-      hostname: host,
-      port: porta,
-      tls,
-      auth: { username: usuario, password: senha },
-    },
+  const mensagem = montarMensagem({
+    remetente,
+    nomeRemetente,
+    destino,
+    responderPara,
+    assunto,
+    texto: corpo + (rodape?.texto ?? ""),
+    html: textoParaHtml(corpo) + (rodape?.html ?? ""),
+    // Sem o token, o Message-ID ainda é nosso: o servidor não precisa inventar um.
+    messageId: messageId ?? `<demanda.${crypto.randomUUID()}@${dominio}>`,
+    data: new Date(),
+    fronteira: `=_doctordev_${crypto.randomUUID().replace(/-/g, "")}`,
   });
 
   try {
-    await comPrazo(client.send({
-      from: `${nomeRemetente} <${remetente}>`,
-      to: destino,
-      // Endereço puro, sem nome de exibição: nome com acento aqui cairia no
-      // mesmo problema de encoded-word que o assunto já teve.
-      replyTo: responderPara,
-      // O denomailer não escreve Message-ID; sem este, o servidor SMTP cria um
-      // e o token não volta na resposta.
-      ...(messageId ? { headers: { "Message-ID": messageId } } : {}),
-      subject: codificarAssunto(assunto),
-      content: corpo + (rodape?.texto ?? ""),
-      html: textoParaHtml(corpo) + (rodape?.html ?? ""),
-    }), PRAZO_SMTP_MS);
+    await enviarPorSmtp(credenciais, destino, paraData(mensagem));
     return { ok: true };
   } catch (e: any) {
-    if (e instanceof PrazoEsgotado) {
-      console.error(`[notificar-cliente-demanda] SMTP ${host}:${porta} sem resposta em ${e.ms} ms`);
-      return { ok: false, erro: erroDePrazo(e.ms, host) };
-    }
-    return { ok: false, erro: e?.message ? String(e.message) : String(e) };
-  } finally {
-    // O close também pode travar na mesma conexão: prazo curto e segue.
-    try {
-      await comPrazo(client.close(), 3_000);
-    } catch {
-      // conexão já caiu ou travou — não interessa
-    }
+    const erro = e?.message ? String(e.message) : String(e);
+    console.error(`[notificar-cliente-demanda] SMTP ${credenciais.host}:${credenciais.porta}: ${erro}`);
+    return { ok: false, erro };
   }
 }
 

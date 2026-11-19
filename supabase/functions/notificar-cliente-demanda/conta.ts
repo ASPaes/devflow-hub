@@ -25,7 +25,7 @@ export interface CredenciaisEnvio {
   origem: "tela" | "secrets";
   host: string;
   porta: number;
-  /** true = TLS direto (465). false = conexão limpa + STARTTLS, que o denomailer sobe sozinho. */
+  /** true = TLS direto (465). false = conexão limpa + STARTTLS quando o servidor oferece (smtp-envio.ts). */
   tls: boolean;
   usuario: string;
   senha: string;
